@@ -26,11 +26,8 @@ export async function addWork(payload) {
     if (payload[f] != null) formData.append(f, payload[f]);
   });
 
-  if (payload?.media?.image) {
-    formData.append("media[image]", payload.media.image);
-  }
-  if (payload?.media?.video) {
-    formData.append("media[video]", payload.media.video);
+  if (payload?.media) {
+    formData.append("media", payload.media);
   }
 
   const { data } = await apiClient.post("/api/works", formData, {
@@ -55,11 +52,8 @@ export async function updateWork(id, payload) {
   fields.forEach((f) => {
     if (payload[f] != null) formData.append(f, payload[f]);
   });
-  if (payload?.media?.image) {
-    formData.append("media[image]", payload.media.image);
-  }
-  if (payload?.media?.video) {
-    formData.append("media[video]", payload.media.video);
+  if (payload?.media) {
+    formData.append("media", payload.media);
   }
 
   const { data } = await apiClient.post(`/api/works/${id}`, formData, {
