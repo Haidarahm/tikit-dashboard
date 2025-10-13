@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "react-toastify";
 import {
   getServices,
   getService,
@@ -37,6 +38,7 @@ export const useServicesStore = create((set, get) => ({
       set({ items, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to load services");
     } finally {
       set({ isLoading: false });
     }
@@ -49,6 +51,7 @@ export const useServicesStore = create((set, get) => ({
       set({ current: data });
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to load service");
     } finally {
       set({ isLoading: false });
     }
@@ -63,6 +66,7 @@ export const useServicesStore = create((set, get) => ({
       return created;
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to create service");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -78,6 +82,7 @@ export const useServicesStore = create((set, get) => ({
       return updated;
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to update service");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -91,6 +96,7 @@ export const useServicesStore = create((set, get) => ({
       await get().fetchList();
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to delete service");
       throw error;
     } finally {
       set({ isLoading: false });

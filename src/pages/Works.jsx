@@ -9,8 +9,8 @@ import {
   Input,
   Upload,
   Radio,
-  message,
 } from "antd";
+import { toast } from "react-toastify";
 import { useWorksStore } from "../store/worksStrore.js";
 
 function Works() {
@@ -157,19 +157,23 @@ function Works() {
             }
 
             if (!payload.media) {
-              message.error("Please upload an image or a video.");
+              toast.error("Please upload an image or a video.");
               return;
             }
 
             await create(payload);
-            message.success("Work added successfully");
+            toast.success("Work added successfully");
             setIsAddOpen(false);
             addForm.resetFields();
             setImageFileList([]);
             setVideoFileList([]);
             setMediaType("image");
           } catch (err) {
-            // validation or API error
+            if (err?.response?.data?.message) {
+              toast.error(err.response.data.message);
+            } else if (err?.message) {
+              toast.error(err.message);
+            }
           }
         }}
         confirmLoading={isLoading}

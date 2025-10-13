@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "react-toastify";
 
 const getInitialToken = () => {
   try {
@@ -16,11 +17,13 @@ export const useAuthStore = create((set, get) => ({
       localStorage.setItem("auth_token", token);
     } catch {}
     set({ token, isAuthenticated: true });
+    toast.success("Logged in successfully");
   },
   logout: () => {
     try {
       localStorage.removeItem("auth_token");
     } catch {}
     set({ token: "", isAuthenticated: false });
+    toast.success("Logged out");
   },
 }));
