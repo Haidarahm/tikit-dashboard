@@ -1,8 +1,567 @@
+import { useEffect, useMemo, useState } from "react";
+import {
+  Table,
+  Image,
+  Select,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Upload,
+  Radio,
+  Space,
+  Popconfirm,
+} from "antd";
+import { toast } from "react-toastify";
+import { useWorksStore } from "../store/worksStrore.js";
+import { useSubWorksStore } from "../store/subWorksStore.js";
+
 function SubWorks() {
+  // Works source for filter
+  const {
+    items: works,
+    page: worksPage,
+    perPage: worksPerPage,
+    lang: worksLang,
+    isLoading: isLoadingWorks,
+    fetchList: fetchWorks,
+    setPage: setWorksPage,
+    setPerPage: setWorksPerPage,
+    setLang: setWorksLang,
+  } = useWorksStore();
+
+  // Cases store
+  const {
+    items: cases,
+    total,
+    page,
+    perPage,
+    lang,
+    isLoading,
+    setWorkId,
+    setPage,
+    setPerPage,
+    setLang,
+    fetchList,
+    create,
+    update,
+    remove,
+  } = useSubWorksStore();
+
+  const [selectedWorkId, setSelectedWorkId] = useState(null);
+
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [addForm] = Form.useForm();
+  const [mediaType, setMediaType] = useState("image");
+  const [imageFileList, setImageFileList] = useState([]);
+  const [videoFileList, setVideoFileList] = useState([]);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editForm] = Form.useForm();
+  const [editMediaType, setEditMediaType] = useState("image");
+  const [editImageFileList, setEditImageFileList] = useState([]);
+  const [editVideoFileList, setEditVideoFileList] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+
+  // Fetch all works titles (increase per page temporarily)
+  useEffect(() => {
+    if (worksPerPage < 1000) setWorksPerPage(1000);
+    if (worksPage !== 1) setWorksPage(1);
+    fetchWorks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [worksLang]);
+
+  // When work selected, set in cases store and fetch
+  useEffect(() => {
+    if (selectedWorkId) {
+      setWorkId(selectedWorkId);
+      fetchList();
+    }
+  }, [selectedWorkId, page, perPage, lang]);
+
+  const caseColumns = useMemo(
+    () => [
+      {
+        title: "ID",
+        dataIndex: "id",
+        key: "id",
+        width: 80,
+        render: (v, _r, i) => v ?? i + 1,
+      },
+      { title: "Title", dataIndex: "title", key: "title", ellipsis: true },
+      {
+        title: "Subtitle",
+        dataIndex: "subtitle",
+        key: "subtitle",
+        ellipsis: true,
+      },
+      {
+        title: "Description",
+        dataIndex: "description",
+        key: "description",
+        ellipsis: true,
+      },
+      {
+        title: "Media",
+        key: "media",
+        render: (row) => {
+          if (row.media_type === "image" && row.media) {
+            return (
+              <Image src={row.media} width={64} preview={{ mask: "Preview" }} />
+            );
+          }
+          return row.media_type || "-";
+        },
+        width: 120,
+      },
+      {
+        title: "Actions",
+        key: "actions",
+        width: 200,
+        render: (row) => (
+          <Space>
+            <Button
+              onClick={() => {
+                setEditingId(row.id);
+                setIsEditOpen(true);
+                editForm.resetFields();
+                setEditImageFileList([]);
+                setEditVideoFileList([]);
+                setEditMediaType("image");
+              }}
+            >
+              Update
+            </Button>
+            <Popconfirm
+              title="Delete this case?"
+              okText="Yes"
+              cancelText="No"
+              onConfirm={async () => {
+                try {
+                  await remove(row.id);
+                  toast.success("Case deleted");
+                } catch (err) {
+                  toast.error(
+                    err?.response?.data?.message ||
+                      err?.message ||
+                      "Delete failed"
+                  );
+                }
+              }}
+            >
+              <Button danger>Delete</Button>
+            </Popconfirm>
+          </Space>
+        ),
+      },
+    ],
+    []
+  );
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Sub Works</h2>
-      <p className="text-gray-600">Manage sub-categories of works.</p>
+      <div className="flex items-center justify-between mb-4 gap-4">
+        <h2 className="text-xl font-semibold">Sub Works (Cases)</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Language:</span>
+          <Select
+            value={lang}
+            style={{ width: 140 }}
+            options={[
+              { label: "English", value: "en" },
+              { label: "Arabic", value: "ar" },
+              { label: "French", value: "fr" },
+            ]}
+            onChange={(value) => {
+              setLang(value);
+              setPage(1);
+              // also reflect to worksLang for titles
+              setWorksLang(value);
+            }}
+          />
+          <span className="text-sm text-gray-600">Work:</span>
+          <Select
+            placeholder="Select a work"
+            loading={isLoadingWorks}
+            value={selectedWorkId}
+            style={{ width: 220 }}
+            options={(works || []).map((w) => ({
+              label: w.title,
+              value: w.id,
+            }))}
+            onChange={(value) => {
+              setSelectedWorkId(value);
+              setPage(1);
+            }}
+            allowClear
+            onClear={() => {
+              setSelectedWorkId(null);
+            }}
+          />
+          <Button
+            type="primary"
+            disabled={!selectedWorkId}
+            onClick={() => setIsAddOpen(true)}
+          >
+            Add Case
+          </Button>
+        </div>
+      </div>
+
+      <Table
+        rowKey={(r, i) => r.id ?? i}
+        columns={caseColumns}
+        dataSource={cases}
+        loading={isLoading}
+        pagination={{
+          current: page,
+          pageSize: perPage,
+          total,
+          showSizeChanger: true,
+          onChange: (nextPage, nextSize) => {
+            if (nextSize !== perPage) setPerPage(nextSize);
+            if (nextPage !== page) setPage(nextPage);
+          },
+        }}
+      />
+
+      {/* Add Case Modal */}
+      <Modal
+        title="Add Case"
+        open={isAddOpen}
+        onCancel={() => {
+          setIsAddOpen(false);
+          addForm.resetFields();
+          setImageFileList([]);
+          setVideoFileList([]);
+          setMediaType("image");
+        }}
+        onOk={async () => {
+          try {
+            const values = await addForm.validateFields();
+            const payload = {
+              title_en: values.title_en,
+              title_ar: values.title_ar,
+              title_fr: values.title_fr,
+              subtitle_en: values.subtitle_en,
+              subtitle_ar: values.subtitle_ar,
+              subtitle_fr: values.subtitle_fr,
+              description_en: values.description_en,
+              description_ar: values.description_ar,
+              description_fr: values.description_fr,
+              media: null,
+            };
+
+            if (mediaType === "image" && imageFileList[0]?.originFileObj) {
+              payload.media = imageFileList[0].originFileObj;
+            }
+            if (mediaType === "video" && videoFileList[0]?.originFileObj) {
+              payload.media = videoFileList[0].originFileObj;
+            }
+
+            if (!payload.media) {
+              toast.error("Please upload an image or a video.");
+              return;
+            }
+
+            await create(payload);
+            toast.success("Case added successfully");
+            setIsAddOpen(false);
+            addForm.resetFields();
+            setImageFileList([]);
+            setVideoFileList([]);
+            setMediaType("image");
+          } catch (err) {
+            if (err?.response?.data?.message) {
+              toast.error(err.response.data.message);
+            } else if (err?.message) {
+              toast.error(err.message);
+            }
+          }
+        }}
+        confirmLoading={isLoading}
+        okText="Create"
+      >
+        <Form form={addForm} layout="vertical">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Form.Item
+              name="title_en"
+              label="Title (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English title" />
+            </Form.Item>
+            <Form.Item
+              name="title_ar"
+              label="Title (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item
+              name="title_fr"
+              label="Title (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+
+            <Form.Item
+              name="subtitle_en"
+              label="Subtitle (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_ar"
+              label="Subtitle (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_fr"
+              label="Subtitle (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+
+            <Form.Item
+              name="description_en"
+              label="Description (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item
+              name="description_ar"
+              label="Description (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item
+              name="description_fr"
+              label="Description (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter French description" />
+            </Form.Item>
+          </div>
+
+          <Form.Item label="Media Type">
+            <Radio.Group
+              value={mediaType}
+              onChange={(e) => setMediaType(e.target.value)}
+            >
+              <Radio value="image">Image</Radio>
+              <Radio value="video">Video</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          {mediaType === "image" ? (
+            <Form.Item label="Upload Image" required>
+              <Upload
+                fileList={imageFileList}
+                beforeUpload={() => false}
+                listType="picture-card"
+                maxCount={1}
+                accept="image/*"
+                onChange={({ fileList }) => setImageFileList(fileList)}
+              >
+                {imageFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          ) : (
+            <Form.Item label="Upload Video" required>
+              <Upload
+                fileList={videoFileList}
+                beforeUpload={() => false}
+                maxCount={1}
+                accept="video/*"
+                onChange={({ fileList }) => setVideoFileList(fileList)}
+              >
+                {videoFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          )}
+        </Form>
+      </Modal>
+
+      {/* Edit Case Modal */}
+      <Modal
+        title="Update Case"
+        open={isEditOpen}
+        onCancel={() => {
+          setIsEditOpen(false);
+          editForm.resetFields();
+          setEditImageFileList([]);
+          setEditVideoFileList([]);
+          setEditMediaType("image");
+          setEditingId(null);
+        }}
+        onOk={async () => {
+          try {
+            const values = await editForm.validateFields();
+            const payload = {
+              title_en: values.title_en,
+              title_ar: values.title_ar,
+              title_fr: values.title_fr,
+              subtitle_en: values.subtitle_en,
+              subtitle_ar: values.subtitle_ar,
+              subtitle_fr: values.subtitle_fr,
+              description_en: values.description_en,
+              description_ar: values.description_ar,
+              description_fr: values.description_fr,
+            };
+
+            if (
+              editMediaType === "image" &&
+              editImageFileList[0]?.originFileObj
+            ) {
+              payload.media = editImageFileList[0].originFileObj;
+            }
+            if (
+              editMediaType === "video" &&
+              editVideoFileList[0]?.originFileObj
+            ) {
+              payload.media = editVideoFileList[0].originFileObj;
+            }
+
+            await update(editingId, payload);
+            toast.success("Case updated successfully");
+            setIsEditOpen(false);
+            editForm.resetFields();
+            setEditImageFileList([]);
+            setEditVideoFileList([]);
+            setEditMediaType("image");
+            setEditingId(null);
+          } catch (err) {
+            if (err?.response?.data?.message) {
+              toast.error(err.response.data.message);
+            } else if (err?.message) {
+              toast.error(err.message);
+            }
+          }
+        }}
+        confirmLoading={isLoading}
+        okText="Update"
+      >
+        <Form form={editForm} layout="vertical">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Form.Item
+              name="title_en"
+              label="Title (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English title" />
+            </Form.Item>
+            <Form.Item
+              name="title_ar"
+              label="Title (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item
+              name="title_fr"
+              label="Title (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+
+            <Form.Item
+              name="subtitle_en"
+              label="Subtitle (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_ar"
+              label="Subtitle (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_fr"
+              label="Subtitle (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+
+            <Form.Item
+              name="description_en"
+              label="Description (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item
+              name="description_ar"
+              label="Description (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item
+              name="description_fr"
+              label="Description (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter French description" />
+            </Form.Item>
+          </div>
+
+          <Form.Item label="Media Type">
+            <Radio.Group
+              value={editMediaType}
+              onChange={(e) => setEditMediaType(e.target.value)}
+            >
+              <Radio value="image">Image</Radio>
+              <Radio value="video">Video</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          {editMediaType === "image" ? (
+            <Form.Item label="Upload Image">
+              <Upload
+                fileList={editImageFileList}
+                beforeUpload={() => false}
+                listType="picture-card"
+                maxCount={1}
+                accept="image/*"
+                onChange={({ fileList }) => setEditImageFileList(fileList)}
+              >
+                {editImageFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          ) : (
+            <Form.Item label="Upload Video">
+              <Upload
+                fileList={editVideoFileList}
+                beforeUpload={() => false}
+                maxCount={1}
+                accept="video/*"
+                onChange={({ fileList }) => setEditVideoFileList(fileList)}
+              >
+                {editVideoFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          )}
+        </Form>
+      </Modal>
     </div>
   );
 }
