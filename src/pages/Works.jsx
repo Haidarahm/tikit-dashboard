@@ -9,6 +9,8 @@ import {
   Input,
   Upload,
   Radio,
+  Popconfirm,
+  Space,
 } from "antd";
 import { toast } from "react-toastify";
 import { useWorksStore } from "../store/worksStrore.js";
@@ -33,6 +35,13 @@ function Works() {
   const [mediaType, setMediaType] = useState("image");
   const [imageFileList, setImageFileList] = useState([]);
   const [videoFileList, setVideoFileList] = useState([]);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editForm] = Form.useForm();
+  const [editMediaType, setEditMediaType] = useState("image");
+  const [editImageFileList, setEditImageFileList] = useState([]);
+  const [editVideoFileList, setEditVideoFileList] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchList();
@@ -77,6 +86,46 @@ function Works() {
           return row.media_type || "-";
         },
         width: 120,
+      },
+      {
+        title: "Actions",
+        key: "actions",
+        width: 200,
+        render: (row) => (
+          <Space>
+            <Button
+              onClick={() => {
+                setEditingId(row.id);
+                setIsEditOpen(true);
+                editForm.resetFields();
+                setEditImageFileList([]);
+                setEditVideoFileList([]);
+                setEditMediaType("image");
+              }}
+            >
+              Update
+            </Button>
+            <Popconfirm
+              title="Delete this work?"
+              okText="Yes"
+              cancelText="No"
+              onConfirm={async () => {
+                try {
+                  await useWorksStore.getState().remove(row.id);
+                  toast.success("Work deleted");
+                } catch (err) {
+                  toast.error(
+                    err?.response?.data?.message ||
+                      err?.message ||
+                      "Delete failed"
+                  );
+                }
+              }}
+            >
+              <Button danger>Delete</Button>
+            </Popconfirm>
+          </Space>
+        ),
       },
     ],
     []
@@ -160,7 +209,6 @@ function Works() {
               toast.error("Please upload an image or a video.");
               return;
             }
-
             await create(payload);
             toast.success("Work added successfully");
             setIsAddOpen(false);
@@ -284,6 +332,175 @@ function Works() {
                 onChange={({ fileList }) => setVideoFileList(fileList)}
               >
                 {videoFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          )}
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Update Work"
+        open={isEditOpen}
+        onCancel={() => {
+          setIsEditOpen(false);
+          editForm.resetFields();
+          setEditImageFileList([]);
+          setEditVideoFileList([]);
+          setEditMediaType("image");
+          setEditingId(null);
+        }}
+        onOk={async () => {
+          try {
+            const values = await editForm.validateFields();
+            const payload = {
+              title_en: values.title_en,
+              title_ar: values.title_ar,
+              title_fr: values.title_fr,
+              subtitle_en: values.subtitle_en,
+              subtitle_ar: values.subtitle_ar,
+              subtitle_fr: values.subtitle_fr,
+              description_en: values.description_en,
+              description_ar: values.description_ar,
+              description_fr: values.description_fr,
+            };
+
+            if (
+              editMediaType === "image" &&
+              editImageFileList[0]?.originFileObj
+            ) {
+              payload.media = editImageFileList[0].originFileObj;
+            }
+            if (
+              editMediaType === "video" &&
+              editVideoFileList[0]?.originFileObj
+            ) {
+              payload.media = editVideoFileList[0].originFileObj;
+            }
+
+            await useWorksStore.getState().update(editingId, payload);
+            toast.success("Work updated successfully");
+            setIsEditOpen(false);
+            editForm.resetFields();
+            setEditImageFileList([]);
+            setEditVideoFileList([]);
+            setEditMediaType("image");
+            setEditingId(null);
+          } catch (err) {
+            if (err?.response?.data?.message) {
+              toast.error(err.response.data.message);
+            } else if (err?.message) {
+              toast.error(err.message);
+            }
+          }
+        }}
+        confirmLoading={isLoading}
+        okText="Update"
+      >
+        <Form form={editForm} layout="vertical">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Form.Item
+              name="title_en"
+              label="Title (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English title" />
+            </Form.Item>
+            <Form.Item
+              name="title_ar"
+              label="Title (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item
+              name="title_fr"
+              label="Title (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+
+            <Form.Item
+              name="subtitle_en"
+              label="Subtitle (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter English subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_ar"
+              label="Subtitle (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_fr"
+              label="Subtitle (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+
+            <Form.Item
+              name="description_en"
+              label="Description (EN)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item
+              name="description_ar"
+              label="Description (AR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item
+              name="description_fr"
+              label="Description (FR)"
+              rules={[{ required: true }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter French description" />
+            </Form.Item>
+          </div>
+
+          <Form.Item label="Media Type">
+            <Radio.Group
+              value={editMediaType}
+              onChange={(e) => setEditMediaType(e.target.value)}
+            >
+              <Radio value="image">Image</Radio>
+              <Radio value="video">Video</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          {editMediaType === "image" ? (
+            <Form.Item label="Upload Image">
+              <Upload
+                fileList={editImageFileList}
+                beforeUpload={() => false}
+                listType="picture-card"
+                maxCount={1}
+                accept="image/*"
+                onChange={({ fileList }) => setEditImageFileList(fileList)}
+              >
+                {editImageFileList.length === 0 && "+ Upload"}
+              </Upload>
+            </Form.Item>
+          ) : (
+            <Form.Item label="Upload Video">
+              <Upload
+                fileList={editVideoFileList}
+                beforeUpload={() => false}
+                maxCount={1}
+                accept="video/*"
+                onChange={({ fileList }) => setEditVideoFileList(fileList)}
+              >
+                {editVideoFileList.length === 0 && "+ Upload"}
               </Upload>
             </Form.Item>
           )}
