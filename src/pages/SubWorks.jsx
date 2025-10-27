@@ -196,6 +196,8 @@ function SubWorks() {
             allowClear
             onClear={() => {
               setSelectedWorkId(null);
+              // also clear in store so table becomes empty
+              setWorkId(null);
             }}
           />
           <Button

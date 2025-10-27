@@ -7,8 +7,10 @@ function Login() {
   const location = useLocation();
   const login = useAuthStore((s) => s.login);
 
-  const FAKE_EMAIL = "haidarahmad421@gmail.com";
-  const FAKE_PASSWORD = "Haidar@123";
+  const ALLOWED_USERS = [
+    { email: "haidarahmad421@gmail.com", password: "Haidar@123" },
+    { email: "Hadeekmufti@tikit.ae", password: "Hadeek@123" },
+  ];
 
   const onFinish = (values) => {
     const { email, password } = values || {};
@@ -16,7 +18,10 @@ function Login() {
       message.error("Please enter email and password");
       return;
     }
-    if (email === FAKE_EMAIL && password === FAKE_PASSWORD) {
+    const isAllowed = ALLOWED_USERS.some(
+      (u) => u.email === email && u.password === password
+    );
+    if (isAllowed) {
       login("demo-token");
       const redirectTo = location.state?.from?.pathname || "/works";
       message.success("Logged in");

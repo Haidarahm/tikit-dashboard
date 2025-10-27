@@ -18,29 +18,40 @@ export const useSubWorksStore = create((set, get) => ({
   error: null,
   workId: null,
 
-  setWorkId: (workId) => set({ workId, page: 1 }),
+  setWorkId: (workId) => {
+    if (!workId) {
+      // Clear items when no work is selected so the table shows no data
+      set({ workId: null, page: 1, items: [], total: 0 });
+      return;
+    }
+    set({ workId, page: 1 });
+  },
   setPage: (page) => set({ page }),
   setPerPage: (perPage) => set({ perPage }),
   setLang: (lang) => set({ lang, page: 1 }),
 
   fetchList: async () => {
     const { page, perPage, lang, workId } = get();
-    if (!workId) return; // no-op until workId is set
+    if (!workId) {
+      set({ items: [], total: 0 });
+      return;
+    }
     set({ isLoading: true, error: null });
     try {
       const resp = await getAllCases(workId, { page, per_page: perPage, lang });
-      const items = Array.isArray(resp?.data)
-        ? resp.data
-        : Array.isArray(resp)
-        ? resp
-        : [];
-      const total = resp?.pagination?.total ?? resp?.total ?? items.length;
+      let items = [];
+      if (Array.isArray(resp?.data)) items = resp.data;
+      else if (Array.isArray(resp)) items = resp;
+      else if (Array.isArray(resp?.items)) items = resp.items;
+
+      const safeItems = Array.isArray(items) ? items : [];
+      const total =
+        resp?.pagination?.total ?? resp?.total ?? safeItems.length ?? 0;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
-      set({ items, total, page: nextPage, perPage: nextPerPage });
+      set({ items: safeItems, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
-      set({ error });
-      toast.error(error?.response?.data?.message || "Failed to load cases");
+      set({ error, items: [], total: 0 });
     } finally {
       set({ isLoading: false });
     }
