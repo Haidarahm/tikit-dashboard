@@ -12,6 +12,7 @@ import {
   Popconfirm,
   Space,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useWorksStore } from "../store/worksStrore.js";
 
@@ -28,6 +29,7 @@ function Works() {
     setPerPage,
     setLang,
     create,
+    import: importWorks,
   } = useWorksStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -53,6 +55,14 @@ function Works() {
   useEffect(() => {
     fetchList();
   }, [page, perPage, lang]);
+
+  const handleImportExcel = async (file) => {
+    try {
+      await importWorks(file);
+    } catch (error) {
+      // Error is already handled in the store
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -157,6 +167,32 @@ function Works() {
               setPage(1);
             }}
           />
+          <Upload
+            accept=".xlsx,.xls"
+            beforeUpload={(file) => {
+              const isExcel =
+                file.type ===
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                file.type === "application/vnd.ms-excel" ||
+                file.name.endsWith(".xlsx") ||
+                file.name.endsWith(".xls");
+              if (!isExcel) {
+                toast.error("Please upload an Excel file (.xlsx or .xls)");
+                return false;
+              }
+              return false; // Prevent auto upload
+            }}
+            onChange={(info) => {
+              if (info.fileList.length > 0) {
+                const file = info.fileList[0].originFileObj;
+                handleImportExcel(file);
+              }
+            }}
+            maxCount={1}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Import Excel</Button>
+          </Upload>
           <Button type="primary" onClick={() => setIsAddOpen(true)}>
             Add Work
           </Button>

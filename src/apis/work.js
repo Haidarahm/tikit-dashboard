@@ -73,3 +73,13 @@ export async function getWork(id, { lang } = {}) {
   const { data } = await apiClient.get(`/api/works/${id}`, { params });
   return data;
 }
+
+export async function importWorks(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post("/api/works/import", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}

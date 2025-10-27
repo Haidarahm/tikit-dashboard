@@ -6,6 +6,7 @@ import {
   addWork,
   updateWork,
   deleteWork,
+  importWorks,
 } from "../apis/work.js";
 
 export const useWorksStore = create((set, get) => ({
@@ -96,6 +97,22 @@ export const useWorksStore = create((set, get) => ({
     } catch (error) {
       set({ error });
       toast.error(error?.response?.data?.message || "Failed to delete work");
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  import: async (file) => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importWorks(file);
+      await get().fetchList();
+      toast.success("Works imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(error?.response?.data?.message || "Failed to import works");
       throw error;
     } finally {
       set({ isLoading: false });
