@@ -1,4 +1,4 @@
-import { Layout, Menu, Button, Dropdown, Avatar, Divider } from "antd";
+import { Layout, Menu, Dropdown, Avatar } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 import { useAuthStore } from "../store/auth.js";
@@ -34,14 +34,6 @@ function DashboardLayout() {
 
   const userMenuItems = [
     {
-      key: "profile",
-      icon: <UserOutlined />,
-      label: "Profile",
-    },
-    {
-      type: "divider",
-    },
-    {
       key: "logout",
       icon: <LogoutOutlined />,
       label: "Logout",
@@ -59,9 +51,10 @@ function DashboardLayout() {
         width={260}
         className="shadow-lg"
       >
-        <div className="h-16 flex items-center justify-center border-b border-gray-700">
-          <div className="text-white text-2xl font-bold tracking-wider">
-            <span className="text-blue-400">T</span>ikit
+        <div className="h-16 flex items-center justify-center border-b border-gray-600">
+          <div className="text-white text-2xl font-bold tracking-wider drop-shadow-sm">
+            <span className="text-blue-300">T</span>
+            <span className="text-gray-50">ikit</span>
           </div>
         </div>
         <Menu
@@ -98,29 +91,39 @@ function DashboardLayout() {
         />
       </Sider>
       <Layout>
-        <Header className="bg-white shadow-sm flex items-center justify-between px-6 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="text-xl font-semibold text-gray-800">Dashboard</div>
+        <Header
+          className="bg-gray-800 shadow-md border-b border-gray-700 flex items-center justify-between px-4 md:px-6"
+          style={{ height: 64 }}
+        >
+          <div className="flex items-center"></div>
+          <div className="flex items-center">
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              placement="bottomRight"
+              arrow
+              trigger={["click"]}
+            >
+              <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer group">
+                <Avatar
+                  size="default"
+                  className="ring-2 ring-blue-400/30"
+                  style={{ backgroundColor: "#2563eb" }}
+                  icon={<UserOutlined />}
+                />
+                <div className="hidden sm:flex flex-col items-start ml-1">
+                  <span className="text-xs font-semibold text-gray-300 leading-none">
+                    Admin
+                  </span>
+                  <span className="text-sm font-bold text-white leading-tight">
+                    Dashboard
+                  </span>
+                </div>
+              </button>
+            </Dropdown>
           </div>
-          <Dropdown
-            menu={{ items: userMenuItems }}
-            placement="bottomRight"
-            arrow
-          >
-            <div className="cursor-pointer flex items-center gap-3 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
-              <Avatar
-                size="small"
-                style={{ backgroundColor: "#3b82f6" }}
-                icon={<UserOutlined />}
-              />
-              <span className="text-sm font-medium text-gray-700">
-                Admin User
-              </span>
-            </div>
-          </Dropdown>
         </Header>
-        <Content className="p-6 bg-gray-50 min-h-[calc(100vh-64px)] overflow-auto">
-          <div className="bg-white p-6 rounded-lg shadow-sm min-h-[60vh]">
+        <Content className="p-4 md:p-6 bg-gray-50 min-h-[calc(100vh-64px)] overflow-auto">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm min-h-[60vh]">
             <Outlet />
           </div>
         </Content>

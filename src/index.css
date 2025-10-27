@@ -1,1 +1,83 @@
 @import "tailwindcss";
+
+/* Enhanced Text Contrast for Better Readability */
+body {
+  color: #1f2937; /* gray-800 - high contrast default text */
+}
+
+/* Table Text Contrast */
+.ant-table {
+  color: #111827; /* gray-900 - maximum contrast for table text */
+}
+
+.ant-table-thead > tr > th {
+  color: #111827;
+  font-weight: 600;
+}
+
+.ant-table-tbody > tr > td {
+  color: #1f2937;
+}
+
+/* Form Label Contrast */
+.ant-form-item-label > label {
+  color: #111827;
+  font-weight: 500;
+}
+
+/* Button Text Contrast */
+.ant-btn-primary {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Input Text Contrast */
+.ant-input,
+.ant-input-password input,
+.ant-input-number input {
+  color: #111827;
+}
+
+.ant-input::placeholder,
+.ant-input-password input::placeholder {
+  color: #6b7280; /* gray-500 for placeholders */
+}
+
+/* Text Area Contrast */
+.ant-input-textarea textarea {
+  color: #111827;
+}
+
+/* Select Dropdown Text Contrast */
+.ant-select-selector,
+.ant-select-selection-item,
+.ant-select-selection-placeholder {
+  color: #111827;
+}
+
+/* Modal Text Contrast */
+.ant-modal-title {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Typography Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Card Content */
+.ant-card {
+  color: #111827;
+}
+
+.ant-card-head-title {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Popconfirm Text */
+.ant-popconfirm-title {
+  color: #111827;
+}

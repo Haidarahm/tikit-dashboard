@@ -43,6 +43,13 @@ function Works() {
   const [editVideoFileList, setEditVideoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
+  // Initialize perPage to 5 on mount
+  useEffect(() => {
+    if (perPage !== 5) {
+      setPerPage(5);
+    }
+  }, []);
+
   useEffect(() => {
     fetchList();
   }, [page, perPage, lang]);
