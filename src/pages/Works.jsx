@@ -44,6 +44,7 @@ function Works() {
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editVideoFileList, setEditVideoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
   // Initialize perPage to 5 on mount
   useEffect(() => {
@@ -89,7 +90,37 @@ function Works() {
         title: "Description",
         dataIndex: "description",
         key: "description",
-        ellipsis: true,
+        width: 300,
+        render: (text, record) => {
+          const isExpanded = expandedDescriptions[record.id];
+          const maxLength = 50;
+
+          if (!text) return "-";
+
+          if (text.length <= maxLength) {
+            return <div className="whitespace-pre-wrap">{text}</div>;
+          }
+
+          return (
+            <div>
+              <div className="whitespace-pre-wrap mb-1">
+                {isExpanded ? text : `${text.substring(0, maxLength)}...`}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedDescriptions({
+                    ...expandedDescriptions,
+                    [record.id]: !isExpanded,
+                  });
+                }}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </button>
+            </div>
+          );
+        },
       },
       {
         title: "Media",
@@ -145,7 +176,7 @@ function Works() {
         ),
       },
     ],
-    []
+    [expandedDescriptions]
   );
 
   return (
@@ -441,72 +472,36 @@ function Works() {
       >
         <Form form={editForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_en" label="Title (EN)">
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_ar" label="Title (AR)">
               <Input placeholder="Enter Arabic title" />
             </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_fr" label="Title (FR)">
               <Input placeholder="Enter French title" />
             </Form.Item>
 
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_en" label="Subtitle (EN)">
               <Input placeholder="Enter English subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
               <Input placeholder="Enter Arabic subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
               <Input placeholder="Enter French subtitle" />
             </Form.Item>
 
-            <Form.Item
-              name="description_en"
-              label="Description (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_en" label="Description (EN)">
               <Input.TextArea
                 rows={3}
                 placeholder="Enter English description"
               />
             </Form.Item>
-            <Form.Item
-              name="description_ar"
-              label="Description (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_ar" label="Description (AR)">
               <Input.TextArea rows={3} placeholder="Enter Arabic description" />
             </Form.Item>
-            <Form.Item
-              name="description_fr"
-              label="Description (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_fr" label="Description (FR)">
               <Input.TextArea rows={3} placeholder="Enter French description" />
             </Form.Item>
           </div>
