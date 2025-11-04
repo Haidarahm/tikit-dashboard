@@ -9,6 +9,8 @@ import {
   FileTextOutlined,
   AppstoreOutlined,
   BarcodeOutlined,
+  UnorderedListOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -20,6 +22,8 @@ function DashboardLayout() {
 
   const selectedKeys = useMemo(() => {
     const path = location.pathname;
+    if (path.startsWith("/banner")) return ["banner"];
+    if (path.startsWith("/influencer/sections")) return ["sections"];
     if (path.startsWith("/works/sub")) return ["works-sub"];
     if (path.startsWith("/works")) return ["works"];
     if (path.startsWith("/services/sub")) return ["services-sub"];
@@ -86,6 +90,18 @@ function DashboardLayout() {
               icon: <BarcodeOutlined />,
               label: "Sub Services",
               onClick: () => navigate("/services/sub"),
+            },
+            {
+              key: "sections",
+              icon: <UnorderedListOutlined />,
+              label: "Influencer Sections",
+              onClick: () => navigate("/influencer/sections"),
+            },
+            {
+              key: "banner",
+              icon: <VideoCameraOutlined />,
+              label: "Banner Videos",
+              onClick: () => navigate("/banner"),
             },
           ]}
         />

@@ -12,6 +12,7 @@ import {
   Popconfirm,
   Space,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useServicesStore } from "../store/servicesStore.js";
 
@@ -28,6 +29,7 @@ function Services() {
     setPerPage,
     setLang,
     create,
+    import: importServices,
   } = useServicesStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -42,10 +44,19 @@ function Services() {
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editVideoFileList, setEditVideoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
   useEffect(() => {
     fetchList();
   }, [page, perPage, lang]);
+
+  const handleImportExcel = async (file) => {
+    try {
+      await importServices(file);
+    } catch (error) {
+      // Error is already handled in the store
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -72,7 +83,37 @@ function Services() {
         title: "Description",
         dataIndex: "description",
         key: "description",
-        ellipsis: true,
+        width: 300,
+        render: (text, record) => {
+          const isExpanded = expandedDescriptions[record.id];
+          const maxLength = 50;
+
+          if (!text) return "-";
+
+          if (text.length <= maxLength) {
+            return <div className="whitespace-pre-wrap">{text}</div>;
+          }
+
+          return (
+            <div>
+              <div className="whitespace-pre-wrap mb-1">
+                {isExpanded ? text : `${text.substring(0, maxLength)}...`}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedDescriptions({
+                    ...expandedDescriptions,
+                    [record.id]: !isExpanded,
+                  });
+                }}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </button>
+            </div>
+          );
+        },
       },
       {
         title: "Media",
@@ -128,7 +169,7 @@ function Services() {
         ),
       },
     ],
-    []
+    [expandedDescriptions]
   );
 
   return (
@@ -150,6 +191,32 @@ function Services() {
               setPage(1);
             }}
           />
+          <Upload
+            accept=".xlsx,.xls"
+            beforeUpload={(file) => {
+              const isExcel =
+                file.type ===
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                file.type === "application/vnd.ms-excel" ||
+                file.name.endsWith(".xlsx") ||
+                file.name.endsWith(".xls");
+              if (!isExcel) {
+                toast.error("Please upload an Excel file (.xlsx or .xls)");
+                return false;
+              }
+              return false; // Prevent auto upload
+            }}
+            onChange={(info) => {
+              if (info.fileList.length > 0) {
+                const file = info.fileList[0].originFileObj;
+                handleImportExcel(file);
+              }
+            }}
+            maxCount={1}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Import Excel</Button>
+          </Upload>
           <Button type="primary" onClick={() => setIsAddOpen(true)}>
             Add Service
           </Button>
@@ -399,72 +466,36 @@ function Services() {
       >
         <Form form={editForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_en" label="Title (EN)">
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_ar" label="Title (AR)">
               <Input placeholder="Enter Arabic title" />
             </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="title_fr" label="Title (FR)">
               <Input placeholder="Enter French title" />
             </Form.Item>
 
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_en" label="Subtitle (EN)">
               <Input placeholder="Enter English subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
               <Input placeholder="Enter Arabic subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
               <Input placeholder="Enter French subtitle" />
             </Form.Item>
 
-            <Form.Item
-              name="description_en"
-              label="Description (EN)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_en" label="Description (EN)">
               <Input.TextArea
                 rows={3}
                 placeholder="Enter English description"
               />
             </Form.Item>
-            <Form.Item
-              name="description_ar"
-              label="Description (AR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_ar" label="Description (AR)">
               <Input.TextArea rows={3} placeholder="Enter Arabic description" />
             </Form.Item>
-            <Form.Item
-              name="description_fr"
-              label="Description (FR)"
-              rules={[{ required: true }]}
-            >
+            <Form.Item name="description_fr" label="Description (FR)">
               <Input.TextArea rows={3} placeholder="Enter French description" />
             </Form.Item>
           </div>

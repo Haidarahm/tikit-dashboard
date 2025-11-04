@@ -5,6 +5,8 @@ import Works from "./pages/Works.jsx";
 import SubWorks from "./pages/SubWorks.jsx";
 import Services from "./pages/Services.jsx";
 import SubServices from "./pages/SubServices.jsx";
+import Sections from "./pages/influencer/Sections.jsx";
+import Banner from "./pages/Banner.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
             <Route path="/works/sub" element={<SubWorks />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/sub" element={<SubServices />} />
+            <Route path="/influencer/sections" element={<Sections />} />
+            <Route path="/banner" element={<Banner />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

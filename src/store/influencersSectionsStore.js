@@ -1,15 +1,14 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import {
-  getServices,
-  getService,
-  addService,
-  updateService,
-  deleteService,
-  importServices,
-} from "../apis/service.js";
+  getInfluencersSections,
+  getInfluencersSection,
+  addInfluencersSection,
+  updateInfluencersSection,
+  deleteInfluencersSection,
+} from "../apis/influencersSections.js";
 
-export const useServicesStore = create((set, get) => ({
+export const useInfluencersSectionsStore = create((set, get) => ({
   items: [],
   total: 0,
   page: 1,
@@ -27,7 +26,11 @@ export const useServicesStore = create((set, get) => ({
     const { page, perPage, lang } = get();
     set({ isLoading: true, error: null });
     try {
-      const resp = await getServices({ page, per_page: perPage, lang });
+      const resp = await getInfluencersSections({
+        page,
+        per_page: perPage,
+        lang,
+      });
       const items = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
@@ -47,11 +50,13 @@ export const useServicesStore = create((set, get) => ({
   fetchOne: async (id, opts = {}) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await getService(id, { lang: opts.lang ?? get().lang });
+      const data = await getInfluencersSection(id, {
+        lang: opts.lang ?? get().lang,
+      });
       set({ current: data });
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to load service");
+      toast.error(error?.response?.data?.message || "Failed to load section");
     } finally {
       set({ isLoading: false });
     }
@@ -60,13 +65,14 @@ export const useServicesStore = create((set, get) => ({
   create: async (payload) => {
     set({ isLoading: true, error: null });
     try {
-      const created = await addService(payload);
+      const created = await addInfluencersSection(payload);
       set({ current: created });
       await get().fetchList();
+      toast.success("Section created successfully");
       return created;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to create service");
+      toast.error(error?.response?.data?.message || "Failed to create section");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -76,13 +82,14 @@ export const useServicesStore = create((set, get) => ({
   update: async (id, payload) => {
     set({ isLoading: true, error: null });
     try {
-      const updated = await updateService(id, payload);
+      const updated = await updateInfluencersSection(id, payload);
       set({ current: updated });
       await get().fetchList();
+      toast.success("Section updated successfully");
       return updated;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to update service");
+      toast.error(error?.response?.data?.message || "Failed to update section");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -92,29 +99,12 @@ export const useServicesStore = create((set, get) => ({
   remove: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await deleteService(id);
+      await deleteInfluencersSection(id);
       await get().fetchList();
+      toast.success("Section deleted successfully");
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to delete service");
-      throw error;
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  import: async (file) => {
-    set({ isLoading: true, error: null });
-    try {
-      const result = await importServices(file);
-      await get().fetchList();
-      toast.success("Services imported successfully");
-      return result;
-    } catch (error) {
-      set({ error });
-      toast.error(
-        error?.response?.data?.message || "Failed to import services"
-      );
+      toast.error(error?.response?.data?.message || "Failed to delete section");
       throw error;
     } finally {
       set({ isLoading: false });
