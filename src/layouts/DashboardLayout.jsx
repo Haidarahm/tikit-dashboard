@@ -9,6 +9,7 @@ import {
   BarcodeOutlined,
   UnorderedListOutlined,
   VideoCameraOutlined,
+  FolderOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -22,6 +23,7 @@ function DashboardLayout() {
     const path = location.pathname;
     if (path.startsWith("/banner")) return ["banner"];
     if (path.startsWith("/influencer/sections")) return ["sections"];
+    if (path.startsWith("/works")) return ["works"];
     if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
     return [];
@@ -74,6 +76,12 @@ function DashboardLayout() {
               icon: <BarcodeOutlined />,
               label: "Sub Services",
               onClick: () => navigate("/services/sub"),
+            },
+            {
+              key: "works",
+              icon: <FolderOutlined />,
+              label: "Works Sections",
+              onClick: () => navigate("/works"),
             },
             {
               key: "sections",

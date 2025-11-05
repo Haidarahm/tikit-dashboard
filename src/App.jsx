@@ -5,6 +5,7 @@ import Services from "./pages/Services.jsx";
 import SubServices from "./pages/SubServices.jsx";
 import Sections from "./pages/influencer/Sections.jsx";
 import Banner from "./pages/Banner.jsx";
+import WorksSection from "./pages/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route index element={<Navigate to="/services" replace />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/sub" element={<SubServices />} />
+            <Route path="/works" element={<WorksSection />} />
             <Route path="/influencer/sections" element={<Sections />} />
             <Route path="/banner" element={<Banner />} />
           </Route>
