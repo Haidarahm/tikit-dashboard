@@ -5,7 +5,7 @@ export async function getInfluencersSections({ per_page, page, lang } = {}) {
   if (per_page != null) params.per_page = per_page;
   if (page != null) params.page = page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/api/sections", { params });
+  const { data } = await apiClient.get("/api/sections/get", { params });
   return data;
 }
 
@@ -27,7 +27,7 @@ export async function addInfluencersSection(payload) {
     formData.append("image", payload.image);
   }
 
-  const { data } = await apiClient.post("/api/sections", formData, {
+  const { data } = await apiClient.post("/api/sections/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -50,14 +50,14 @@ export async function updateInfluencersSection(id, payload) {
     formData.append("image", payload.image);
   }
 
-  const { data } = await apiClient.post(`/api/sections/${id}`, formData, {
+  const { data } = await apiClient.post(`/api/sections/${id}/update`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteInfluencersSection(id) {
-  const { data } = await apiClient.delete(`/api/sections/${id}`);
+  const { data } = await apiClient.delete(`/api/sections/${id}/delete`);
   return data;
 }
 

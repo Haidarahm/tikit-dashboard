@@ -186,7 +186,7 @@ export const Sections = () => {
                     <div className="h-48 overflow-hidden bg-gray-100">
                       {section.image ? (
                         <img
-                          src={section.images}
+                          src={section.image}
                           alt={section.title}
                           className="w-full h-full object-cover"
                         />

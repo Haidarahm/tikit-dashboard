@@ -5,8 +5,6 @@ import { useAuthStore } from "../store/auth.js";
 import {
   UserOutlined,
   LogoutOutlined,
-  FolderOutlined,
-  FileTextOutlined,
   AppstoreOutlined,
   BarcodeOutlined,
   UnorderedListOutlined,
@@ -24,8 +22,6 @@ function DashboardLayout() {
     const path = location.pathname;
     if (path.startsWith("/banner")) return ["banner"];
     if (path.startsWith("/influencer/sections")) return ["sections"];
-    if (path.startsWith("/works/sub")) return ["works-sub"];
-    if (path.startsWith("/works")) return ["works"];
     if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
     return [];
@@ -67,18 +63,6 @@ function DashboardLayout() {
           selectedKeys={selectedKeys}
           className="border-r-0"
           items={[
-            {
-              key: "works",
-              icon: <FolderOutlined />,
-              label: "Works",
-              onClick: () => navigate("/works"),
-            },
-            {
-              key: "works-sub",
-              icon: <FileTextOutlined />,
-              label: "Sub Works",
-              onClick: () => navigate("/works/sub"),
-            },
             {
               key: "services",
               icon: <AppstoreOutlined />,
