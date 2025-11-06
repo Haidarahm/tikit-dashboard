@@ -1,8 +1,10 @@
 import { apiClient } from "../client.js";
 
-export async function getItems({ work_id } = {}) {
+export async function getItems({ work_id, page, per_page } = {}) {
   const params = {};
   if (work_id != null) params.work_id = work_id;
+  if (page != null) params.page = page;
+  if (per_page != null) params.per_page = per_page;
   const { data } = await apiClient.get("/api/work-influences/get", { params });
   return data;
 }
@@ -26,6 +28,11 @@ export async function addItem(payload) {
   fields.forEach((f) => {
     if (payload[f] != null) formData.append(f, payload[f]);
   });
+
+  // Add logo
+  if (payload?.logo) {
+    formData.append("logo", payload.logo);
+  }
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
@@ -61,6 +68,11 @@ export async function updateItem(id, payload) {
   fields.forEach((f) => {
     if (payload[f] != null) formData.append(f, payload[f]);
   });
+
+  // Add logo
+  if (payload?.logo) {
+    formData.append("logo", payload.logo);
+  }
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {

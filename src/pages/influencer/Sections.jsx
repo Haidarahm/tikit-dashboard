@@ -88,14 +88,27 @@ export const Sections = () => {
   const handleEdit = async () => {
     try {
       const values = await editForm.validateFields();
-      const payload = {
-        title_en: values.title_en,
-        title_ar: values.title_ar,
-        title_fr: values.title_fr,
-        subtitle_en: values.subtitle_en,
-        subtitle_ar: values.subtitle_ar,
-        subtitle_fr: values.subtitle_fr,
-      };
+      const payload = {};
+
+      // Only include fields that have values
+      if (values.title_en && values.title_en.trim()) {
+        payload.title_en = values.title_en;
+      }
+      if (values.title_ar && values.title_ar.trim()) {
+        payload.title_ar = values.title_ar;
+      }
+      if (values.title_fr && values.title_fr.trim()) {
+        payload.title_fr = values.title_fr;
+      }
+      if (values.subtitle_en && values.subtitle_en.trim()) {
+        payload.subtitle_en = values.subtitle_en;
+      }
+      if (values.subtitle_ar && values.subtitle_ar.trim()) {
+        payload.subtitle_ar = values.subtitle_ar;
+      }
+      if (values.subtitle_fr && values.subtitle_fr.trim()) {
+        payload.subtitle_fr = values.subtitle_fr;
+      }
 
       if (editImageFileList[0]?.originFileObj) {
         payload.image = editImageFileList[0].originFileObj;

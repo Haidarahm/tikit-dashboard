@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   Button,
@@ -20,10 +21,12 @@ import {
   PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
+import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useWorksSectionStore } from "../../store/works/worksSectionStore.js";
 
 const WorksSection = () => {
+  const navigate = useNavigate();
   const {
     items,
     total,
@@ -164,6 +167,10 @@ const WorksSection = () => {
     setEditImageFileList([]);
   };
 
+  const handleViewData = (workId) => {
+    navigate(`/works/influence/${workId}`);
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -253,6 +260,13 @@ const WorksSection = () => {
                     </div>
                   }
                   actions={[
+                    <Button
+                      key="data"
+                      type="text"
+                      icon={<FaDatabase />}
+                      onClick={() => handleViewData(work.id)}
+                      className="flex items-center justify-center"
+                    />,
                     <EditOutlined
                       key="edit"
                       onClick={() => openEditModal(work)}

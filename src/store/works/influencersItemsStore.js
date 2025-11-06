@@ -9,28 +9,41 @@ import {
 
 export const useInfluencersItemsStore = create((set, get) => ({
   items: [],
+  total: 0,
+  page: 1,
+  perPage: 5,
   workId: null,
   current: null,
   isLoading: false,
   error: null,
 
   setWorkId: (workId) => set({ workId }),
+  setPage: (page) => set({ page }),
+  setPerPage: (perPage) => set({ perPage }),
 
-  fetchList: async () => {
-    const { workId } = get();
-    if (!workId) {
-      set({ items: [] });
+  fetchList: async (workId = null) => {
+    const { page, perPage } = get();
+    const targetWorkId = workId ?? get().workId;
+    if (!targetWorkId) {
+      set({ items: [], total: 0 });
       return;
     }
     set({ isLoading: true, error: null });
     try {
-      const resp = await getItems({ work_id: workId });
+      const resp = await getItems({
+        work_id: targetWorkId,
+        page,
+        per_page: perPage,
+      });
       const items = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
         ? resp
         : [];
-      set({ items });
+      const total = resp?.pagination?.total ?? resp?.total ?? items.length;
+      const nextPage = resp?.pagination?.current_page ?? page;
+      const nextPerPage = resp?.pagination?.per_page ?? perPage;
+      set({ items, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
       toast.error(
