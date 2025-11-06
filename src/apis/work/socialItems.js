@@ -102,4 +102,3 @@ export async function deleteSocial(id) {
   const { data } = await apiClient.delete(`/api/work-socials/${id}/delete`);
   return data;
 }
-
