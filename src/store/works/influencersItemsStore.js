@@ -5,7 +5,7 @@ import {
   addItem,
   updateItem,
   deleteItem,
-} from "../apis/influencersItems.js";
+} from "../../apis/influencersItems.js";
 
 export const useInfluencersItemsStore = create((set, get) => ({
   items: [],

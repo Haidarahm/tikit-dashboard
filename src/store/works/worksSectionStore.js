@@ -6,7 +6,7 @@ import {
   updateWorkSection,
   deleteWorkSection,
   importExcel,
-} from "../apis/worksSection.js";
+} from "../../apis/worksSection.js";
 
 export const useWorksSectionStore = create((set, get) => ({
   items: [],

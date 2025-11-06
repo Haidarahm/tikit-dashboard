@@ -6,7 +6,7 @@ import {
   addInfluencersSection,
   updateInfluencersSection,
   deleteInfluencersSection,
-} from "../apis/influencersSections.js";
+} from "../../apis/influencersSections.js";
 
 export const useInfluencersSectionsStore = create((set, get) => ({
   items: [],
