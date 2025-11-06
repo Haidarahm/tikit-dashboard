@@ -172,6 +172,12 @@ const WorksSection = () => {
       navigate(`/works/social/${workId}`);
     } else if (workType === "influence") {
       navigate(`/works/influence/${workId}`);
+    } else if (workType === "digital") {
+      navigate(`/works/digital/${workId}`);
+    } else if (workType === "creative") {
+      navigate(`/works/creative/${workId}`);
+    } else if (workType === "event") {
+      navigate(`/works/event/${workId}`);
     } else {
       // Default to influence for backward compatibility
       navigate(`/works/influence/${workId}`);

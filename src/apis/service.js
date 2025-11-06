@@ -5,7 +5,7 @@ export async function getServices({ per_page, page, lang } = {}) {
   if (per_page != null) params.per_page = per_page;
   if (page != null) params.page = page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/api/services", { params });
+  const { data } = await apiClient.get("/api/services/get", { params });
   return data;
 }
 
@@ -30,7 +30,7 @@ export async function addService(payload) {
     formData.append("media", payload.media);
   }
 
-  const { data } = await apiClient.post("/api/services", formData, {
+  const { data } = await apiClient.post("/api/services/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
