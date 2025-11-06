@@ -56,7 +56,7 @@ export async function updateService(id, payload) {
     formData.append("media", payload.media);
   }
 
-  const { data } = await apiClient.post(`/api/services/${id}`, formData, {
+  const { data } = await apiClient.post(`/api/services/update/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -70,7 +70,7 @@ export async function deleteService(id) {
 export async function getService(id, { lang } = {}) {
   const params = {};
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/api/services/${id}`, { params });
+  const { data } = await apiClient.get(`/api/services/delete/${id}`, { params });
   return data;
 }
 
