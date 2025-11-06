@@ -5,9 +5,10 @@ import Services from "./pages/Services.jsx";
 import SubServices from "./pages/SubServices.jsx";
 import Sections from "./pages/influencer/Sections.jsx";
 import Banner from "./pages/Banner.jsx";
-import WorksSection from "./pages/WorksSection.jsx";
+import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-
+import InfluencersData from "./pages/influencer/influencersData.jsx";
+import InfluencersItems from "./pages/work/InfluencersItems.jsx";
 function App() {
   const basename = "/dashboardTikit";
   return (
@@ -20,7 +21,9 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/services/sub" element={<SubServices />} />
             <Route path="/works" element={<WorksSection />} />
+            <Route path="/works/influence/:id" element={<InfluencersItems />} />
             <Route path="/influencer/sections" element={<Sections />} />
+            <Route path="/influencer/data/:id" element={<InfluencersData />} />
             <Route path="/banner" element={<Banner />} />
           </Route>
         </Route>

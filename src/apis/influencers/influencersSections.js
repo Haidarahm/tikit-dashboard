@@ -1,4 +1,4 @@
-import { apiClient } from "./client.js";
+import { apiClient } from "../client.js";
 
 export async function getInfluencersSections({ per_page, page, lang } = {}) {
   const params = {};
@@ -50,9 +50,13 @@ export async function updateInfluencersSection(id, payload) {
     formData.append("image", payload.image);
   }
 
-  const { data } = await apiClient.post(`/api/sections/${id}/update`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await apiClient.post(
+    `/api/sections/${id}/update`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 }
 

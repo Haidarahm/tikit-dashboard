@@ -5,7 +5,7 @@ import {
   addInfluencer,
   updateInfluencer,
   deleteInfluencer,
-} from "../../apis/influencer.js";
+} from "../../apis/influencers/influencer.js";
 
 export const useInfluencerStore = create((set, get) => ({
   items: [],
@@ -58,10 +58,14 @@ export const useInfluencerStore = create((set, get) => ({
     }
   },
 
-  create: async (payload) => {
+  create: async (payload, sectionId = null) => {
     set({ isLoading: true, error: null });
     try {
-      const created = await addInfluencer(payload);
+      const targetSectionId = sectionId ?? get().sectionId;
+      if (!targetSectionId) {
+        throw new Error("Section ID is required to create influencer");
+      }
+      const created = await addInfluencer(targetSectionId, payload);
       set({ current: created });
       await get().fetchList();
       toast.success("Influencer created successfully");
@@ -69,7 +73,9 @@ export const useInfluencerStore = create((set, get) => ({
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to create influencer"
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to create influencer"
       );
       throw error;
     } finally {

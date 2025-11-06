@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   Button,
@@ -14,10 +15,12 @@ import {
   Spin,
 } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { useInfluencersSectionsStore } from "../../store/influencersSectionsStore.js";
+import { useInfluencersSectionsStore } from "../../store/influencers/influencersSectionsStore.js";
 
 export const Sections = () => {
+  const navigate = useNavigate();
   const {
     items,
     total,
@@ -136,6 +139,10 @@ export const Sections = () => {
     setEditImageFileList([]);
   };
 
+  const handleViewData = (sectionId) => {
+    navigate(`/influencer/data/${sectionId}`);
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -198,6 +205,13 @@ export const Sections = () => {
                     </div>
                   }
                   actions={[
+                    <Button
+                      key="data"
+                      type="text"
+                      icon={<FaDatabase />}
+                      onClick={() => handleViewData(section.id)}
+                      className="flex items-center justify-center"
+                    />,
                     <EditOutlined
                       key="edit"
                       onClick={() => openEditModal(section)}

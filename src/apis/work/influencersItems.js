@@ -1,4 +1,4 @@
-import { apiClient } from "./client.js";
+import { apiClient } from "../client.js";
 
 export async function getItems({ work_id } = {}) {
   const params = {};

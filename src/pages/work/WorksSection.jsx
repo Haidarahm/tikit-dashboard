@@ -21,7 +21,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { useWorksSectionStore } from "../store/works/worksSectionStore.js";
+import { useWorksSectionStore } from "../../store/works/worksSectionStore.js";
 
 const WorksSection = () => {
   const {

@@ -1,6 +1,6 @@
-import { apiClient } from "./client.js";
+import { apiClient } from "../client.js";
 
-export async function addInfluencer(payload) {
+export async function addInfluencer(sectionId, payload) {
   const formData = new FormData();
   const fields = [
     "name_en",
@@ -33,9 +33,13 @@ export async function addInfluencer(payload) {
     });
   }
 
-  const { data } = await apiClient.post("/api/influencers/add", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await apiClient.post(
+    `/api/influencers/sections/${sectionId}/add`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 }
 
