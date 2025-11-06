@@ -167,8 +167,15 @@ const WorksSection = () => {
     setEditImageFileList([]);
   };
 
-  const handleViewData = (workId) => {
-    navigate(`/works/influence/${workId}`);
+  const handleViewData = (workId, workType) => {
+    if (workType === "social") {
+      navigate(`/works/social/${workId}`);
+    } else if (workType === "influence") {
+      navigate(`/works/influence/${workId}`);
+    } else {
+      // Default to influence for backward compatibility
+      navigate(`/works/influence/${workId}`);
+    }
   };
 
   return (
@@ -264,7 +271,7 @@ const WorksSection = () => {
                       key="data"
                       type="text"
                       icon={<FaDatabase />}
-                      onClick={() => handleViewData(work.id)}
+                      onClick={() => handleViewData(work.id, work.type)}
                       className="flex items-center justify-center"
                     />,
                     <EditOutlined
