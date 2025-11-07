@@ -50,9 +50,6 @@ export const useInfluencerStore = create((set, get) => ({
       set({ items, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
-      toast.error(
-        error?.response?.data?.message || "Failed to fetch influencers"
-      );
     } finally {
       set({ isLoading: false });
     }

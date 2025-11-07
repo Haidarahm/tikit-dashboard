@@ -8,12 +8,12 @@ import {
   Input,
   Upload,
   Popconfirm,
-  Card,
-  Row,
-  Col,
   Pagination,
   Spin,
   Image,
+  Table,
+  Tooltip,
+  Typography,
 } from "antd";
 import {
   EditOutlined,
@@ -184,6 +184,106 @@ const WorksSection = () => {
     }
   };
 
+  const { Text } = Typography;
+
+  const columns = [
+    {
+      title: "Media",
+      dataIndex: "media",
+      key: "media",
+      width: 120,
+      render: (media) =>
+        media ? (
+          <Image
+            src={media}
+            alt="Work media"
+            width={80}
+            height={80}
+            className="object-cover"
+            preview={{ mask: "Preview" }}
+          />
+        ) : (
+          <span className="text-gray-400">No Image</span>
+        ),
+    },
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      ellipsis: true,
+      render: (_, work) => (
+        <Text strong ellipsis={{ tooltip: work.title }}>
+          {work.title || "No Title"}
+        </Text>
+      ),
+    },
+    {
+      title: "Subtitle",
+      dataIndex: "subtitle",
+      key: "subtitle",
+      ellipsis: true,
+      render: (_, work) => (
+        <Text ellipsis={{ tooltip: work.subtitle }}>
+          {work.subtitle || "No Subtitle"}
+        </Text>
+      ),
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+      render: (description) => (
+        <Text ellipsis={{ tooltip: description }}>{description || ""}</Text>
+      ),
+    },
+    {
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
+      width: 120,
+      render: (type) => (
+        <Text type="secondary" className="uppercase tracking-wide">
+          {type || ""}
+        </Text>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 140,
+      fixed: "right",
+      render: (_, work) => (
+        <div className="flex items-center gap-2">
+          <Tooltip title="View Data">
+            <Button
+              type="text"
+              icon={<FaDatabase />}
+              onClick={() => handleViewData(work.id, work.type)}
+            />
+          </Tooltip>
+          <Tooltip title="Edit">
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => openEditModal(work)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Delete this work section?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => handleDelete(work.id)}
+          >
+            <Tooltip title="Delete">
+              <Button type="text" danger icon={<DeleteOutlined />} />
+            </Tooltip>
+          </Popconfirm>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -251,78 +351,15 @@ const WorksSection = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]}>
-            {items.map((work) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={work.id}>
-                <Card
-                  hoverable
-                  cover={
-                    <div className="h-48 overflow-hidden bg-gray-100">
-                      {work.media ? (
-                        <Image
-                          src={work.media}
-                          alt={work.title}
-                          className="w-full h-full object-cover"
-                          preview={{ mask: "Preview" }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-                  }
-                  actions={[
-                    <Button
-                      key="data"
-                      type="text"
-                      icon={<FaDatabase />}
-                      onClick={() => handleViewData(work.id, work.type)}
-                      className="flex items-center justify-center"
-                    />,
-                    <EditOutlined
-                      key="edit"
-                      onClick={() => openEditModal(work)}
-                    />,
-                    <Popconfirm
-                      key="delete"
-                      title="Delete this work section?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => handleDelete(work.id)}
-                    >
-                      <DeleteOutlined danger />
-                    </Popconfirm>,
-                  ]}
-                >
-                  <Card.Meta
-                    title={
-                      <div className="font-semibold text-base line-clamp-2">
-                        {work.title || "No Title"}
-                      </div>
-                    }
-                    description={
-                      <div>
-                        <div className="text-gray-600 line-clamp-1 mb-1">
-                          {work.subtitle || "No Subtitle"}
-                        </div>
-                        {work.description && (
-                          <div className="text-gray-500 text-sm line-clamp-2">
-                            {work.description}
-                          </div>
-                        )}
-                        {work.type && (
-                          <div className="text-xs text-blue-600 mt-2">
-                            Type: {work.type}
-                          </div>
-                        )}
-                      </div>
-                    }
-                  />
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          <Table
+            columns={columns}
+            dataSource={items}
+            rowKey="id"
+            pagination={false}
+            className="bg-white shadow-sm rounded-lg"
+            size="middle"
+            scroll={{ x: true }}
+          />
 
           {total > perPage && (
             <div className="flex justify-center mt-8">
