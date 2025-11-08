@@ -5,6 +5,7 @@ import Services from "./pages/Services.jsx";
 import SubServices from "./pages/SubServices.jsx";
 import Sections from "./pages/influencer/Sections.jsx";
 import Banner from "./pages/Banner.jsx";
+import AboutBanners from "./pages/AboutBanners.jsx";
 import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import InfluencersData from "./pages/influencer/influencersData.jsx";
@@ -33,6 +34,7 @@ function App() {
             <Route path="/influencer/sections" element={<Sections />} />
             <Route path="/influencer/data/:id" element={<InfluencersData />} />
             <Route path="/banner" element={<Banner />} />
+            <Route path="/about-banners" element={<AboutBanners />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

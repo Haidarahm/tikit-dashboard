@@ -1,32 +1,30 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import {
-  getVideos,
-  addVideo,
-  updateVideo,
-  deleteVideo,
-} from "../apis/banners/banner";
+  getAllTeamTypes,
+  createTeamType,
+  updateTeamType,
+  deleteTeamType,
+} from "../../apis/team/teamsType.js";
 
-export const useBannerStore = create((set, get) => ({
+export const useTeamsTypeStore = create((set, get) => ({
   items: [],
   total: 0,
   page: 1,
-  perPage: 5,
+  perPage: 10,
   current: null,
   isLoading: false,
   error: null,
 
   setPage: (page) => set({ page }),
   setPerPage: (perPage) => set({ perPage }),
+  setCurrent: (current) => set({ current }),
 
   fetchList: async () => {
     const { page, perPage } = get();
     set({ isLoading: true, error: null });
     try {
-      const resp = await getVideos({
-        page,
-        per_page: perPage,
-      });
+      const resp = await getAllTeamTypes({ page, per_page: perPage });
       const items = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
@@ -36,8 +34,13 @@ export const useBannerStore = create((set, get) => ({
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
       set({ items, total, page: nextPage, perPage: nextPerPage });
+      return items;
     } catch (error) {
       set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to load team types data"
+      );
+      throw error;
     } finally {
       set({ isLoading: false });
     }
@@ -46,14 +49,16 @@ export const useBannerStore = create((set, get) => ({
   create: async (payload) => {
     set({ isLoading: true, error: null });
     try {
-      const created = await addVideo(payload);
+      const created = await createTeamType(payload);
       set({ current: created?.data || created });
       await get().fetchList();
-      toast.success("Video added successfully");
+      toast.success("Team type created successfully");
       return created;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to add video");
+      toast.error(
+        error?.response?.data?.message || "Failed to create team type"
+      );
       throw error;
     } finally {
       set({ isLoading: false });
@@ -63,14 +68,16 @@ export const useBannerStore = create((set, get) => ({
   update: async (id, payload) => {
     set({ isLoading: true, error: null });
     try {
-      const updated = await updateVideo(id, payload);
+      const updated = await updateTeamType(id, payload);
       set({ current: updated?.data || updated });
       await get().fetchList();
-      toast.success("Video updated successfully");
+      toast.success("Team type updated successfully");
       return updated;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to update video");
+      toast.error(
+        error?.response?.data?.message || "Failed to update team type"
+      );
       throw error;
     } finally {
       set({ isLoading: false });
@@ -80,12 +87,14 @@ export const useBannerStore = create((set, get) => ({
   remove: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await deleteVideo(id);
+      await deleteTeamType(id);
       await get().fetchList();
-      toast.success("Video deleted successfully");
+      toast.success("Team type deleted successfully");
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to delete video");
+      toast.error(
+        error?.response?.data?.message || "Failed to delete team type"
+      );
       throw error;
     } finally {
       set({ isLoading: false });

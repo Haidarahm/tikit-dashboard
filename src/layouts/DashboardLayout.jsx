@@ -10,6 +10,7 @@ import {
   UnorderedListOutlined,
   VideoCameraOutlined,
   FolderOutlined,
+  PlaySquareOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -21,6 +22,7 @@ function DashboardLayout() {
 
   const selectedKeys = useMemo(() => {
     const path = location.pathname;
+    if (path.startsWith("/about-banners")) return ["about-banners"];
     if (path.startsWith("/banner")) return ["banner"];
     if (path.startsWith("/influencer/sections")) return ["sections"];
     if (path.startsWith("/works")) return ["works"];
@@ -94,6 +96,12 @@ function DashboardLayout() {
               icon: <VideoCameraOutlined />,
               label: "Banner Videos",
               onClick: () => navigate("/banner"),
+            },
+            {
+              key: "about-banners",
+              icon: <PlaySquareOutlined />,
+              label: "About Us Banners",
+              onClick: () => navigate("/about-banners"),
             },
           ]}
         />
