@@ -32,12 +32,18 @@ export const useTeamMembersStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const resp = await getAllTeamMembers(effectiveTypeId);
-      const items = Array.isArray(resp?.data)
-        ? resp.data
-        : Array.isArray(resp)
-        ? resp
-        : [];
-      const total = resp?.pagination?.total ?? resp?.total ?? items.length;
+      let items = [];
+      if (Array.isArray(resp?.data)) {
+        items = resp.data;
+      } else if (Array.isArray(resp)) {
+        items = resp;
+      } else if (resp && typeof resp === "object") {
+        items = "id" in resp ? [resp] : [];
+      }
+      const total =
+        resp?.pagination?.total ??
+        resp?.total ??
+        (resp && typeof resp === "object" && "id" in resp ? 1 : items.length);
       set({ items, total, typeId: effectiveTypeId });
       return items;
     } catch (error) {

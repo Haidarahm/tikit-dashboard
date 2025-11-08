@@ -11,6 +11,7 @@ import {
   VideoCameraOutlined,
   FolderOutlined,
   PlaySquareOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -28,6 +29,7 @@ function DashboardLayout() {
     if (path.startsWith("/works")) return ["works"];
     if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
+    if (path.startsWith("/team")) return ["team"];
     return [];
   }, [location.pathname]);
 
@@ -67,6 +69,12 @@ function DashboardLayout() {
           selectedKeys={selectedKeys}
           className="border-r-0"
           items={[
+            {
+              key: "team",
+              icon: <TeamOutlined />,
+              label: "Teams",
+              onClick: () => navigate("/team"),
+            },
             {
               key: "services",
               icon: <AppstoreOutlined />,
