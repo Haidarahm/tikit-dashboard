@@ -12,6 +12,7 @@ import {
   FolderOutlined,
   PlaySquareOutlined,
   TeamOutlined,
+  ReadOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -30,6 +31,7 @@ function DashboardLayout() {
     if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
     if (path.startsWith("/team")) return ["team"];
+    if (path.startsWith("/news")) return ["news"];
     return [];
   }, [location.pathname]);
 
@@ -74,6 +76,12 @@ function DashboardLayout() {
               icon: <TeamOutlined />,
               label: "Teams",
               onClick: () => navigate("/team"),
+            },
+            {
+              key: "news",
+              icon: <ReadOutlined />,
+              label: "Blogs / News",
+              onClick: () => navigate("/news"),
             },
             {
               key: "services",
