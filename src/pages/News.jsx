@@ -75,7 +75,6 @@ function News() {
         payload.images = createImage[0].originFileObj;
       }
       await create(payload);
-      toast.success("News card created successfully");
       setIsCreateOpen(false);
       resetCreateModal();
     } catch (error) {
@@ -90,12 +89,15 @@ function News() {
   const handleEditOpen = (record) => {
     setEditingId(record.id);
     editForm.setFieldsValue({
-      title_en: record.title_en || "",
-      title_ar: record.title_ar || "",
-      title_fr: record.title_fr || "",
-      subtitle_en: record.subtitle_en || "",
-      subtitle_ar: record.subtitle_ar || "",
-      subtitle_fr: record.subtitle_fr || "",
+      title_en: record.title_en || record.title || "",
+      title_ar: record.title_ar || record.title || "",
+      title_fr: record.title_fr || record.title || "",
+      subtitle_en: record.subtitle_en || record.subtitle || "",
+      subtitle_ar: record.subtitle_ar || record.subtitle || "",
+      subtitle_fr: record.subtitle_fr || record.subtitle || "",
+      description_en: record.description_en || record.description || "",
+      description_ar: record.description_ar || record.description || "",
+      description_fr: record.description_fr || record.description || "",
     });
     setIsEditOpen(true);
   };
@@ -146,6 +148,13 @@ function News() {
         ellipsis: true,
       },
       {
+        title: "Description",
+        dataIndex: "description",
+        key: "description",
+        ellipsis: true,
+        render: (text) => text || "-",
+      },
+      {
         title: "Image",
         dataIndex: "images",
         key: "images",
@@ -193,7 +202,7 @@ function News() {
         ),
       },
     ],
-    [remove]
+    [remove, handleEditOpen]
   );
 
   return (
@@ -261,23 +270,71 @@ function News() {
       >
         <Form form={createForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item name="title_en" label="Title (EN)">
+            <Form.Item
+              name="title_en"
+              label="Title (EN)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item name="title_ar" label="Title (AR)">
+            <Form.Item
+              name="title_ar"
+              label="Title (AR)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
               <Input placeholder="Enter Arabic title" />
             </Form.Item>
-            <Form.Item name="title_fr" label="Title (FR)">
+            <Form.Item
+              name="title_fr"
+              label="Title (FR)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
               <Input placeholder="Enter French title" />
             </Form.Item>
-            <Form.Item name="subtitle_en" label="Subtitle (EN)">
+            <Form.Item
+              name="subtitle_en"
+              label="Subtitle (EN)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
               <Input placeholder="Enter English subtitle" />
             </Form.Item>
-            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
+            <Form.Item
+              name="subtitle_ar"
+              label="Subtitle (AR)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
               <Input placeholder="Enter Arabic subtitle" />
             </Form.Item>
-            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
+            <Form.Item
+              name="subtitle_fr"
+              label="Subtitle (FR)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
               <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="description_en"
+              label="Description (EN)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item
+              name="description_ar"
+              label="Description (AR)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item
+              name="description_fr"
+              label="Description (FR)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter French description" />
             </Form.Item>
           </div>
           <Form.Item label="Image" required>
@@ -313,41 +370,35 @@ function News() {
       >
         <Form form={editForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-            >
+            <Form.Item name="title_en" label="Title (EN)">
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-            >
+            <Form.Item name="title_ar" label="Title (AR)">
               <Input placeholder="Enter Arabic title" />
             </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-            >
+            <Form.Item name="title_fr" label="Title (FR)">
               <Input placeholder="Enter French title" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-            >
+            <Form.Item name="subtitle_en" label="Subtitle (EN)">
               <Input placeholder="Enter English subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-            >
+            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
               <Input placeholder="Enter Arabic subtitle" />
             </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-            >
+            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
               <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+            <Form.Item name="description_en" label="Description (EN)">
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item name="description_ar" label="Description (AR)">
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item name="description_fr" label="Description (FR)">
+              <Input.TextArea rows={3} placeholder="Enter French description" />
             </Form.Item>
           </div>
           <Form.Item label="Image">

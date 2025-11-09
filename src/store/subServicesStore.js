@@ -44,9 +44,7 @@ export const useSubServicesStore = create((set, get) => ({
       set({ items, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
-      toast.error(
-        error?.response?.data?.message || "Failed to load sub services"
-      );
+    
     } finally {
       set({ isLoading: false });
     }

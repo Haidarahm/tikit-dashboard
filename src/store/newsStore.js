@@ -27,11 +27,23 @@ export const useNewsStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const resp = await getAllNews({ page, per_page: perPage, lang });
-      const items = Array.isArray(resp?.data)
+      const rawItems = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
         ? resp
         : [];
+      const items = rawItems.map((item) => ({
+        ...item,
+        title_en: item.title_en ?? item.title ?? "",
+        title_ar: item.title_ar ?? item.title ?? "",
+        title_fr: item.title_fr ?? item.title ?? "",
+        subtitle_en: item.subtitle_en ?? item.subtitle ?? "",
+        subtitle_ar: item.subtitle_ar ?? item.subtitle ?? "",
+        subtitle_fr: item.subtitle_fr ?? item.subtitle ?? "",
+        description_en: item.description_en ?? item.description ?? "",
+        description_ar: item.description_ar ?? item.description ?? "",
+        description_fr: item.description_fr ?? item.description ?? "",
+      }));
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;

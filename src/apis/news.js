@@ -17,6 +17,9 @@ const appendNewsFields = (formData, payload = {}) => {
     "subtitle_en",
     "subtitle_ar",
     "subtitle_fr",
+    "description_en",
+    "description_ar",
+    "description_fr",
   ];
   fields.forEach((field) => {
     if (payload[field] != null) {
