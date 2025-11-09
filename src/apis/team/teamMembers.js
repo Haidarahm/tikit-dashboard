@@ -24,7 +24,7 @@ const buildFormData = (payload = {}) => {
 };
 
 export async function getAllTeamMembers(typeId) {
-  const { data } = await apiClient.get(`/api/teams/${typeId}/show`);
+  const { data } = await apiClient.get(`/api/teams/type/${typeId}`);
   return data;
 }
 

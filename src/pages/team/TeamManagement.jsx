@@ -7,6 +7,7 @@ import {
   Input,
   Modal,
   Popconfirm,
+  Space,
   Spin,
   Tabs,
 } from "antd";
@@ -16,12 +17,15 @@ import { useTeamsTypeStore } from "../../store/team/teamsTypeStore.js";
 import TeamMembersManager from "./TeamMembersManager.jsx";
 
 function TeamManagement() {
-  const { items, isLoading, fetchList, create, remove, setCurrent } =
+  const { items, isLoading, fetchList, create, update, remove, setCurrent } =
     useTeamsTypeStore();
 
   const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingType, setEditingType] = useState(null);
   const [createForm] = Form.useForm();
+  const [editForm] = Form.useForm();
 
   useEffect(() => {
     fetchList();
@@ -60,13 +64,45 @@ function TeamManagement() {
     }
   };
 
+  const handleOpenEdit = (type) => {
+    setEditingType(type);
+    editForm.setFieldsValue({ type: type.type || "" });
+    setIsEditOpen(true);
+  };
+
+  const handleUpdateType = async () => {
+    try {
+      const values = await editForm.validateFields();
+      if (!editingType?.id) return;
+      await update(editingType.id, { type: values.type });
+      toast.success("Team type updated successfully");
+      setIsEditOpen(false);
+      setEditingType(null);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        toast.error(error.message);
+      }
+    }
+  };
+
   const tabItems = useMemo(
     () =>
       (items || []).map((type) => ({
         key: String(type.id),
         label: (
-          <div className="flex items-center gap-2">
+          <Space size={8} align="center">
             <span>{type.type || `Type ${type.id}`}</span>
+            <Button
+              size="small"
+              onClick={(event) => {
+                event.stopPropagation();
+                handleOpenEdit(type);
+              }}
+            >
+              Update
+            </Button>
             <Popconfirm
               title="Delete this team type?"
               okText="Yes"
@@ -90,14 +126,13 @@ function TeamManagement() {
             >
               <Button
                 danger
-                type="link"
-                onClick={(event) => event.stopPropagation()}
                 size="small"
+                onClick={(event) => event.stopPropagation()}
               >
                 Delete
               </Button>
             </Popconfirm>
-          </div>
+          </Space>
         ),
         children: <TeamMembersManager typeId={type.id} />,
       })),
@@ -176,6 +211,29 @@ function TeamManagement() {
             rules={[{ required: true, message: "Type name is required" }]}
           >
             <Input placeholder="e.g. Design, Development" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Update Team Type"
+        open={isEditOpen}
+        onCancel={() => {
+          setIsEditOpen(false);
+          setEditingType(null);
+          editForm.resetFields();
+        }}
+        onOk={handleUpdateType}
+        okText="Update"
+        confirmLoading={isLoading}
+      >
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            name="type"
+            label="Type Name"
+            rules={[{ required: true, message: "Type name is required" }]}
+          >
+            <Input placeholder="Enter team type name" />
           </Form.Item>
         </Form>
       </Modal>
