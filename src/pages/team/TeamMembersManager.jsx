@@ -6,11 +6,25 @@ import {
   Input,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Table,
+  Tooltip,
   Upload,
 } from "antd";
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import { FiPlus, FiEdit2, FiTrash2, FiExternalLink } from "react-icons/fi";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedinIn,
+  FaYoutube,
+  FaTiktok,
+  FaSnapchatGhost,
+  FaPinterestP,
+  FaGlobe,
+} from "react-icons/fa";
+import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useTeamMembersStore } from "../../store/team/teamMembersStore.js";
 
@@ -23,6 +37,30 @@ const normalizeSocialLinks = (links) =>
         }))
         .filter((link) => link.url || link.link_type)
     : [];
+
+const SOCIAL_OPTIONS = [
+  { label: "Facebook", value: "facebook" },
+  { label: "Twitter / X", value: "twitter" },
+  { label: "Instagram", value: "instagram" },
+  { label: "LinkedIn", value: "linkedin" },
+  { label: "YouTube", value: "youtube" },
+  { label: "TikTok", value: "tiktok" },
+  { label: "Snapchat", value: "snapchat" },
+  { label: "Pinterest", value: "pinterest" },
+  { label: "Website", value: "website" },
+];
+
+const SOCIAL_ICON_MAP = {
+  facebook: FaFacebookF,
+  twitter: FaTwitter,
+  instagram: FaInstagram,
+  linkedin: FaLinkedinIn,
+  youtube: FaYoutube,
+  tiktok: FaTiktok,
+  snapchat: FaSnapchatGhost,
+  pinterest: FaPinterestP,
+  website: FaGlobe,
+};
 
 function TeamMembersManager({ typeId }) {
   const { items, isLoading, fetchList, create, update, remove, setTypeId } =
@@ -150,19 +188,31 @@ function TeamMembersManager({ typeId }) {
           const list = normalizeSocialLinks(links);
           if (!list.length) return "-";
           return (
-            <div className="flex flex-col gap-1">
+            <Space>
               {list.map((link, index) => (
-                <a
+                <Tooltip
                   key={`${link.url}-${index}`}
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-600 hover:text-blue-800"
+                  title={link.link_type || link.url}
                 >
-                  {link.link_type || "Link"}: {link.url}
-                </a>
+                  <Button
+                    type="default"
+                    shape="circle"
+                    icon={(() => {
+                      const Icon =
+                        SOCIAL_ICON_MAP[(link.link_type || "").toLowerCase()] ||
+                        FiExternalLink;
+                      return <Icon />;
+                    })()}
+                    aria-label={`Open ${link.link_type || "link"}`}
+                    onClick={() => {
+                      if (link.url) {
+                        window.open(link.url, "_blank", "noopener,noreferrer");
+                      }
+                    }}
+                  />
+                </Tooltip>
               ))}
-            </div>
+            </Space>
           );
         },
       },
@@ -172,9 +222,15 @@ function TeamMembersManager({ typeId }) {
         width: 180,
         render: (record) => (
           <Space>
-            <Button type="primary" onClick={() => handleOpenEdit(record)}>
-              Edit
-            </Button>
+            <Tooltip title="Edit member">
+              <Button
+                type="default"
+                shape="circle"
+                icon={<FiEdit2 />}
+                aria-label="Edit member"
+                onClick={() => handleOpenEdit(record)}
+              />
+            </Tooltip>
             <Popconfirm
               title="Delete this member?"
               okText="Yes"
@@ -191,13 +247,21 @@ function TeamMembersManager({ typeId }) {
                 }
               }}
             >
-              <Button danger>Delete</Button>
+              <Tooltip title="Delete member">
+                <Button
+                  danger
+                  type="default"
+                  shape="circle"
+                  icon={<FiTrash2 />}
+                  aria-label="Delete member"
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
         ),
       },
     ],
-    [remove]
+    [remove, handleOpenEdit]
   );
 
   if (!typeId) {
@@ -212,18 +276,20 @@ function TeamMembersManager({ typeId }) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Team Members</h3>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            addForm.setFieldsValue({
-              social_links: [{ url: "", link_type: "" }],
-            });
-            setIsAddOpen(true);
-          }}
-        >
-          Add Member
-        </Button>
+        <Tooltip title="Add member">
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<FiPlus />}
+            aria-label="Add member"
+            onClick={() => {
+              addForm.setFieldsValue({
+                social_links: [{ url: "", link_type: "" }],
+              });
+              setIsAddOpen(true);
+            }}
+          />
+        </Tooltip>
       </div>
 
       <Table
@@ -285,7 +351,7 @@ function TeamMembersManager({ typeId }) {
                   <Button
                     type="dashed"
                     onClick={() => add({ url: "", link_type: "" })}
-                    icon={<PlusOutlined />}
+                    icon={<FiPlus />}
                   >
                     Add Link
                   </Button>
@@ -294,7 +360,7 @@ function TeamMembersManager({ typeId }) {
                   <Space
                     key={key}
                     align="baseline"
-                    className="flex flex-wrap gap-3"
+                    className="flex flex-wrap gap-3 "
                   >
                     <Form.Item
                       {...restField}
@@ -311,6 +377,7 @@ function TeamMembersManager({ typeId }) {
                     <Form.Item
                       {...restField}
                       name={[name, "link_type"]}
+                      className="min-w-[100px]"
                       rules={[
                         {
                           required: true,
@@ -318,7 +385,14 @@ function TeamMembersManager({ typeId }) {
                         },
                       ]}
                     >
-                      <Input placeholder="e.g. twitter" />
+                      <Select
+                        placeholder="Select social network"
+                        options={SOCIAL_OPTIONS}
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                        
+                      />
                     </Form.Item>
                     {fields.length > 1 && (
                       <Button
@@ -388,7 +462,7 @@ function TeamMembersManager({ typeId }) {
                   <Button
                     type="dashed"
                     onClick={() => add({ url: "", link_type: "" })}
-                    icon={<PlusOutlined />}
+                    icon={<FiPlus />}
                   >
                     Add Link
                   </Button>
@@ -421,7 +495,13 @@ function TeamMembersManager({ typeId }) {
                         },
                       ]}
                     >
-                      <Input placeholder="e.g. twitter" />
+                      <Select
+                        placeholder="Select social network"
+                        options={SOCIAL_OPTIONS}
+                        allowClear
+                        showSearch
+                        optionFilterProp="label"
+                      />
                     </Form.Item>
                     {fields.length > 1 && (
                       <Button

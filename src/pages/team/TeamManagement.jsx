@@ -10,8 +10,10 @@ import {
   Space,
   Spin,
   Tabs,
+  Tooltip,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { useTeamsTypeStore } from "../../store/team/teamsTypeStore.js";
 import TeamMembersManager from "./TeamMembersManager.jsx";
@@ -94,15 +96,18 @@ function TeamManagement() {
         label: (
           <Space size={8} align="center">
             <span>{type.type || `Type ${type.id}`}</span>
-            <Button
-              size="small"
-              onClick={(event) => {
-                event.stopPropagation();
-                handleOpenEdit(type);
-              }}
-            >
-              Update
-            </Button>
+            <Tooltip title="Update team type">
+              <Button
+                size="small"
+                shape="circle"
+                icon={<FiEdit2 />}
+                aria-label="Update team type"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleOpenEdit(type);
+                }}
+              />
+            </Tooltip>
             <Popconfirm
               title="Delete this team type?"
               okText="Yes"
@@ -124,13 +129,16 @@ function TeamManagement() {
               }}
               onCancel={(event) => event?.stopPropagation?.()}
             >
-              <Button
-                danger
-                size="small"
-                onClick={(event) => event.stopPropagation()}
-              >
-                Delete
-              </Button>
+              <Tooltip title="Delete team type">
+                <Button
+                  danger
+                  size="small"
+                  shape="circle"
+                  icon={<FiTrash2 />}
+                  aria-label="Delete team type"
+                  onClick={(event) => event.stopPropagation()}
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
         ),
