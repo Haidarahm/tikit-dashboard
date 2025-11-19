@@ -12,6 +12,7 @@ export const useInfluencersItemsStore = create((set, get) => ({
   total: 0,
   page: 1,
   perPage: 5,
+  lang: "en",
   workId: null,
   current: null,
   isLoading: false,
@@ -20,9 +21,10 @@ export const useInfluencersItemsStore = create((set, get) => ({
   setWorkId: (workId) => set({ workId }),
   setPage: (page) => set({ page }),
   setPerPage: (perPage) => set({ perPage }),
+  setLang: (lang) => set({ lang }),
 
   fetchList: async (workId = null) => {
-    const { page, perPage } = get();
+    const { page, perPage, lang } = get();
     const targetWorkId = workId ?? get().workId;
     if (!targetWorkId) {
       set({ items: [], total: 0 });
@@ -34,6 +36,7 @@ export const useInfluencersItemsStore = create((set, get) => ({
         work_id: targetWorkId,
         page,
         per_page: perPage,
+        lang,
       });
       const items = Array.isArray(resp?.data)
         ? resp.data

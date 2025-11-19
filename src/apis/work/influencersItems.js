@@ -1,10 +1,11 @@
 import { apiClient } from "../client.js";
 
-export async function getItems({ work_id, page, per_page } = {}) {
+export async function getItems({ work_id, page, per_page, lang } = {}) {
   const params = {};
   if (work_id != null) params.work_id = work_id;
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
+  if (lang != null) params.lang = lang;
   const { data } = await apiClient.get("/api/work-influences/get", { params });
   return data;
 }

@@ -14,14 +14,12 @@ import {
   Pagination,
   Spin,
   Image,
-  Badge,
   Tooltip,
 } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
-  CloseOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
@@ -54,10 +52,9 @@ const InfluencersItems = () => {
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editLogoFileList, setEditLogoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [previewModal, setPreviewModal] = useState({
+  const [viewModal, setViewModal] = useState({
     open: false,
-    images: [],
-    current: 0,
+    item: null,
   });
 
   useEffect(() => {
@@ -184,14 +181,11 @@ const InfluencersItems = () => {
     setEditLogoFileList([]);
   };
 
-  const openPreviewModal = (media) => {
-    if (media && media.length > 0) {
-      setPreviewModal({
-        open: true,
-        images: media,
-        current: 0,
-      });
-    }
+  const openViewModal = (item) => {
+    setViewModal({
+      open: true,
+      item: item,
+    });
   };
 
   return (
@@ -219,7 +213,6 @@ const InfluencersItems = () => {
         <>
           <Row gutter={[24, 24]}>
             {items.map((item) => {
-              const media = item.media || [];
               return (
                 <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
                   <Card
@@ -241,10 +234,7 @@ const InfluencersItems = () => {
                               src={item.logo}
                               alt={item.title}
                               className="w-full h-full object-contain p-4"
-                              preview={{
-                                mask: "Preview Logo",
-                                src: item.logo,
-                              }}
+                              preview={false}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -255,54 +245,14 @@ const InfluencersItems = () => {
                             </div>
                           )}
                         </div>
-                        {/* Media Preview Section */}
-                        {media.length > 0 && (
-                          <div className="bg-white border-t border-gray-200 p-2">
-                            <div
-                              className="flex gap-1 overflow-x-auto scrollbar-hide"
-                              style={{ WebkitOverflowScrolling: "touch" }}
-                            >
-                              {media.slice(0, 4).map((img, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex-shrink-0 w-16 h-16 rounded overflow-hidden border border-gray-200 cursor-pointer hover:border-blue-400 transition-colors"
-                                  onClick={() => openPreviewModal(media)}
-                                >
-                                  <Image
-                                    src={img}
-                                    alt={`Media ${idx + 1}`}
-                                    className="w-full h-full object-cover"
-                                    preview={false}
-                                  />
-                                </div>
-                              ))}
-                              {media.length > 4 && (
-                                <div
-                                  className="flex-shrink-0 w-16 h-16 rounded border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-blue-400 transition-colors bg-gray-50"
-                                  onClick={() => openPreviewModal(media)}
-                                >
-                                  <div className="text-center px-1">
-                                    <div className="text-xs font-semibold text-gray-600 leading-tight">
-                                      +{media.length - 4}
-                                    </div>
-                                    <div className="text-[10px] text-gray-400 leading-tight">
-                                      more
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     }
                     actions={[
-                      <Tooltip title="View Media" key="view">
+                      <Tooltip title="View Details" key="view">
                         <Button
                           type="text"
                           icon={<EyeOutlined />}
-                          onClick={() => openPreviewModal(media)}
-                          disabled={media.length === 0}
+                          onClick={() => openViewModal(item)}
                           className="flex items-center justify-center"
                         />
                       </Tooltip>,
@@ -329,75 +279,9 @@ const InfluencersItems = () => {
                     ]}
                   >
                     <div className="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
-                      <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words">
+                      <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words text-center">
                         {item.title || "No Title"}
                       </h3>
-                      {item.objective && (
-                        <p className="text-gray-600 text-sm line-clamp-2 mb-3 min-w-0 break-words">
-                          {item.objective}
-                        </p>
-                      )}
-                      <div className="space-y-2 mt-auto">
-                        <div className="grid grid-cols-3 gap-1.5 text-xs min-w-0">
-                          {item.reach && (
-                            <div className="bg-blue-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
-                              <div className="text-gray-500 text-[10px] mb-0.5 truncate">
-                                Reach
-                              </div>
-                              <div
-                                className="font-bold text-blue-700 text-xs truncate"
-                                title={item.reach.toLocaleString()}
-                              >
-                                {item.reach >= 1000000
-                                  ? `${(item.reach / 1000000).toFixed(1)}M`
-                                  : item.reach >= 1000
-                                  ? `${(item.reach / 1000).toFixed(1)}K`
-                                  : item.reach.toLocaleString()}
-                              </div>
-                            </div>
-                          )}
-                          {item.views && (
-                            <div className="bg-green-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
-                              <div className="text-gray-500 text-[10px] mb-0.5 truncate">
-                                Views
-                              </div>
-                              <div
-                                className="font-bold text-green-700 text-xs truncate"
-                                title={item.views.toLocaleString()}
-                              >
-                                {item.views >= 1000000
-                                  ? `${(item.views / 1000000).toFixed(1)}M`
-                                  : item.views >= 1000
-                                  ? `${(item.views / 1000).toFixed(1)}K`
-                                  : item.views.toLocaleString()}
-                              </div>
-                            </div>
-                          )}
-                          {item.engagement_rate && (
-                            <div className="bg-purple-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
-                              <div className="text-gray-500 text-[10px] mb-0.5 truncate">
-                                Engagement
-                              </div>
-                              <div className="font-bold text-purple-700 text-xs truncate">
-                                {item.engagement_rate}%
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        {media.length > 0 && (
-                          <div className="text-xs text-gray-500 text-center pt-1">
-                            <Badge
-                              count={media.length}
-                              showZero={false}
-                              size="small"
-                            >
-                              <span className="text-gray-600 text-xs">
-                                Media
-                              </span>
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </Card>
                 </Col>
@@ -646,37 +530,146 @@ const InfluencersItems = () => {
         </Form>
       </Modal>
 
-      {/* Media Preview Modal */}
+      {/* View Details Modal */}
       <Modal
-        title="Media Gallery"
-        open={previewModal.open}
-        onCancel={() =>
-          setPreviewModal({ open: false, images: [], current: 0 })
-        }
+        title="Item Details"
+        open={viewModal.open}
+        onCancel={() => setViewModal({ open: false, item: null })}
         footer={null}
-        width={900}
+        width={1000}
         centered
+        destroyOnClose
       >
-        {previewModal.images.length > 0 && (
-          <Image.PreviewGroup>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {previewModal.images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="aspect-square rounded-lg overflow-hidden border border-gray-200"
-                >
-                  <Image
-                    src={img}
-                    alt={`Media ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    preview={{
-                      mask: "Preview",
-                    }}
-                  />
-                </div>
-              ))}
+        {viewModal.item ? (
+          <div className="space-y-6">
+            {/* Title */}
+            <div className="text-center pb-4 border-b border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900">
+                {viewModal.item.title || "No Title"}
+              </h3>
             </div>
-          </Image.PreviewGroup>
+
+            {/* Logo Section */}
+            {viewModal.item.logo && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700">Logo</h4>
+                <div className="flex justify-center">
+                  <div className="w-32 h-32 bg-gray-50 rounded-lg overflow-hidden border border-gray-200 p-3">
+                    <Image
+                      src={viewModal.item.logo}
+                      alt="Logo"
+                      className="w-full h-full object-contain"
+                      preview={{
+                        mask: "Preview",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Stats Section */}
+            {(viewModal.item.reach ||
+              viewModal.item.views ||
+              viewModal.item.engagement_rate) && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Statistics
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  {viewModal.item.reach && (
+                    <div className="bg-blue-50 rounded-lg p-4 text-center">
+                      <div className="text-gray-500 text-sm mb-1">Reach</div>
+                      <div className="font-bold text-blue-700 text-xl">
+                        {viewModal.item.reach >= 1000000
+                          ? `${(viewModal.item.reach / 1000000).toFixed(1)}M`
+                          : viewModal.item.reach >= 1000
+                          ? `${(viewModal.item.reach / 1000).toFixed(1)}K`
+                          : viewModal.item.reach.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
+                  {viewModal.item.views && (
+                    <div className="bg-green-50 rounded-lg p-4 text-center">
+                      <div className="text-gray-500 text-sm mb-1">Views</div>
+                      <div className="font-bold text-green-700 text-xl">
+                        {viewModal.item.views >= 1000000
+                          ? `${(viewModal.item.views / 1000000).toFixed(1)}M`
+                          : viewModal.item.views >= 1000
+                          ? `${(viewModal.item.views / 1000).toFixed(1)}K`
+                          : viewModal.item.views.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
+                  {viewModal.item.engagement_rate && (
+                    <div className="bg-purple-50 rounded-lg p-4 text-center">
+                      <div className="text-gray-500 text-sm mb-1">
+                        Engagement Rate
+                      </div>
+                      <div className="font-bold text-purple-700 text-xl">
+                        {viewModal.item.engagement_rate}%
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Objective Section */}
+            {viewModal.item.objective && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Objective
+                </h4>
+                <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                  {viewModal.item.objective}
+                </p>
+              </div>
+            )}
+
+            {/* Media Gallery Section */}
+            {viewModal.item.media && viewModal.item.media.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Media Gallery ({viewModal.item.media.length})
+                </h4>
+                <Image.PreviewGroup>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {viewModal.item.media.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="aspect-square rounded-lg overflow-hidden border border-gray-200"
+                      >
+                        <Image
+                          src={img}
+                          alt={`Media ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          preview={{
+                            mask: "Preview",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Image.PreviewGroup>
+              </div>
+            )}
+
+            {!viewModal.item.logo &&
+              !viewModal.item.reach &&
+              !viewModal.item.views &&
+              !viewModal.item.engagement_rate &&
+              !viewModal.item.objective &&
+              (!viewModal.item.media || viewModal.item.media.length === 0) && (
+                <div className="py-8 text-center text-gray-500">
+                  No additional details available
+                </div>
+              )}
+          </div>
+        ) : (
+          <div className="py-8 text-center text-gray-500">
+            No data to display
+          </div>
         )}
       </Modal>
     </div>
