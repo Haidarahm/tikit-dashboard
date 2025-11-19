@@ -71,7 +71,6 @@ export const useTeamsTypeStore = create((set, get) => ({
       const updated = await updateTeamType(id, payload);
       set({ current: updated?.data || updated });
       await get().fetchList();
-      toast.success("Team type updated successfully");
       return updated;
     } catch (error) {
       set({ error });

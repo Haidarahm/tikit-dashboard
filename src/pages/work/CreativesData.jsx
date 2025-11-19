@@ -353,7 +353,11 @@ const CreativesData = () => {
                       {/* Title */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-base text-gray-900 line-clamp-2 break-words mb-1">
-                          {creative.title || "No Title"}
+                          {lang === "en"
+                            ? creative.title_en
+                            : lang === "ar"
+                            ? creative.title_ar
+                            : creative.title_fr || "No Title"}
                         </h3>
                       </div>
                     </div>
@@ -696,7 +700,11 @@ const CreativesData = () => {
             {/* Title */}
             <div className="text-center pb-4 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900">
-                {previewModal.data.title || "No Title"}
+                {lang === "en"
+                  ? previewModal.data.title_en
+                  : lang === "ar"
+                  ? previewModal.data.title_ar
+                  : previewModal.data.title_fr || "No Title"}
               </h3>
             </div>
 
@@ -739,69 +747,91 @@ const CreativesData = () => {
             )}
 
             {/* Brand Images Section */}
-            {previewModal.data.brand_images &&
-              previewModal.data.brand_images.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-gray-700">
-                    Brand Images ({previewModal.data.brand_images.length})
-                  </h4>
-                  <Image.PreviewGroup>
-                    <div className="flex flex-wrap gap-3">
-                      {previewModal.data.brand_images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0"
-                        >
-                          <Image
-                            src={img}
-                            alt={`Brand ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            preview={{
-                              mask: "Preview",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Image.PreviewGroup>
-                </div>
-              )}
+            {(previewModal.data.brand_image_1 ||
+              previewModal.data.brand_image_2 ||
+              previewModal.data.brand_image_3) && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Brand Images
+                </h4>
+                <Image.PreviewGroup>
+                  <div className="flex flex-wrap gap-3">
+                    {previewModal.data.brand_image_1 && (
+                      <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                        <Image
+                          src={previewModal.data.brand_image_1}
+                          alt="Brand 1"
+                          className="w-full h-full object-cover"
+                          preview={{
+                            mask: "Preview",
+                          }}
+                        />
+                      </div>
+                    )}
+                    {previewModal.data.brand_image_2 && (
+                      <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                        <Image
+                          src={previewModal.data.brand_image_2}
+                          alt="Brand 2"
+                          className="w-full h-full object-cover"
+                          preview={{
+                            mask: "Preview",
+                          }}
+                        />
+                      </div>
+                    )}
+                    {previewModal.data.brand_image_3 && (
+                      <div className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
+                        <Image
+                          src={previewModal.data.brand_image_3}
+                          alt="Brand 3"
+                          className="w-full h-full object-cover"
+                          preview={{
+                            mask: "Preview",
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </Image.PreviewGroup>
+              </div>
+            )}
 
             {/* Gallery Images Section */}
-            {previewModal.data.images &&
-              previewModal.data.images.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-gray-700">
-                    Gallery Images ({previewModal.data.images.length})
-                  </h4>
-                  <Image.PreviewGroup>
-                    <div className="flex flex-wrap gap-3">
-                      {previewModal.data.images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0"
-                        >
-                          <Image
-                            src={img}
-                            alt={`Gallery ${idx + 1}`}
-                            className="w-full h-full object-cover"
-                            preview={{
-                              mask: "Preview",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Image.PreviewGroup>
-                </div>
-              )}
+            {previewModal.data.media && previewModal.data.media.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-gray-700">
+                  Gallery Images ({previewModal.data.media.length})
+                </h4>
+                <Image.PreviewGroup>
+                  <div className="flex flex-wrap gap-3">
+                    {previewModal.data.media.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="w-32 h-32 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0"
+                      >
+                        <Image
+                          src={img}
+                          alt={`Gallery ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          preview={{
+                            mask: "Preview",
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </Image.PreviewGroup>
+              </div>
+            )}
 
             {!previewModal.data.logo &&
               !previewModal.data.main_image &&
-              (!previewModal.data.brand_images ||
-                previewModal.data.brand_images.length === 0) &&
-              (!previewModal.data.images ||
-                previewModal.data.images.length === 0) && (
+              !previewModal.data.brand_image_1 &&
+              !previewModal.data.brand_image_2 &&
+              !previewModal.data.brand_image_3 &&
+              (!previewModal.data.media ||
+                previewModal.data.media.length === 0) && (
                 <div className="py-8">
                   <Empty description={<span>No media to preview</span>} />
                 </div>

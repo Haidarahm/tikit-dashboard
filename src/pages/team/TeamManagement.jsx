@@ -4,9 +4,9 @@ import {
   Card,
   Empty,
   Form,
-  Input,
   Modal,
   Popconfirm,
+  Select,
   Space,
   Spin,
   Tabs,
@@ -28,6 +28,19 @@ function TeamManagement() {
   const [editingType, setEditingType] = useState(null);
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
+
+  const predefinedTypes = useMemo(
+    () => [
+      "Web Development",
+      "Social Media Team",
+      "Monitor",
+      "Graphic Design",
+      "Photographers",
+      "CEO",
+      "Presenter",
+    ],
+    []
+  );
 
   useEffect(() => {
     fetchList();
@@ -218,7 +231,16 @@ function TeamManagement() {
             label="Type Name"
             rules={[{ required: true, message: "Type name is required" }]}
           >
-            <Input placeholder="e.g. Design, Development" />
+            <Select
+              placeholder="Select team type"
+              options={predefinedTypes.map((type) => ({
+                label: type,
+                value: type,
+              }))}
+              showSearch
+              optionFilterProp="label"
+              allowClear
+            />
           </Form.Item>
         </Form>
       </Modal>
@@ -241,7 +263,16 @@ function TeamManagement() {
             label="Type Name"
             rules={[{ required: true, message: "Type name is required" }]}
           >
-            <Input placeholder="Enter team type name" />
+            <Select
+              placeholder="Select team type"
+              options={predefinedTypes.map((type) => ({
+                label: type,
+                value: type,
+              }))}
+              showSearch
+              optionFilterProp="label"
+              allowClear
+            />
           </Form.Item>
         </Form>
       </Modal>

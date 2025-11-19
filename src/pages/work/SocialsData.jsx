@@ -196,21 +196,20 @@ const SocialsData = () => {
   };
 
   const openEditModal = (item) => {
-    const social = item.social || {};
-    setEditingId(social.id);
+    setEditingId(item.id);
     setIsEditOpen(true);
     editForm.setFieldsValue({
-      title_en: social.title_en || "",
-      title_ar: social.title_ar || "",
-      title_fr: social.title_fr || "",
-      follower_growth: social.follower_growth || 0,
-      engagement_rate: social.engagement_rate || 0,
-      objective_en: social.objective_en || "",
-      objective_ar: social.objective_ar || "",
-      objective_fr: social.objective_fr || "",
-      approach_en: social.approach_en || "",
-      approach_ar: social.approach_ar || "",
-      approach_fr: social.approach_fr || "",
+      title_en: item.title_en || "",
+      title_ar: item.title_ar || "",
+      title_fr: item.title_fr || "",
+      follower_growth: item.follower_growth || 0,
+      engagement_rate: item.engagement_rate || 0,
+      objective_en: item.objective_en || "",
+      objective_ar: item.objective_ar || "",
+      objective_fr: item.objective_fr || "",
+      approach_en: item.approach_en || "",
+      approach_ar: item.approach_ar || "",
+      approach_fr: item.approach_fr || "",
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
@@ -268,11 +267,12 @@ const SocialsData = () => {
       ) : (
         <>
           <Row gutter={[24, 24]}>
+         
             {items.map((item) => {
-              const social = item.social || {};
+             
               const media = item.media || [];
               return (
-                <Col xs={24} sm={12} md={8} lg={6} key={social.id}>
+                <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
                   <Card
                     hoverable
                     className="h-full flex flex-col overflow-hidden"
@@ -287,14 +287,14 @@ const SocialsData = () => {
                       <div className="relative">
                         {/* Logo Section */}
                         <div className="h-40 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                          {social.logo ? (
+                          {item.logo ? (
                             <Image
-                              src={social.logo}
-                              alt={social.title}
+                              src={item.logo}
+                              alt={item.title}
                               className="w-full h-full object-contain p-4"
                               preview={{
                                 mask: "Preview Logo",
-                                src: social.logo,
+                                src: item.logo,
                               }}
                             />
                           ) : (
@@ -368,7 +368,7 @@ const SocialsData = () => {
                         title="Delete this item?"
                         okText="Yes"
                         cancelText="No"
-                        onConfirm={() => handleDelete(social.id)}
+                        onConfirm={() => handleDelete(item.id)}
                       >
                         <Tooltip title="Delete">
                           <DeleteOutlined
@@ -381,40 +381,40 @@ const SocialsData = () => {
                   >
                     <div className="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
                       <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words">
-                        {social.title || "No Title"}
+                        {item.title || "No Title"}
                       </h3>
-                      {social.objective && (
+                      {item.objective && (
                         <p className="text-gray-600 text-sm line-clamp-2 mb-2 min-w-0 break-words">
-                          {social.objective}
+                          {item.objective}
                         </p>
                       )}
-                      {social.approach && (
+                      {item.approach && (
                         <p className="text-gray-500 text-xs line-clamp-1 mb-3 min-w-0 break-words">
-                          {social.approach}
+                          {item.approach}
                         </p>
                       )}
                       <div className="space-y-2 mt-auto">
                         <div className="grid grid-cols-2 gap-1.5 text-xs min-w-0">
-                          {social.follower_growth != null && (
+                          {item.follower_growth != null && (
                             <div className="bg-blue-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
                               <div className="text-gray-500 text-[10px] mb-0.5 truncate">
                                 Follower Growth
                               </div>
                               <div
                                 className="font-bold text-blue-700 text-xs truncate"
-                                title={social.follower_growth.toString()}
+                                title={item.follower_growth.toString()}
                               >
-                                {social.follower_growth}%
+                                {item.follower_growth}%
                               </div>
                             </div>
                           )}
-                          {social.engagement_rate && (
+                          {item.engagement_rate && (
                             <div className="bg-purple-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
                               <div className="text-gray-500 text-[10px] mb-0.5 truncate">
                                 Engagement
                               </div>
                               <div className="font-bold text-purple-700 text-xs truncate">
-                                {social.engagement_rate}%
+                                {item.engagement_rate}%
                               </div>
                             </div>
                           )}
