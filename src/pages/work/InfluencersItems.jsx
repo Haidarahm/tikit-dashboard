@@ -167,19 +167,18 @@ const InfluencersItems = () => {
   };
 
   const openEditModal = (item) => {
-    const influence = item.influence || {};
-    setEditingId(influence.id);
+    setEditingId(item.id);
     setIsEditOpen(true);
     editForm.setFieldsValue({
-      title_en: influence.title_en || "",
-      title_ar: influence.title_ar || "",
-      title_fr: influence.title_fr || "",
-      reach: influence.reach || 0,
-      views: influence.views || 0,
-      objective_en: influence.objective_en || "",
-      objective_ar: influence.objective_ar || "",
-      objective_fr: influence.objective_fr || "",
-      engagement_rate: influence.engagement_rate || 0,
+      title_en: item.title_en || "",
+      title_ar: item.title_ar || "",
+      title_fr: item.title_fr || "",
+      reach: item.reach || 0,
+      views: item.views || 0,
+      objective_en: item.objective_en || "",
+      objective_ar: item.objective_ar || "",
+      objective_fr: item.objective_fr || "",
+      engagement_rate: item.engagement_rate || 0,
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
@@ -220,10 +219,9 @@ const InfluencersItems = () => {
         <>
           <Row gutter={[24, 24]}>
             {items.map((item) => {
-              const influence = item.influence || {};
               const media = item.media || [];
               return (
-                <Col xs={24} sm={12} md={8} lg={6} key={influence.id}>
+                <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
                   <Card
                     hoverable
                     className="h-full flex flex-col overflow-hidden"
@@ -238,14 +236,14 @@ const InfluencersItems = () => {
                       <div className="relative">
                         {/* Logo Section */}
                         <div className="h-40 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                          {influence.logo ? (
+                          {item.logo ? (
                             <Image
-                              src={influence.logo}
-                              alt={influence.title}
+                              src={item.logo}
+                              alt={item.title}
                               className="w-full h-full object-contain p-4"
                               preview={{
                                 mask: "Preview Logo",
-                                src: influence.logo,
+                                src: item.logo,
                               }}
                             />
                           ) : (
@@ -319,7 +317,7 @@ const InfluencersItems = () => {
                         title="Delete this item?"
                         okText="Yes"
                         cancelText="No"
-                        onConfirm={() => handleDelete(influence.id)}
+                        onConfirm={() => handleDelete(item.id)}
                       >
                         <Tooltip title="Delete">
                           <DeleteOutlined
@@ -332,56 +330,56 @@ const InfluencersItems = () => {
                   >
                     <div className="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
                       <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words">
-                        {influence.title || "No Title"}
+                        {item.title || "No Title"}
                       </h3>
-                      {influence.objective && (
+                      {item.objective && (
                         <p className="text-gray-600 text-sm line-clamp-2 mb-3 min-w-0 break-words">
-                          {influence.objective}
+                          {item.objective}
                         </p>
                       )}
                       <div className="space-y-2 mt-auto">
                         <div className="grid grid-cols-3 gap-1.5 text-xs min-w-0">
-                          {influence.reach && (
+                          {item.reach && (
                             <div className="bg-blue-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
                               <div className="text-gray-500 text-[10px] mb-0.5 truncate">
                                 Reach
                               </div>
                               <div
                                 className="font-bold text-blue-700 text-xs truncate"
-                                title={influence.reach.toLocaleString()}
+                                title={item.reach.toLocaleString()}
                               >
-                                {influence.reach >= 1000000
-                                  ? `${(influence.reach / 1000000).toFixed(1)}M`
-                                  : influence.reach >= 1000
-                                  ? `${(influence.reach / 1000).toFixed(1)}K`
-                                  : influence.reach.toLocaleString()}
+                                {item.reach >= 1000000
+                                  ? `${(item.reach / 1000000).toFixed(1)}M`
+                                  : item.reach >= 1000
+                                  ? `${(item.reach / 1000).toFixed(1)}K`
+                                  : item.reach.toLocaleString()}
                               </div>
                             </div>
                           )}
-                          {influence.views && (
+                          {item.views && (
                             <div className="bg-green-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
                               <div className="text-gray-500 text-[10px] mb-0.5 truncate">
                                 Views
                               </div>
                               <div
                                 className="font-bold text-green-700 text-xs truncate"
-                                title={influence.views.toLocaleString()}
+                                title={item.views.toLocaleString()}
                               >
-                                {influence.views >= 1000000
-                                  ? `${(influence.views / 1000000).toFixed(1)}M`
-                                  : influence.views >= 1000
-                                  ? `${(influence.views / 1000).toFixed(1)}K`
-                                  : influence.views.toLocaleString()}
+                                {item.views >= 1000000
+                                  ? `${(item.views / 1000000).toFixed(1)}M`
+                                  : item.views >= 1000
+                                  ? `${(item.views / 1000).toFixed(1)}K`
+                                  : item.views.toLocaleString()}
                               </div>
                             </div>
                           )}
-                          {influence.engagement_rate && (
+                          {item.engagement_rate && (
                             <div className="bg-purple-50 rounded-lg p-1.5 text-center min-w-0 overflow-hidden">
                               <div className="text-gray-500 text-[10px] mb-0.5 truncate">
                                 Engagement
                               </div>
                               <div className="font-bold text-purple-700 text-xs truncate">
-                                {influence.engagement_rate}%
+                                {item.engagement_rate}%
                               </div>
                             </div>
                           )}
