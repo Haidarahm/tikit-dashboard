@@ -582,18 +582,18 @@ const EventsData = () => {
             {/* Title */}
             <div className="text-center pb-4 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900">
-                {previewModal.data.event?.title || "No Title"}
+                {previewModal.data.title || "No Title"}
               </h3>
             </div>
 
             {/* Logo Section */}
-            {previewModal.data.event?.logo && (
+            {previewModal.data.logo && (
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700">Logo</h4>
                 <div className="flex justify-center">
                   <div className="w-32 h-32 bg-gray-50 rounded-lg overflow-hidden border border-gray-200 p-3">
                     <Image
-                      src={previewModal.data.event.logo}
+                      src={previewModal.data.logo}
                       alt="Logo"
                       className="w-full h-full object-contain"
                       preview={{
@@ -606,13 +606,13 @@ const EventsData = () => {
             )}
 
             {/* Objective Section */}
-            {previewModal.data.event?.objective && (
+            {previewModal.data.objective && (
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700">
                   Objective
                 </h4>
                 <p className="text-gray-600 text-sm whitespace-pre-wrap">
-                  {previewModal.data.event.objective}
+                  {previewModal.data.objective}
                 </p>
               </div>
             )}
@@ -645,8 +645,8 @@ const EventsData = () => {
               </div>
             )}
 
-            {!previewModal.data.event?.logo &&
-              !previewModal.data.event?.objective &&
+            {!previewModal.data.logo &&
+              !previewModal.data.objective &&
               (!previewModal.data.media ||
                 previewModal.data.media.length === 0) && (
                 <div className="py-8">
