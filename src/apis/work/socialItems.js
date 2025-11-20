@@ -5,7 +5,7 @@ export async function getSocialItems({ work_id, page, per_page, lang } = {}) {
   if (work_id != null) params.work_id = work_id;
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
-  if (lang) params.lang = lang;
+  if (lang != null) params.lang = lang;
   const { data } = await apiClient.get("/api/work-socials/get", { params });
   return data;
 }

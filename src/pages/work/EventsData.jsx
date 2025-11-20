@@ -166,7 +166,7 @@ const EventsData = () => {
   };
 
   const openEditModal = (item) => {
-    const event = item.event || {};
+    const event = item || {};
     setEditingId(event.id);
     editForm.setFieldsValue({
       title_en: event.title_en || "",
@@ -180,7 +180,7 @@ const EventsData = () => {
   };
 
   const openPreviewModal = (item) => {
-    if (item?.event) {
+    if (item) {
       setPreviewModal({
         open: true,
         data: item,
@@ -249,7 +249,7 @@ const EventsData = () => {
         <>
           <Row gutter={[20, 20]}>
             {items.map((item) => {
-              const event = item.event || {};
+              const event = item || {};
               const media = item.media || [];
               return (
                 <Col

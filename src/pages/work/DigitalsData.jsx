@@ -74,17 +74,20 @@ const DigitalsData = () => {
         title_en: values.title_en,
         title_ar: values.title_ar,
         title_fr: values.title_fr,
-        cpo: values.cpo,
-        orders: values.orders,
-        roas: values.roas,
-        top_search: values.top_search,
-        conversions: values.conversions,
-        traffic: values.traffic,
-        ctr: values.ctr,
-        cpp: values.cpp,
-        avg_cart: values.avg_cart,
-        cltv: values.cltv,
-        ftus: values.ftus,
+        cpo: typeof values.cpo === "number" ? values.cpo : null,
+        orders: typeof values.orders === "number" ? values.orders : null,
+        roas: typeof values.roas === "number" ? values.roas : null,
+        top_search:
+          typeof values.top_search === "number" ? values.top_search : null,
+        conversions:
+          typeof values.conversions === "number" ? values.conversions : null,
+        traffic: typeof values.traffic === "number" ? values.traffic : null,
+        ctr: typeof values.ctr === "number" ? values.ctr : null,
+        cpp: typeof values.cpp === "number" ? values.cpp : null,
+        avg_cart: typeof values.avg_cart === "number" ? values.avg_cart : null,
+        cltv: typeof values.cltv === "number" ? values.cltv : null,
+        ftus: typeof values.ftus === "number" ? values.ftus : null,
+        reach: typeof values.reach === "number" ? values.reach : null,
         objective_en: values.objective_en,
         objective_ar: values.objective_ar,
         objective_fr: values.objective_fr,
@@ -127,38 +130,44 @@ const DigitalsData = () => {
       if (values.title_fr && values.title_fr.trim()) {
         payload.title_fr = values.title_fr;
       }
-      if (values.cpo != null) {
+      if (values.cpo != null && typeof values.cpo === "number") {
         payload.cpo = values.cpo;
       }
-      if (values.orders != null) {
+      if (values.orders != null && typeof values.orders === "number") {
         payload.orders = values.orders;
       }
-      if (values.roas != null) {
+      if (values.roas != null && typeof values.roas === "number") {
         payload.roas = values.roas;
       }
-      if (values.top_search && values.top_search.trim()) {
+      if (values.top_search != null && typeof values.top_search === "number") {
         payload.top_search = values.top_search;
       }
-      if (values.conversions != null) {
+      if (
+        values.conversions != null &&
+        typeof values.conversions === "number"
+      ) {
         payload.conversions = values.conversions;
       }
-      if (values.traffic != null) {
+      if (values.traffic != null && typeof values.traffic === "number") {
         payload.traffic = values.traffic;
       }
-      if (values.ctr != null) {
+      if (values.ctr != null && typeof values.ctr === "number") {
         payload.ctr = values.ctr;
       }
-      if (values.cpp != null) {
+      if (values.cpp != null && typeof values.cpp === "number") {
         payload.cpp = values.cpp;
       }
-      if (values.avg_cart != null) {
+      if (values.avg_cart != null && typeof values.avg_cart === "number") {
         payload.avg_cart = values.avg_cart;
       }
-      if (values.cltv != null) {
+      if (values.cltv != null && typeof values.cltv === "number") {
         payload.cltv = values.cltv;
       }
-      if (values.ftus != null) {
+      if (values.ftus != null && typeof values.ftus === "number") {
         payload.ftus = values.ftus;
+      }
+      if (values.reach != null && typeof values.reach === "number") {
+        payload.reach = values.reach;
       }
       if (values.objective_en && values.objective_en.trim()) {
         payload.objective_en = values.objective_en;
@@ -199,7 +208,7 @@ const DigitalsData = () => {
   };
 
   const openEditModal = (item) => {
-    const digital = item.digital || {};
+    const digital = item || {};
     setEditingId(digital.id);
     setIsEditOpen(true);
     editForm.setFieldsValue({
@@ -209,7 +218,7 @@ const DigitalsData = () => {
       cpo: digital.cpo || null,
       orders: digital.orders || null,
       roas: digital.roas || null,
-      top_search: digital.top_search || "",
+      top_search: digital.top_search || null,
       conversions: digital.conversions || null,
       traffic: digital.traffic || null,
       ctr: digital.ctr || null,
@@ -217,6 +226,7 @@ const DigitalsData = () => {
       avg_cart: digital.avg_cart || null,
       cltv: digital.cltv || null,
       ftus: digital.ftus || null,
+      reach: digital.reach || null,
       objective_en: digital.objective_en || "",
       objective_ar: digital.objective_ar || "",
       objective_fr: digital.objective_fr || "",
@@ -225,10 +235,10 @@ const DigitalsData = () => {
   };
 
   const openPreviewModal = (item) => {
-    if (item?.digital) {
+    if (item) {
       setPreviewModal({
         open: true,
-        data: item.digital,
+        data: item,
       });
     }
   };
@@ -284,7 +294,7 @@ const DigitalsData = () => {
         <>
           <div className="flex flex-wrap gap-6">
             {items.map((item) => {
-              const digital = item.digital || {};
+              const digital = item || {};
               return (
                 <div
                   key={digital.id}
@@ -475,107 +485,408 @@ const DigitalsData = () => {
             </div>
 
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="cpo" label="CPO">
+              <Form.Item
+                name="cpo"
+                label="CPO"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue)) {
+                        return Promise.reject(
+                          new Error("CPO must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter CPO"
                   className="w-full"
                   min={0}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="orders" label="Orders">
+              <Form.Item
+                name="orders"
+                label="Orders"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Orders must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter orders"
                   className="w-full"
                   min={0}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="roas" label="ROAS">
+              <Form.Item
+                name="roas"
+                label="ROAS"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("ROAS must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter ROAS"
                   className="w-full"
                   min={0}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
 
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="top_search" label="Top Search">
-                <Input placeholder="Enter top search" />
+              <Form.Item
+                name="top_search"
+                label="Top Search"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Top Search must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <InputNumber
+                  placeholder="Enter top search"
+                  className="w-full"
+                  min={0}
+                  controls={true}
+                />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="conversions" label="Conversions">
+              <Form.Item
+                name="conversions"
+                label="Conversions"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Conversions must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter conversions"
                   className="w-full"
                   min={0}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="traffic" label="Traffic">
+              <Form.Item
+                name="traffic"
+                label="Traffic"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Traffic must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter traffic"
                   className="w-full"
                   min={0}
+                  controls={true}
                 />
               </Form.Item>
             </div>
 
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="ctr" label="CTR (%)">
+              <Form.Item
+                name="ctr"
+                label="CTR (%)"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("CTR must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter CTR"
                   className="w-full"
                   min={0}
                   max={100}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="cpp" label="CPP">
+              <Form.Item
+                name="cpp"
+                label="CPP"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("CPP must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter CPP"
                   className="w-full"
                   min={0}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="avg_cart" label="Avg Cart">
+              <Form.Item
+                name="avg_cart"
+                label="Avg Cart"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Avg Cart must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter average cart"
                   className="w-full"
                   min={0}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
 
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="cltv" label="CLTV">
+              <Form.Item
+                name="cltv"
+                label="CLTV"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("CLTV must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter CLTV"
                   className="w-full"
                   min={0}
                   step={0.01}
+                  controls={true}
                 />
               </Form.Item>
             </div>
             <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
-              <Form.Item name="ftus" label="FTUs">
+              <Form.Item
+                name="ftus"
+                label="FTUs"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("FTUs must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
                 <InputNumber
                   placeholder="Enter FTUs"
                   className="w-full"
                   min={0}
+                  controls={true}
+                />
+              </Form.Item>
+            </div>
+            <div className="flex-1 min-w-full md:min-w-[calc(33.333%-11px)]">
+              <Form.Item
+                name="reach"
+                label="Reach"
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (
+                        value === null ||
+                        value === undefined ||
+                        value === ""
+                      ) {
+                        return Promise.resolve();
+                      }
+                      const numValue = Number(value);
+                      if (isNaN(numValue) || value === "") {
+                        return Promise.reject(
+                          new Error("Reach must be a number")
+                        );
+                      }
+                      return Promise.resolve();
+                    },
+                  },
+                ]}
+              >
+                <InputNumber
+                  placeholder="Enter reach"
+                  className="w-full"
+                  min={0}
+                  controls={true}
                 />
               </Form.Item>
             </div>
@@ -638,87 +949,326 @@ const DigitalsData = () => {
               <Input.TextArea rows={2} placeholder="Enter French objective" />
             </Form.Item>
 
-            <Form.Item name="cpo" label="CPO">
+            <Form.Item
+              name="cpo"
+              label="CPO"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("CPO must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter CPO"
                 className="w-full"
                 min={0}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="orders" label="Orders">
+            <Form.Item
+              name="orders"
+              label="Orders"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Orders must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter orders"
                 className="w-full"
                 min={0}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="roas" label="ROAS">
+            <Form.Item
+              name="roas"
+              label="ROAS"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("ROAS must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter ROAS"
                 className="w-full"
                 min={0}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
 
-            <Form.Item name="top_search" label="Top Search">
-              <Input placeholder="Enter top search" />
+            <Form.Item
+              name="top_search"
+              label="Top Search"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Top Search must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder="Enter top search"
+                className="w-full"
+                min={0}
+                controls={true}
+              />
             </Form.Item>
-            <Form.Item name="conversions" label="Conversions">
+            <Form.Item
+              name="conversions"
+              label="Conversions"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Conversions must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter conversions"
                 className="w-full"
                 min={0}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="traffic" label="Traffic">
+            <Form.Item
+              name="traffic"
+              label="Traffic"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Traffic must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter traffic"
                 className="w-full"
                 min={0}
+                controls={true}
               />
             </Form.Item>
 
-            <Form.Item name="ctr" label="CTR (%)">
+            <Form.Item
+              name="ctr"
+              label="CTR (%)"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("CTR must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter CTR"
                 className="w-full"
                 min={0}
                 max={100}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="cpp" label="CPP">
+            <Form.Item
+              name="cpp"
+              label="CPP"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("CPP must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter CPP"
                 className="w-full"
                 min={0}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="avg_cart" label="Avg Cart">
+            <Form.Item
+              name="avg_cart"
+              label="Avg Cart"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Avg Cart must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter average cart"
                 className="w-full"
                 min={0}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
 
-            <Form.Item name="cltv" label="CLTV">
+            <Form.Item
+              name="cltv"
+              label="CLTV"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("CLTV must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter CLTV"
                 className="w-full"
                 min={0}
                 step={0.01}
+                controls={true}
               />
             </Form.Item>
-            <Form.Item name="ftus" label="FTUs">
+            <Form.Item
+              name="ftus"
+              label="FTUs"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(new Error("FTUs must be a number"));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
               <InputNumber
                 placeholder="Enter FTUs"
                 className="w-full"
                 min={0}
+                controls={true}
+              />
+            </Form.Item>
+            <Form.Item
+              name="reach"
+              label="Reach"
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value === null || value === undefined || value === "") {
+                      return Promise.resolve();
+                    }
+                    const numValue = Number(value);
+                    if (isNaN(numValue) || value === "") {
+                      return Promise.reject(
+                        new Error("Reach must be a number")
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <InputNumber
+                placeholder="Enter reach"
+                className="w-full"
+                min={0}
+                controls={true}
               />
             </Form.Item>
           </div>
@@ -890,6 +1440,16 @@ const DigitalsData = () => {
                       <div className="text-gray-500 text-xs mb-1">FTUs</div>
                       <div className="font-bold text-lime-700 text-sm">
                         {formatNumber(previewModal.data.ftus)}
+                      </div>
+                    </div>
+                  </Col>
+                )}
+                {previewModal.data.reach != null && (
+                  <Col xs={12} sm={8} md={6}>
+                    <div className="bg-rose-50 rounded-lg p-3 text-center">
+                      <div className="text-gray-500 text-xs mb-1">Reach</div>
+                      <div className="font-bold text-rose-700 text-sm">
+                        {formatNumber(previewModal.data.reach)}
                       </div>
                     </div>
                   </Col>

@@ -194,7 +194,7 @@ const CreativesData = () => {
   };
 
   const openEditModal = (item) => {
-    const creative = item.creative || {};
+    const creative = item || {};
     setEditingId(creative.id);
     editForm.setFieldsValue({
       title_en: creative.title_en || "",
@@ -205,10 +205,10 @@ const CreativesData = () => {
   };
 
   const openPreviewModal = (item) => {
-    if (item?.creative) {
+    if (item) {
       setPreviewModal({
         open: true,
-        data: item.creative,
+        data: item,
       });
     }
   };
@@ -276,7 +276,7 @@ const CreativesData = () => {
         <>
           <Row gutter={[20, 20]}>
             {items.map((item) => {
-              const creative = item.creative || {};
+              const creative = item || {};
               return (
                 <Col
                   key={creative.id}
@@ -299,7 +299,7 @@ const CreativesData = () => {
                       <div className="relative">
                         {/* Main Image */}
                         {creative.main_image ? (
-                          <div className="h-56 overflow-hidden bg-gray-100">
+                          <div className=" overflow-hidden bg-gray-100">
                             <Image
                               src={creative.main_image}
                               alt="Main Image"
@@ -353,11 +353,7 @@ const CreativesData = () => {
                       {/* Title */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-base text-gray-900 line-clamp-2 break-words mb-1">
-                          {lang === "en"
-                            ? creative.title_en
-                            : lang === "ar"
-                            ? creative.title_ar
-                            : creative.title_fr || "No Title"}
+                         {creative.title}
                         </h3>
                       </div>
                     </div>
@@ -747,6 +743,8 @@ const CreativesData = () => {
             )}
 
             {/* Brand Images Section */}
+            { console.log(previewModal)}
+
             {(previewModal.data.brand_image_1 ||
               previewModal.data.brand_image_2 ||
               previewModal.data.brand_image_3) && (
@@ -824,14 +822,13 @@ const CreativesData = () => {
                 </Image.PreviewGroup>
               </div>
             )}
-
             {!previewModal.data.logo &&
               !previewModal.data.main_image &&
               !previewModal.data.brand_image_1 &&
               !previewModal.data.brand_image_2 &&
               !previewModal.data.brand_image_3 &&
               (!previewModal.data.media ||
-                previewModal.data.media.length === 0) && (
+                previewModal.media.length === 0) && (
                 <div className="py-8">
                   <Empty description={<span>No media to preview</span>} />
                 </div>

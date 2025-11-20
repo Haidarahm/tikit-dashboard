@@ -15,6 +15,7 @@ import {
   Spin,
   Image,
   Tooltip,
+  Select,
 } from "antd";
 import {
   EditOutlined,
@@ -32,10 +33,12 @@ const InfluencersItems = () => {
     total,
     page,
     perPage,
+    lang,
     isLoading,
     fetchList,
     setPage,
     setPerPage,
+    setLang,
     setWorkId,
     create,
     update,
@@ -62,7 +65,7 @@ const InfluencersItems = () => {
       setWorkId(id);
       fetchList(id);
     }
-  }, [id, page, perPage]);
+  }, [id, page, perPage, lang]);
 
   const handleAdd = async () => {
     try {
@@ -192,13 +195,31 @@ const InfluencersItems = () => {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Influencer Items</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setIsAddOpen(true)}
-        >
-          Add Item
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Language:</span>
+            <Select
+              value={lang}
+              style={{ width: 140 }}
+              options={[
+                { label: "English", value: "en" },
+                { label: "Arabic", value: "ar" },
+                { label: "French", value: "fr" },
+              ]}
+              onChange={(value) => {
+                setLang(value);
+                setPage(1);
+              }}
+            />
+          </div>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsAddOpen(true)}
+          >
+            Add Item
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

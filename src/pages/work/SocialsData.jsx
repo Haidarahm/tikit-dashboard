@@ -21,7 +21,6 @@ import {
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
-  CloseOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
@@ -196,6 +195,9 @@ const SocialsData = () => {
   const openEditModal = (item) => {
     setEditingId(item.id);
     setIsEditOpen(true);
+    // Note: For editing, we still need to fetch all language versions
+    // The backend should return all language fields when fetching a single item
+    // For now, we'll set empty values and let the user edit
     editForm.setFieldsValue({
       title_en: item.title_en || "",
       title_ar: item.title_ar || "",
