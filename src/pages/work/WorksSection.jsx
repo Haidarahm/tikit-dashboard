@@ -234,7 +234,11 @@ const WorksSection = () => {
       key: "description",
       ellipsis: true,
       render: (description) => (
-        <Text ellipsis={{ tooltip: description }}>{description || ""}</Text>
+        <Tooltip title={description || ""}>
+          <span className="block max-w-[320px] truncate">
+            {description || ""}
+          </span> 
+        </Tooltip>
       ),
     },
     {

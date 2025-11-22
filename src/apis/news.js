@@ -27,7 +27,7 @@ const appendNewsFields = (formData, payload = {}) => {
     }
   });
   if (payload?.images) {
-    formData.append("images", payload.images);
+    formData.append("image", payload.images);
   }
 };
 

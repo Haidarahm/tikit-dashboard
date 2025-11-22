@@ -106,7 +106,6 @@ export const useNewsStore = create((set, get) => ({
     try {
       await deleteNewsCard(id);
       await get().fetchList();
-      toast.success("News card deleted successfully");
     } catch (error) {
       set({ error });
       toast.error(

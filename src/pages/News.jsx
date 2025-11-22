@@ -72,7 +72,7 @@ function News() {
         ...values,
       };
       if (createImage[0]?.originFileObj) {
-        payload.images = createImage[0].originFileObj;
+        payload.image = createImage[0].originFileObj;
       }
       await create(payload);
       setIsCreateOpen(false);
@@ -112,7 +112,7 @@ function News() {
         return acc;
       }, {});
       if (editImage[0]?.originFileObj) {
-        payload.images = editImage[0].originFileObj;
+        payload.image = editImage[0].originFileObj;
       }
       await update(editingId, payload);
       toast.success("News card updated successfully");
@@ -156,8 +156,8 @@ function News() {
       },
       {
         title: "Image",
-        dataIndex: "images",
-        key: "images",
+        dataIndex: "image",
+        key: "image",
         width: 120,
         render: (value) =>
           value ? (
