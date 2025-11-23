@@ -6,6 +6,7 @@ import {
   addInfluencersSection,
   updateInfluencersSection,
   deleteInfluencersSection,
+  importExcel,
 } from "../../apis/influencers/influencersSections.js";
 
 export const useInfluencersSectionsStore = create((set, get) => ({
@@ -105,6 +106,24 @@ export const useInfluencersSectionsStore = create((set, get) => ({
     } catch (error) {
       set({ error });
       toast.error(error?.response?.data?.message || "Failed to delete section");
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  import: async (file) => {
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importExcel(file);
+      await get().fetchList();
+      toast.success("Sections imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import sections"
+      );
       throw error;
     } finally {
       set({ isLoading: false });

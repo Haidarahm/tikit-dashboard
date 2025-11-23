@@ -26,8 +26,8 @@ const appendNewsFields = (formData, payload = {}) => {
       formData.append(field, payload[field]);
     }
   });
-  if (payload?.images) {
-    formData.append("image", payload.images);
+  if (payload?.image) {
+    formData.append("image", payload.image);
   }
 };
 

@@ -8,6 +8,7 @@ import Banner from "./pages/Banner.jsx";
 import AboutBanners from "./pages/AboutBanners.jsx";
 import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import PublicRoute from "./components/PublicRoute.jsx";
 import InfluencersData from "./pages/influencer/influencersData.jsx";
 import InfluencersItems from "./pages/work/InfluencersItems.jsx";
 import SocialsData from "./pages/work/SocialsData.jsx";
@@ -21,7 +22,14 @@ function App() {
   return (
     <BrowserRouter basename={basename}>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route index element={<Navigate to="/services" replace />} />

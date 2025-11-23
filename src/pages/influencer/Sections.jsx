@@ -14,7 +14,12 @@ import {
   Pagination,
   Spin,
 } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useInfluencersSectionsStore } from "../../store/influencers/influencersSectionsStore.js";
@@ -35,6 +40,7 @@ export const Sections = () => {
     create,
     update,
     remove,
+    import: importExcel,
   } = useInfluencersSectionsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -49,6 +55,14 @@ export const Sections = () => {
   useEffect(() => {
     fetchList();
   }, [page, perPage, lang]);
+
+  const handleImportExcel = async (file) => {
+    try {
+      await importExcel(file);
+    } catch (error) {
+      // Error is already handled in the store
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -177,6 +191,32 @@ export const Sections = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            beforeUpload={(file) => {
+              const isExcel =
+                file.type ===
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                file.type === "application/vnd.ms-excel" ||
+                file.name.endsWith(".xlsx") ||
+                file.name.endsWith(".xls");
+              if (!isExcel) {
+                toast.error("Please upload an Excel file (.xlsx or .xls)");
+                return false;
+              }
+              return false; // Prevent auto upload
+            }}
+            onChange={(info) => {
+              if (info.fileList.length > 0) {
+                const file = info.fileList[0].originFileObj;
+                handleImportExcel(file);
+              }
+            }}
+            maxCount={1}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Import Excel</Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}

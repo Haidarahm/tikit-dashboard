@@ -1,33 +1,30 @@
-import { Card, Form, Input, Button, Typography, message } from "antd";
+import { Card, Form, Input, Button, Typography } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/auth.js";
+import { useState } from "react";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const login = useAuthStore((s) => s.login);
+  const [loading, setLoading] = useState(false);
 
-  const ALLOWED_USERS = [
-    { email: "haidarahmad421@gmail.com", password: "Haidar@123" },
-    { email: "Hadeekmufti@tikit.ae", password: "Hadeek@123" },
-  ];
-
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const { email, password } = values || {};
     if (!email || !password) {
-      message.error("Please enter email and password");
       return;
     }
-    const isAllowed = ALLOWED_USERS.some(
-      (u) => u.email === email && u.password === password
-    );
-    if (isAllowed) {
-      login("demo-token");
-      const redirectTo = location.state?.from?.pathname || "/works";
-      message.success("Logged in");
-      navigate(redirectTo, { replace: true });
-    } else {
-      message.error("Invalid email or password");
+    setLoading(true);
+    try {
+      const result = await login({ email, password });
+      if (result.success) {
+        const redirectTo = location.state?.from?.pathname || "/works";
+        navigate(redirectTo, { replace: true });
+      }
+    } catch (error) {
+      // Error is already handled in the store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,7 +49,7 @@ function Login() {
           >
             <Input.Password placeholder="••••••••" />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block>
+          <Button type="primary" htmlType="submit" block loading={loading}>
             Sign in
           </Button>
         </Form>
