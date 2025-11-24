@@ -99,6 +99,20 @@ export async function updateInfluencer(id, payload) {
 }
 
 export async function deleteInfluencer(id) {
-  const { data } = await apiClient.delete(`/api/influencers/${id}`);
+  const { data } = await apiClient.delete(`/api/influencers/${id}/delete`);
+  return data;
+}
+
+export async function importExcel(sectionId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post(
+    `/api/influencers/${sectionId}/import`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 }

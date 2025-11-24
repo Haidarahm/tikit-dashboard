@@ -5,6 +5,7 @@ import {
   addInfluencer,
   updateInfluencer,
   deleteInfluencer,
+  importExcel,
 } from "../../apis/influencers/influencer.js";
 
 export const useInfluencerStore = create((set, get) => ({
@@ -109,6 +110,30 @@ export const useInfluencerStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete influencer"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  import: async (file, sectionId = null) => {
+    set({ isLoading: true, error: null });
+    try {
+      const targetSectionId = sectionId ?? get().sectionId;
+      if (!targetSectionId) {
+        throw new Error("Section ID is required to import influencers");
+      }
+      const result = await importExcel(targetSectionId, file);
+      await get().fetchList();
+      toast.success("Influencers imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to import influencers"
       );
       throw error;
     } finally {

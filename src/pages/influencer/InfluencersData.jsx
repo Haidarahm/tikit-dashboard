@@ -20,6 +20,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   CloseOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import {
   FaInstagram,
@@ -51,6 +52,7 @@ const InfluencersData = () => {
     create,
     update,
     remove,
+    import: importExcel,
   } = useInfluencerStore();
 
   // Helper function to get icon based on link type
@@ -128,6 +130,14 @@ const InfluencersData = () => {
       fetchList(id);
     }
   }, [id, page, perPage, lang]);
+
+  const handleImportExcel = async (file) => {
+    try {
+      await importExcel(file, id);
+    } catch (error) {
+      // Error is already handled in the store
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -299,6 +309,32 @@ const InfluencersData = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            beforeUpload={(file) => {
+              const isExcel =
+                file.type ===
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+                file.type === "application/vnd.ms-excel" ||
+                file.name.endsWith(".xlsx") ||
+                file.name.endsWith(".xls");
+              if (!isExcel) {
+                toast.error("Please upload an Excel file (.xlsx or .xls)");
+                return false;
+              }
+              return false; // Prevent auto upload
+            }}
+            onChange={(info) => {
+              if (info.fileList.length > 0) {
+                const file = info.fileList[0].originFileObj;
+                handleImportExcel(file);
+              }
+            }}
+            maxCount={1}
+            showUploadList={false}
+          >
+            <Button icon={<UploadOutlined />}>Import Excel</Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}
