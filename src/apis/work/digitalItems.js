@@ -11,7 +11,7 @@ export async function getAllDigitalItems({
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/api/work-digitals/get", { params });
+  const { data } = await apiClient.get("/work-digitals/get", { params });
   return data;
 }
 
@@ -48,7 +48,7 @@ export async function createDigitalItem(payload) {
     formData.append("logo", payload.logo);
   }
 
-  const { data } = await apiClient.post("/api/work-digitals/add", formData, {
+  const { data } = await apiClient.post("/work-digitals/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -88,7 +88,7 @@ export async function updateDigitalItem(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/work-digitals/${id}/update`,
+    `/work-digitals/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -98,6 +98,6 @@ export async function updateDigitalItem(id, payload) {
 }
 
 export async function deleteDigitalItem(id) {
-  const { data } = await apiClient.delete(`/api/work-digitals/${id}/delete`);
+  const { data } = await apiClient.delete(`/work-digitals/${id}/delete`);
   return data;
 }

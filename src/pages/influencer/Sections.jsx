@@ -45,11 +45,8 @@ export const Sections = () => {
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [addForm] = Form.useForm();
-  const [imageFileList, setImageFileList] = useState([]);
-
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm] = Form.useForm();
-  const [editImageFileList, setEditImageFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -74,22 +71,11 @@ export const Sections = () => {
         subtitle_en: values.subtitle_en,
         subtitle_ar: values.subtitle_ar,
         subtitle_fr: values.subtitle_fr,
-        image: null,
       };
-
-      if (imageFileList[0]?.originFileObj) {
-        payload.image = imageFileList[0].originFileObj;
-      }
-
-      if (!payload.image) {
-        toast.error("Please upload an image.");
-        return;
-      }
 
       await create(payload);
       setIsAddOpen(false);
       addForm.resetFields();
-      setImageFileList([]);
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err.response.data.message);
@@ -124,14 +110,9 @@ export const Sections = () => {
         payload.subtitle_fr = values.subtitle_fr;
       }
 
-      if (editImageFileList[0]?.originFileObj) {
-        payload.image = editImageFileList[0].originFileObj;
-      }
-
       await update(editingId, payload);
       setIsEditOpen(false);
       editForm.resetFields();
-      setEditImageFileList([]);
       setEditingId(null);
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -163,7 +144,6 @@ export const Sections = () => {
       subtitle_ar: section.subtitle_ar || "",
       subtitle_fr: section.subtitle_fr || "",
     });
-    setEditImageFileList([]);
   };
 
   const handleViewData = (sectionId) => {
@@ -242,21 +222,7 @@ export const Sections = () => {
               <Col xs={24} sm={12} md={8} lg={6} key={section.id}>
                 <Card
                   hoverable
-                  cover={
-                    <div className="h-48 overflow-hidden bg-gray-100">
-                      {section.image ? (
-                        <img
-                          src={section.image}
-                          alt={section.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-                  }
+                 
                   actions={[
                     <Button
                       key="data"
@@ -322,7 +288,6 @@ export const Sections = () => {
         onCancel={() => {
           setIsAddOpen(false);
           addForm.resetFields();
-          setImageFileList([]);
         }}
         onOk={handleAdd}
         confirmLoading={isLoading}
@@ -375,19 +340,6 @@ export const Sections = () => {
               <Input placeholder="Enter French subtitle" />
             </Form.Item>
           </div>
-
-          <Form.Item label="Upload Image" required>
-            <Upload
-              fileList={imageFileList}
-              beforeUpload={() => false}
-              listType="picture-card"
-              maxCount={1}
-              accept="image/*"
-              onChange={({ fileList }) => setImageFileList(fileList)}
-            >
-              {imageFileList.length === 0 && "+ Upload"}
-            </Upload>
-          </Form.Item>
         </Form>
       </Modal>
 
@@ -398,7 +350,6 @@ export const Sections = () => {
         onCancel={() => {
           setIsEditOpen(false);
           editForm.resetFields();
-          setEditImageFileList([]);
           setEditingId(null);
         }}
         onOk={handleEdit}
@@ -428,19 +379,6 @@ export const Sections = () => {
               <Input placeholder="Enter French subtitle" />
             </Form.Item>
           </div>
-
-          <Form.Item label="Upload New Image (optional)">
-            <Upload
-              fileList={editImageFileList}
-              beforeUpload={() => false}
-              listType="picture-card"
-              maxCount={1}
-              accept="image/*"
-              onChange={({ fileList }) => setEditImageFileList(fileList)}
-            >
-              {editImageFileList.length === 0 && "+ Upload"}
-            </Upload>
-          </Form.Item>
         </Form>
       </Modal>
     </div>

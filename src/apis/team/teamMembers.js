@@ -24,13 +24,13 @@ const buildFormData = (payload = {}) => {
 };
 
 export async function getAllTeamMembers(typeId) {
-  const { data } = await apiClient.get(`/api/teams/type/${typeId}`);
+  const { data } = await apiClient.get(`/teams/type/${typeId}`);
   return data;
 }
 
 export async function addTeamMember(typeId, payload) {
   const formData = buildFormData(payload);
-  const { data } = await apiClient.post(`/api/teams/add/${typeId}`, formData, {
+  const { data } = await apiClient.post(`/teams/add/${typeId}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -38,13 +38,13 @@ export async function addTeamMember(typeId, payload) {
 
 export async function updateTeamMember(id, payload) {
   const formData = buildFormData(payload);
-  const { data } = await apiClient.post(`/api/teams/${id}/update`, formData, {
+  const { data } = await apiClient.post(`/teams/${id}/update`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteTeamMember(id) {
-  const { data } = await apiClient.delete(`/api/teams/${id}/delete`);
+  const { data } = await apiClient.delete(`/teams/${id}/delete`);
   return data;
 }

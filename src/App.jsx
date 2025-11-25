@@ -18,9 +18,8 @@ import EventsData from "./pages/work/EventsData.jsx";
 import News from "./pages/News.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
 function App() {
-  const basename = "/dashboardTikit";
   return (
-    <BrowserRouter basename={basename}>
+    <BrowserRouter>
       <Routes>
         <Route
           path="/login"

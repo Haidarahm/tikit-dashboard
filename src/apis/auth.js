@@ -13,6 +13,6 @@ const publicClient = axios.create({
 });
 
 export async function login(credentials) {
-  const { data } = await publicClient.post("/api/auth/login", credentials);
+  const { data } = await publicClient.post("/auth/login", credentials);
   return data;
 }

@@ -5,7 +5,7 @@ export async function getAllNews({ page, per_page, lang } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/api/news/get", { params });
+  const { data } = await apiClient.get("/news/get", { params });
   return data;
 }
 
@@ -34,7 +34,7 @@ const appendNewsFields = (formData, payload = {}) => {
 export async function addNewsCard(payload) {
   const formData = new FormData();
   appendNewsFields(formData, payload);
-  const { data } = await apiClient.post("/api/news/add", formData, {
+  const { data } = await apiClient.post("/news/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -43,13 +43,13 @@ export async function addNewsCard(payload) {
 export async function updateNewsCard(id, payload) {
   const formData = new FormData();
   appendNewsFields(formData, payload);
-  const { data } = await apiClient.post(`/api/news/${id}/update`, formData, {
+  const { data } = await apiClient.post(`/news/${id}/update`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteNewsCard(id) {
-  const { data } = await apiClient.delete(`/api/news/${id}/delete`);
+  const { data } = await apiClient.delete(`/news/${id}/delete`);
   return data;
 }

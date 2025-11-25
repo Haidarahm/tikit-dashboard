@@ -11,7 +11,7 @@ export async function getAllCreativesItems({
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/api/work-creatives/get`, {
+  const { data } = await apiClient.get(`/work-creatives/get`, {
     params,
   });
   return data;
@@ -56,7 +56,7 @@ export async function createCreativeItem(payload) {
     });
   }
 
-  const { data } = await apiClient.post("/api/work-creatives/add", formData, {
+  const { data } = await apiClient.post("/work-creatives/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -102,7 +102,7 @@ export async function updateCreativeItem(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/work-creatives/${id}/update`,
+    `/work-creatives/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -112,6 +112,6 @@ export async function updateCreativeItem(id, payload) {
 }
 
 export async function deleteCreativesItem(id) {
-  const { data } = await apiClient.delete(`/api/work-creatives/${id}/delete`);
+  const { data } = await apiClient.delete(`/work-creatives/${id}/delete`);
   return data;
 }

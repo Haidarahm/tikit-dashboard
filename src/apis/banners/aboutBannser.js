@@ -5,7 +5,7 @@ export async function getAllBannerVideo({ page, per_page } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
 
-  const { data } = await apiClient.get("/api/about-us-banners/get", {
+  const { data } = await apiClient.get("/about-us-banners/get", {
     params,
   });
   return data;
@@ -18,7 +18,7 @@ export async function addBannerVideo(payload) {
     formData.append("media", payload.media);
   }
 
-  const { data } = await apiClient.post("/api/about-us-banners/add", formData, {
+  const { data } = await apiClient.post("/about-us-banners/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
@@ -33,7 +33,7 @@ export async function updateVideo(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/about-us-banners/${id}/update`,
+    `/about-us-banners/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -44,6 +44,6 @@ export async function updateVideo(id, payload) {
 }
 
 export async function deleteVideo(id) {
-  const { data } = await apiClient.delete(`/api/about-us-banners/${id}/delete`);
+  const { data } = await apiClient.delete(`/about-us-banners/${id}/delete`);
   return data;
 }

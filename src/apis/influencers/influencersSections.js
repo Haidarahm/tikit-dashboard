@@ -5,7 +5,7 @@ export async function getInfluencersSections({ per_page, page, lang } = {}) {
   if (per_page != null) params.per_page = per_page;
   if (page != null) params.page = page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/api/sections/get", { params });
+  const { data } = await apiClient.get("/sections/get", { params });
   return data;
 }
 
@@ -27,7 +27,7 @@ export async function addInfluencersSection(payload) {
     formData.append("image", payload.image);
   }
 
-  const { data } = await apiClient.post("/api/sections/add", formData, {
+  const { data } = await apiClient.post("/sections/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -51,7 +51,7 @@ export async function updateInfluencersSection(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/sections/${id}/update`,
+    `/sections/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -61,14 +61,14 @@ export async function updateInfluencersSection(id, payload) {
 }
 
 export async function deleteInfluencersSection(id) {
-  const { data } = await apiClient.delete(`/api/sections/${id}/delete`);
+  const { data } = await apiClient.delete(`/sections/${id}/delete`);
   return data;
 }
 
 export async function getInfluencersSection(id, { lang } = {}) {
   const params = {};
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/api/sections/${id}`, { params });
+  const { data } = await apiClient.get(`/sections/${id}`, { params });
   return data;
 }
 
@@ -76,7 +76,7 @@ export async function importExcel(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const { data } = await apiClient.post("/api/sections/import", formData, {
+  const { data } = await apiClient.post("/sections/import", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;

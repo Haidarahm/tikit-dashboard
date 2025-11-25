@@ -6,7 +6,7 @@ export async function getSocialItems({ work_id, page, per_page, lang } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang != null) params.lang = lang;
-  const { data } = await apiClient.get("/api/work-socials/get", { params });
+  const { data } = await apiClient.get("/work-socials/get", { params });
   return data;
 }
 
@@ -46,7 +46,7 @@ export async function createSocial(payload) {
     });
   }
 
-  const { data } = await apiClient.post("/api/work-socials/add", formData, {
+  const { data } = await apiClient.post("/work-socials/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -89,7 +89,7 @@ export async function updateSocial(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/work-socials/${id}/update`,
+    `/work-socials/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -99,6 +99,6 @@ export async function updateSocial(id, payload) {
 }
 
 export async function deleteSocial(id) {
-  const { data } = await apiClient.delete(`/api/work-socials/${id}/delete`);
+  const { data } = await apiClient.delete(`/work-socials/${id}/delete`);
   return data;
 }

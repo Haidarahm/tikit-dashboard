@@ -6,7 +6,7 @@ export async function getAllEventItems({ work_id, page, per_page, lang } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/api/work-events/get`, {
+  const { data } = await apiClient.get(`/work-events/get`, {
     params,
   });
   return data;
@@ -45,7 +45,7 @@ export async function createEventItem(payload) {
     });
   }
 
-  const { data } = await apiClient.post("/api/work-events/add", formData, {
+  const { data } = await apiClient.post("/work-events/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -85,7 +85,7 @@ export async function updateEventItem(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/work-events/${id}/update`,
+    `/work-events/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -95,6 +95,6 @@ export async function updateEventItem(id, payload) {
 }
 
 export async function deleteEventItem(id) {
-  const { data } = await apiClient.delete(`/api/work-events/${id}/delete`);
+  const { data } = await apiClient.delete(`/work-events/${id}/delete`);
   return data;
 }

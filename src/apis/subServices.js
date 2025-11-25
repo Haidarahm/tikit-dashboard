@@ -5,7 +5,7 @@ export async function getAllSubServices(subId, { per_page, page, lang } = {}) {
   if (per_page != null) params.per_page = per_page;
   if (page != null) params.page = page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/api/services/${subId}/cases/get`, {
+  const { data } = await apiClient.get(`/services/${subId}/cases/get`, {
     params,
   });
   return data;
@@ -33,7 +33,7 @@ export async function addSubService(subId, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/services/${subId}/cases/add`,
+    `/services/${subId}/cases/add`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -62,13 +62,13 @@ export async function updateSubService(id, payload) {
     formData.append("media", payload.media);
   }
 
-  const { data } = await apiClient.post(`/api/services/${id}/cases/update`, formData, {
+  const { data } = await apiClient.post(`/services/${id}/cases/update`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteSubService(id) {
-  const { data } = await apiClient.delete(`/api/cases/delete/${id}`);
+  const { data } = await apiClient.delete(`/cases/delete/${id}`);
   return data;
 }

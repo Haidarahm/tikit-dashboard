@@ -6,7 +6,7 @@ export async function getItems({ work_id, page, per_page, lang } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang != null) params.lang = lang;
-  const { data } = await apiClient.get("/api/work-influences/get", { params });
+  const { data } = await apiClient.get("/work-influences/get", { params });
   return data;
 }
 
@@ -44,7 +44,7 @@ export async function addItem(payload) {
     });
   }
 
-  const { data } = await apiClient.post("/api/work-influences/add", formData, {
+  const { data } = await apiClient.post("/work-influences/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -85,7 +85,7 @@ export async function updateItem(id, payload) {
   }
 
   const { data } = await apiClient.post(
-    `/api/work-influences/${id}/update`,
+    `/work-influences/${id}/update`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
@@ -95,6 +95,6 @@ export async function updateItem(id, payload) {
 }
 
 export async function deleteItem(id) {
-  const { data } = await apiClient.delete(`/api/work-influences/${id}/delete`);
+  const { data } = await apiClient.delete(`/work-influences/${id}/delete`);
   return data;
 }
