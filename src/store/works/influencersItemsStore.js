@@ -5,6 +5,7 @@ import {
   addItem,
   updateItem,
   deleteItem,
+  importExcelfile,
 } from "../../apis/work/influencersItems.js";
 
 export const useInfluencersItemsStore = create((set, get) => ({
@@ -105,6 +106,30 @@ export const useInfluencersItemsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete influencer item"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importExcel: async (file) => {
+    const workId = get().workId;
+    if (!workId) {
+      toast.error("Select a work before importing.");
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importExcelfile(workId, file);
+      await get().fetchList();
+      toast.success("Influencer items imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import influencer items"
       );
       throw error;
     } finally {

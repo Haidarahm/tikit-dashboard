@@ -97,6 +97,18 @@ export async function updateDigitalItem(id, payload) {
   return data;
 }
 
+export async function importExcelfile(id, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post(
+    `/work-digitals/${id}/import`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
 export async function deleteDigitalItem(id) {
   const { data } = await apiClient.delete(`/work-digitals/${id}/delete`);
   return data;

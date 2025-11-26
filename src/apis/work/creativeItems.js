@@ -111,6 +111,18 @@ export async function updateCreativeItem(id, payload) {
   return data;
 }
 
+export async function importExcelfile(id, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post(
+    `/work-creatives/${id}/import`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
 export async function deleteCreativesItem(id) {
   const { data } = await apiClient.delete(`/work-creatives/${id}/delete`);
   return data;

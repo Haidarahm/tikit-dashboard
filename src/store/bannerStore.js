@@ -82,6 +82,11 @@ export const useBannerStore = create((set, get) => ({
     try {
       await deleteVideo(id);
       await get().fetchList();
+      const { items, page } = get();
+      if (items.length === 0 && page > 1) {
+        set({ page: page - 1 });
+        await get().fetchList();
+      }
       toast.success("Video deleted successfully");
     } catch (error) {
       set({ error });

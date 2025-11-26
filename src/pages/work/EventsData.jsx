@@ -44,6 +44,7 @@ const EventsData = () => {
     create,
     update,
     remove,
+    importExcel: importEventExcel,
   } = useEventItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -68,6 +69,39 @@ const EventsData = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, page, perPage, lang]);
+
+  const excelMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+  ];
+
+  const isExcelFile = (file) => {
+    if (!file) return false;
+    const name = file.name?.toLowerCase() || "";
+    return (
+      excelMimeTypes.includes(file.type) ||
+      name.endsWith(".xlsx") ||
+      name.endsWith(".xls")
+    );
+  };
+
+  const handleImportExcel = async (file) => {
+    if (!file) return;
+    if (!isExcelFile(file)) {
+      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
+      return;
+    }
+
+    try {
+      await importEventExcel(file);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to import event items"
+      );
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -216,6 +250,23 @@ const EventsData = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            disabled={!id}
+            beforeUpload={(file) => {
+              handleImportExcel(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              disabled={!id}
+              className="flex items-center"
+            >
+              Import Excel
+            </Button>
+          </Upload>
 
           <Button
             type="primary"

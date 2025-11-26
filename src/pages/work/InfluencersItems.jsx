@@ -22,6 +22,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   EyeOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../store/works/influencersItemsStore.js";
@@ -43,6 +44,7 @@ const InfluencersItems = () => {
     create,
     update,
     remove,
+    importExcel: importInfluencersExcel,
   } = useInfluencersItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -66,6 +68,39 @@ const InfluencersItems = () => {
       fetchList(id);
     }
   }, [id, page, perPage, lang]);
+
+  const excelMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+  ];
+
+  const isExcelFile = (file) => {
+    if (!file) return false;
+    const name = file.name?.toLowerCase() || "";
+    return (
+      excelMimeTypes.includes(file.type) ||
+      name.endsWith(".xlsx") ||
+      name.endsWith(".xls")
+    );
+  };
+
+  const handleImportExcel = async (file) => {
+    if (!file) return;
+    if (!isExcelFile(file)) {
+      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
+      return;
+    }
+
+    try {
+      await importInfluencersExcel(file);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to import influencer items"
+      );
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -212,6 +247,23 @@ const InfluencersItems = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            disabled={!id}
+            beforeUpload={(file) => {
+              handleImportExcel(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              disabled={!id}
+              className="flex items-center"
+            >
+              Import Excel
+            </Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}

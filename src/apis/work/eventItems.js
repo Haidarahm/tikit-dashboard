@@ -84,13 +84,19 @@ export async function updateEventItem(id, payload) {
     });
   }
 
-  const { data } = await apiClient.post(
-    `/work-events/${id}/update`,
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
-  );
+  const { data } = await apiClient.post(`/work-events/${id}/update`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function importExcelfile(id, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post(`/work-events/${id}/import`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }
 

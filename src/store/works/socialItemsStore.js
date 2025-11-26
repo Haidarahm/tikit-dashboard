@@ -5,6 +5,7 @@ import {
   createSocial,
   updateSocial,
   deleteSocial,
+  importExcelfile,
 } from "../../apis/work/socialItems.js";
 
 export const useSocialItemsStore = create((set, get) => ({
@@ -111,5 +112,28 @@ export const useSocialItemsStore = create((set, get) => ({
       set({ isLoading: false });
     }
   },
-}));
 
+  importExcel: async (file) => {
+    const workId = get().workId;
+    if (!workId) {
+      toast.error("Select a work before importing.");
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importExcelfile(workId, file);
+      await get().fetchList();
+      toast.success("Social items imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import social items"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+}));

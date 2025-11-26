@@ -5,6 +5,7 @@ import {
   createCreativeItem,
   updateCreativeItem,
   deleteCreativesItem,
+  importExcelfile,
 } from "../../apis/work/creativeItems.js";
 
 export const useCreativeItemsStore = create((set, get) => ({
@@ -105,6 +106,30 @@ export const useCreativeItemsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete creative item"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importExcel: async (file) => {
+    const workId = get().workId;
+    if (!workId) {
+      toast.error("Select a work before importing.");
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importExcelfile(workId, file);
+      await get().fetchList();
+      toast.success("Creative items imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import creative items"
       );
       throw error;
     } finally {

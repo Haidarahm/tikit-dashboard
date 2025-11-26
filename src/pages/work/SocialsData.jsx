@@ -22,6 +22,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   EyeOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useSocialItemsStore } from "../../store/works/socialItemsStore.js";
@@ -43,6 +44,7 @@ const SocialsData = () => {
     create,
     update,
     remove,
+    importExcel: importSocialExcel,
   } = useSocialItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -66,6 +68,39 @@ const SocialsData = () => {
       fetchList(id);
     }
   }, [id, page, perPage, lang]);
+
+  const excelMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+  ];
+
+  const isExcelFile = (file) => {
+    if (!file) return false;
+    const name = file.name?.toLowerCase() || "";
+    return (
+      excelMimeTypes.includes(file.type) ||
+      name.endsWith(".xlsx") ||
+      name.endsWith(".xls")
+    );
+  };
+
+  const handleImportExcel = async (file) => {
+    if (!file) return;
+    if (!isExcelFile(file)) {
+      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
+      return;
+    }
+
+    try {
+      await importSocialExcel(file);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to import social items"
+      );
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -243,6 +278,23 @@ const SocialsData = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            disabled={!id}
+            beforeUpload={(file) => {
+              handleImportExcel(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              disabled={!id}
+              className="flex items-center"
+            >
+              Import Excel
+            </Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}

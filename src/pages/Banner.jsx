@@ -125,6 +125,11 @@ const Banner = () => {
     toast.success("Data refreshed successfully");
   };
 
+  const handlePaginationChange = (nextPage, nextSize) => {
+    if (nextSize !== perPage) setPerPage(nextSize);
+    if (nextPage !== page) setPage(nextPage);
+  };
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -219,10 +224,8 @@ const Banner = () => {
                 total={total}
                 showSizeChanger
                 pageSizeOptions={["5", "10", "20", "50"]}
-                onChange={(nextPage, nextSize) => {
-                  if (nextSize !== perPage) setPerPage(nextSize);
-                  if (nextPage !== page) setPage(nextPage);
-                }}
+                onChange={handlePaginationChange}
+                onShowSizeChange={handlePaginationChange}
               />
             </div>
           )}

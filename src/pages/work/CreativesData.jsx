@@ -44,6 +44,7 @@ const CreativesData = () => {
     create,
     update,
     remove,
+    importExcel: importCreativeExcel,
   } = useCreativeItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -76,6 +77,39 @@ const CreativesData = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, page, perPage, lang]);
+
+  const excelMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+  ];
+
+  const isExcelFile = (file) => {
+    if (!file) return false;
+    const name = file.name?.toLowerCase() || "";
+    return (
+      excelMimeTypes.includes(file.type) ||
+      name.endsWith(".xlsx") ||
+      name.endsWith(".xls")
+    );
+  };
+
+  const handleImportExcel = async (file) => {
+    if (!file) return;
+    if (!isExcelFile(file)) {
+      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
+      return;
+    }
+
+    try {
+      await importCreativeExcel(file);
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to import creative items"
+      );
+    }
+  };
 
   const handleAdd = async () => {
     try {
@@ -243,6 +277,23 @@ const CreativesData = () => {
               }}
             />
           </div>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            disabled={!id}
+            beforeUpload={(file) => {
+              handleImportExcel(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              disabled={!id}
+              className="flex items-center"
+            >
+              Import Excel
+            </Button>
+          </Upload>
 
           <Button
             type="primary"
@@ -353,7 +404,7 @@ const CreativesData = () => {
                       {/* Title */}
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-base text-gray-900 line-clamp-2 break-words mb-1">
-                         {creative.title}
+                          {creative.title}
                         </h3>
                       </div>
                     </div>
@@ -743,7 +794,7 @@ const CreativesData = () => {
             )}
 
             {/* Brand Images Section */}
-            { console.log(previewModal)}
+            {console.log(previewModal)}
 
             {(previewModal.data.brand_image_1 ||
               previewModal.data.brand_image_2 ||
@@ -827,8 +878,7 @@ const CreativesData = () => {
               !previewModal.data.brand_image_1 &&
               !previewModal.data.brand_image_2 &&
               !previewModal.data.brand_image_3 &&
-              (!previewModal.data.media ||
-                previewModal.media.length === 0) && (
+              (!previewModal.data.media || previewModal.media.length === 0) && (
                 <div className="py-8">
                   <Empty description={<span>No media to preview</span>} />
                 </div>

@@ -5,6 +5,7 @@ import {
   createEventItem,
   updateEventItem,
   deleteEventItem,
+  importExcelfile,
 } from "../../apis/work/eventItems.js";
 
 export const useEventItemsStore = create((set, get) => ({
@@ -102,6 +103,30 @@ export const useEventItemsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete event item"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importExcel: async (file) => {
+    const workId = get().workId;
+    if (!workId) {
+      toast.error("Select a work before importing.");
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    try {
+      const result = await importExcelfile(workId, file);
+      await get().fetchList();
+      toast.success("Event items imported successfully");
+      return result;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import event items"
       );
       throw error;
     } finally {

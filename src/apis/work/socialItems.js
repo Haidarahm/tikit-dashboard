@@ -98,6 +98,18 @@ export async function updateSocial(id, payload) {
   return data;
 }
 
+export async function importExcelfile(id, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { data } = await apiClient.post(
+    `/work-socials/${id}/import`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return data;
+}
+
 export async function deleteSocial(id) {
   const { data } = await apiClient.delete(`/work-socials/${id}/delete`);
   return data;
