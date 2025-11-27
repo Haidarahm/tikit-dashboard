@@ -62,13 +62,30 @@ export async function updateSubService(id, payload) {
     formData.append("media", payload.media);
   }
 
-  const { data } = await apiClient.post(`/services/${id}/cases/update`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await apiClient.post(
+    `/services/${id}/cases/update`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 }
 
 export async function deleteSubService(id) {
   const { data } = await apiClient.delete(`/cases/delete/${id}`);
+  return data;
+}
+
+export async function importSubServices(subId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await apiClient.post(
+    `/services/${subId}/cases/import`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data;
 }

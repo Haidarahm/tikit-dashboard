@@ -53,3 +53,12 @@ export async function deleteNewsCard(id) {
   const { data } = await apiClient.delete(`/news/${id}/delete`);
   return data;
 }
+
+export async function importNewsExcel(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await apiClient.post("/news/import", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}

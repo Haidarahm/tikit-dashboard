@@ -40,6 +40,7 @@ function News() {
     create,
     update,
     remove,
+    importFromExcel,
   } = useNewsStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -49,6 +50,7 @@ function News() {
   const [createImage, setCreateImage] = useState([]);
   const [editImage, setEditImage] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     fetchList();
@@ -125,6 +127,22 @@ function News() {
         toast.error(error.message);
       }
     }
+  };
+
+  const handleImportExcel = async (file) => {
+    setIsImporting(true);
+    try {
+      await importFromExcel(file);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        toast.error(error.message);
+      }
+    } finally {
+      setIsImporting(false);
+    }
+    return false;
   };
 
   const columns = useMemo(
@@ -227,6 +245,19 @@ function News() {
           <Button icon={<ReloadOutlined />} onClick={() => fetchList()}>
             Refresh
           </Button>
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            beforeUpload={handleImportExcel}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              loading={isImporting}
+              disabled={isImporting}
+            >
+              Import Excel
+            </Button>
+          </Upload>
           <Button
             type="primary"
             icon={<PlusOutlined />}

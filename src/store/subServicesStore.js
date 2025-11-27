@@ -5,6 +5,7 @@ import {
   addSubService,
   updateSubService,
   deleteSubService,
+  importSubServices,
 } from "../apis/subServices.js";
 
 export const useSubServicesStore = create((set, get) => ({
@@ -44,7 +45,6 @@ export const useSubServicesStore = create((set, get) => ({
       set({ items, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
-    
     } finally {
       set({ isLoading: false });
     }
@@ -100,6 +100,28 @@ export const useSubServicesStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete sub service"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importFromExcel: async (file) => {
+    const { subId } = get();
+    if (!subId) {
+      toast.error("No service selected");
+      return;
+    }
+    set({ isLoading: true, error: null });
+    try {
+      await importSubServices(subId, file);
+      await get().fetchList();
+      toast.success("Sub services imported successfully");
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import sub services"
       );
       throw error;
     } finally {

@@ -12,6 +12,7 @@ import {
   Space,
   Popconfirm,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useServicesStore } from "../store/servicesStore.js";
 import { useSubServicesStore } from "../store/subServicesStore.js";
@@ -46,6 +47,7 @@ function SubServices() {
     create,
     update,
     remove,
+    importFromExcel,
   } = useSubServicesStore();
 
   const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -62,6 +64,7 @@ function SubServices() {
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editVideoFileList, setEditVideoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   // Fetch all services titles (increase per page temporarily)
   useEffect(() => {
@@ -78,6 +81,26 @@ function SubServices() {
       fetchList();
     }
   }, [selectedServiceId, page, perPage, lang]);
+
+  const handleImportExcel = async (file) => {
+    if (!selectedServiceId) {
+      toast.error("Select a service before importing");
+      return false;
+    }
+    setIsImporting(true);
+    try {
+      await importFromExcel(file);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error?.message) {
+        toast.error(error.message);
+      }
+    } finally {
+      setIsImporting(false);
+    }
+    return false;
+  };
 
   const columns = useMemo(
     () => [
@@ -198,6 +221,20 @@ function SubServices() {
               setSelectedServiceId(null);
             }}
           />
+          <Upload
+            accept=".xlsx,.xls"
+            showUploadList={false}
+            beforeUpload={handleImportExcel}
+            disabled={!selectedServiceId || isImporting}
+          >
+            <Button
+              icon={<UploadOutlined />}
+              disabled={!selectedServiceId || isImporting}
+              loading={isImporting}
+            >
+              Import Excel
+            </Button>
+          </Upload>
           <Button
             type="primary"
             disabled={!selectedServiceId}

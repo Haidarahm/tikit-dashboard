@@ -5,6 +5,7 @@ import {
   addNewsCard,
   updateNewsCard,
   deleteNewsCard,
+  importNewsExcel,
 } from "../apis/news.js";
 
 export const useNewsStore = create((set, get) => ({
@@ -110,6 +111,23 @@ export const useNewsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete news card"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importFromExcel: async (file) => {
+    set({ isLoading: true, error: null });
+    try {
+      await importNewsExcel(file);
+      await get().fetchList();
+      toast.success("News imported successfully");
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import news from Excel"
       );
       throw error;
     } finally {
