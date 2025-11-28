@@ -13,6 +13,7 @@ import {
   PlaySquareOutlined,
   TeamOutlined,
   ReadOutlined,
+  FundProjectionScreenOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -31,6 +32,7 @@ function DashboardLayout() {
     if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
     if (path.startsWith("/team")) return ["team"];
+    if (path.startsWith("/showcase-projects")) return ["showcase-projects"];
     if (path.startsWith("/news")) return ["news"];
     return [];
   }, [location.pathname]);
@@ -94,6 +96,12 @@ function DashboardLayout() {
               icon: <BarcodeOutlined />,
               label: "Sub Services",
               onClick: () => navigate("/services/sub"),
+            },
+            {
+              key: "showcase-projects",
+              icon: <FundProjectionScreenOutlined />,
+              label: "Showcase Projects",
+              onClick: () => navigate("/showcase-projects"),
             },
             {
               key: "works",
