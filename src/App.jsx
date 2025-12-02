@@ -18,6 +18,7 @@ import EventsData from "./pages/work/EventsData.jsx";
 import News from "./pages/News.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
 import ShowcaseProjects from "./pages/ShowcaseProjects.jsx";
+import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -46,6 +47,10 @@ function App() {
             <Route path="/works/event/:id" element={<EventsData />} />
             <Route path="/influencer/sections" element={<Sections />} />
             <Route path="/influencer/data/:id" element={<InfluencersData />} />
+            <Route
+              path="/registered-influencers"
+              element={<RegisteredInfluencers />}
+            />
             <Route path="/banner" element={<Banner />} />
             <Route path="/about-banners" element={<AboutBanners />} />
           </Route>

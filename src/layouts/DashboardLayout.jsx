@@ -14,6 +14,7 @@ import {
   TeamOutlined,
   ReadOutlined,
   FundProjectionScreenOutlined,
+  ContactsOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -34,6 +35,8 @@ function DashboardLayout() {
     if (path.startsWith("/team")) return ["team"];
     if (path.startsWith("/showcase-projects")) return ["showcase-projects"];
     if (path.startsWith("/news")) return ["news"];
+    if (path.startsWith("/registered-influencers"))
+      return ["registered-influencers"];
     return [];
   }, [location.pathname]);
 
@@ -114,6 +117,12 @@ function DashboardLayout() {
               icon: <UnorderedListOutlined />,
               label: "Influencer Sections",
               onClick: () => navigate("/influencer/sections"),
+            },
+            {
+              key: "registered-influencers",
+              icon: <ContactsOutlined />,
+              label: "Registered Influencers",
+              onClick: () => navigate("/registered-influencers"),
             },
             {
               key: "banner",
