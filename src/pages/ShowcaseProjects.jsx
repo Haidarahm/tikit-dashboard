@@ -203,23 +203,23 @@ const ShowcaseProjects = () => {
       },
       {
         title: "Images",
-        dataIndex: "media",
         key: "media",
-        render: (value, record) => {
-          const imgs =
-            (Array.isArray(value) && value.length > 0
-              ? value
-              : Array.isArray(record?.images) && record.images.length > 0
-              ? record.images
-              : Array.isArray(record?.media)
-              ? record.media
-              : []) || [];
+        render: (_, record) => {
+          const imgs = Array.isArray(record?.media) 
+            ? record.media 
+            : Array.isArray(record?.images) 
+            ? record.images 
+            : [];
 
-          return imgs.length > 0 ? (
+          if (!imgs || imgs.length === 0) {
+            return "-";
+          }
+
+          return (
             <Space size={[8, 8]} wrap>
-              {imgs.map((img) => (
+              {imgs.map((img, index) => (
                 <Image
-                  key={img}
+                  key={img || index}
                   src={img}
                   width={48}
                   height={48}
@@ -228,8 +228,6 @@ const ShowcaseProjects = () => {
                 />
               ))}
             </Space>
-          ) : (
-            "-"
           );
         },
       },
