@@ -39,6 +39,14 @@ const appendProjectPayload = (formData, payload = {}) => {
       }
     });
   }
+
+  if (Array.isArray(payload?.thumbnails)) {
+    payload.thumbnails.forEach((file, index) => {
+      if (file) {
+        formData.append(`thumbnails[${index}]`, file);
+      }
+    });
+  }
 };
 
 export async function getShowcaseProjects({ page, per_page, lang } = {}) {
@@ -64,6 +72,21 @@ export async function updateProject(id, payload) {
   appendProjectPayload(formData, payload);
   const { data } = await apiClient.post(
     `/showcase-projects/update/${id}`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+  return data;
+}
+
+export async function importShowcaseProjects(file) {
+  const formData = new FormData();
+  if (file) {
+    formData.append("file", file);
+  }
+  const { data } = await apiClient.post(
+    "/showcase-projects/import",
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },

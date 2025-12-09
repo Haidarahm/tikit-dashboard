@@ -11,6 +11,7 @@ import {
   Upload,
   Select,
   Popconfirm,
+  Typography,
 } from "antd";
 import {
   PlusOutlined,
@@ -19,6 +20,8 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useShowcaseProjectsStore } from "../store/showcaseProjectsStore.js";
+
+const { Text } = Typography;
 
 const LANG_OPTIONS = [
   { label: "English", value: "en" },
@@ -41,6 +44,7 @@ const ShowcaseProjects = () => {
     create,
     update,
     remove,
+    importExcel,
   } = useShowcaseProjectsStore();
 
   const [createForm] = Form.useForm();
@@ -50,8 +54,15 @@ const ShowcaseProjects = () => {
   const [editingId, setEditingId] = useState(null);
   const [logoFileList, setLogoFileList] = useState([]);
   const [imagesFileList, setImagesFileList] = useState([]);
+  const [videosFileList, setVideosFileList] = useState([]);
   const [editLogoFileList, setEditLogoFileList] = useState([]);
   const [editImagesFileList, setEditImagesFileList] = useState([]);
+  const [editVideosFileList, setEditVideosFileList] = useState([]);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewingProject, setViewingProject] = useState(null);
+  const [expandedBriefs, setExpandedBriefs] = useState(new Set());
+  const [expandedStrategies, setExpandedStrategies] = useState(new Set());
+  const [importFileList, setImportFileList] = useState([]);
 
   useEffect(() => {
     fetchList();
@@ -61,16 +72,32 @@ const ShowcaseProjects = () => {
     createForm.resetFields();
     setLogoFileList([]);
     setImagesFileList([]);
+    setVideosFileList([]);
   };
 
   const resetEditModal = () => {
     editForm.resetFields();
     setEditLogoFileList([]);
     setEditImagesFileList([]);
+    setEditVideosFileList([]);
     setEditingId(null);
   };
 
-  const buildPayload = (values, logoList, imagesList) => {
+  const handleImport = async () => {
+    const file = importFileList[0]?.originFileObj;
+    if (!file) {
+      toast.error("Please select a file to import");
+      return;
+    }
+    try {
+      await importExcel(file);
+      setImportFileList([]);
+    } catch (error) {
+      // toast already handled in store
+    }
+  };
+
+  const buildPayload = (values, logoList, imagesList, videosList) => {
     const payload = { ...values };
     if (logoList[0]?.originFileObj) {
       payload.logo = logoList[0].originFileObj;
@@ -81,13 +108,19 @@ const ShowcaseProjects = () => {
     if (imageFiles.length > 0) {
       payload.images = imageFiles;
     }
+    const videoFiles = videosList
+      .map((file) => file.originFileObj)
+      .filter(Boolean);
+    if (videoFiles.length > 0) {
+      payload.thumbnails = videoFiles;
+    }
     return payload;
   };
 
   const handleCreate = async () => {
     try {
       const values = await createForm.validateFields();
-      const payload = buildPayload(values, logoFileList, imagesFileList);
+      const payload = buildPayload(values, logoFileList, imagesFileList, videosFileList);
       await create(payload);
       setIsCreateOpen(false);
       resetCreateModal();
@@ -131,7 +164,8 @@ const ShowcaseProjects = () => {
       const payload = buildPayload(
         values,
         editLogoFileList,
-        editImagesFileList
+        editImagesFileList,
+        editVideosFileList
       );
       await update(editingId, payload);
       setIsEditOpen(false);
@@ -157,13 +191,97 @@ const ShowcaseProjects = () => {
         title: "Brief",
         dataIndex: "brief_en",
         key: "brief_en",
-        render: (value, record) => value || record.brief || "-",
+        width: 300,
+        render: (value, record) => {
+          const text = value || record.brief || "-";
+          const isExpanded = expandedBriefs.has(record.id);
+          
+          if (text === "-" || !text) {
+            return <Text>{text}</Text>;
+          }
+          
+          return (
+            <div>
+              <div
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: isExpanded ? "unset" : 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  wordBreak: "break-word",
+                  lineHeight: "1.5",
+                  maxHeight: isExpanded ? "none" : "3em",
+                }}
+              >
+                <Text>{text}</Text>
+              </div>
+              <Button
+                type="link"
+                size="small"
+                onClick={() => {
+                  const newSet = new Set(expandedBriefs);
+                  if (isExpanded) {
+                    newSet.delete(record.id);
+                  } else {
+                    newSet.add(record.id);
+                  }
+                  setExpandedBriefs(newSet);
+                }}
+                style={{ padding: 0, marginTop: 4, height: "auto" }}
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </Button>
+            </div>
+          );
+        },
       },
       {
         title: "Strategy",
         dataIndex: "strategy_en",
         key: "strategy_en",
-        render: (value, record) => value || record.strategy || "-",
+        width: 300,
+        render: (value, record) => {
+          const text = value || record.strategy || "-";
+          const isExpanded = expandedStrategies.has(record.id);
+          
+          if (text === "-" || !text) {
+            return <Text>{text}</Text>;
+          }
+          
+          return (
+            <div>
+              <div
+                style={{
+                  display: "-webkit-box",
+                  WebkitLineClamp: isExpanded ? "unset" : 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  wordBreak: "break-word",
+                  lineHeight: "1.5",
+                  maxHeight: isExpanded ? "none" : "3em",
+                }}
+              >
+                <Text>{text}</Text>
+              </div>
+              <Button
+                type="link"
+                size="small"
+                onClick={() => {
+                  const newSet = new Set(expandedStrategies);
+                  if (isExpanded) {
+                    newSet.delete(record.id);
+                  } else {
+                    newSet.add(record.id);
+                  }
+                  setExpandedStrategies(newSet);
+                }}
+                style={{ padding: 0, marginTop: 4, height: "auto" }}
+              >
+                {isExpanded ? "Read less" : "Read more"}
+              </Button>
+            </div>
+          );
+        },
       },
       {
         title: "Reach",
@@ -184,59 +302,15 @@ const ShowcaseProjects = () => {
         width: 160,
       },
       {
-        title: "Logo",
-        dataIndex: "logo",
-        key: "logo",
-        width: 120,
-        render: (value) =>
-          value ? (
-            <Image
-              src={value}
-              width={48}
-              height={48}
-              style={{ objectFit: "cover" }}
-              preview={{ mask: "Preview" }}
-            />
-          ) : (
-            "-"
-          ),
-      },
-      {
-        title: "Images",
-        key: "media",
-        render: (_, record) => {
-          const imgs = Array.isArray(record?.media) 
-            ? record.media 
-            : Array.isArray(record?.images) 
-            ? record.images 
-            : [];
-
-          if (!imgs || imgs.length === 0) {
-            return "-";
-          }
-
-          return (
-            <Space size={[8, 8]} wrap>
-              {imgs.map((img, index) => (
-                <Image
-                  key={img || index}
-                  src={img}
-                  width={48}
-                  height={48}
-                  style={{ objectFit: "cover" }}
-                  preview={{ mask: "Preview" }}
-                />
-              ))}
-            </Space>
-          );
-        },
-      },
-      {
         title: "Actions",
         key: "actions",
         width: 220,
         render: (record) => (
           <Space>
+            <Button onClick={() => {
+              setViewingProject(record);
+              setViewModalOpen(true);
+            }}>View</Button>
             <Button onClick={() => handleEditOpen(record)}>Update</Button>
             <Popconfirm
               title="Delete this project?"
@@ -260,7 +334,7 @@ const ShowcaseProjects = () => {
         ),
       },
     ],
-    [remove]
+    [remove, expandedBriefs, expandedStrategies]
   );
 
   return (
@@ -284,6 +358,24 @@ const ShowcaseProjects = () => {
           />
           <Button icon={<ReloadOutlined />} onClick={() => fetchList()}>
             Refresh
+          </Button>
+          <Upload
+            fileList={importFileList}
+            beforeUpload={() => false}
+            maxCount={1}
+            accept=".xlsx,.xls"
+            onChange={({ fileList }) => setImportFileList(fileList)}
+            showUploadList={{ showRemoveIcon: true }}
+          >
+            <Button icon={<UploadOutlined />}>Select Excel</Button>
+          </Upload>
+          <Button
+            type="default"
+            onClick={handleImport}
+            disabled={importFileList.length === 0}
+            loading={isLoading}
+          >
+            Import
           </Button>
           <Button
             type="primary"
@@ -333,6 +425,8 @@ const ShowcaseProjects = () => {
           onLogoChange={setLogoFileList}
           imagesFileList={imagesFileList}
           onImagesChange={setImagesFileList}
+          videosFileList={videosFileList}
+          onVideosChange={setVideosFileList}
         />
       </Modal>
 
@@ -354,8 +448,166 @@ const ShowcaseProjects = () => {
           onLogoChange={setEditLogoFileList}
           imagesFileList={editImagesFileList}
           onImagesChange={setEditImagesFileList}
+          videosFileList={editVideosFileList}
+          onVideosChange={setEditVideosFileList}
           isEdit
         />
+      </Modal>
+
+      <Modal
+        title="Project Details"
+        open={viewModalOpen}
+        onCancel={() => {
+          setViewModalOpen(false);
+          setViewingProject(null);
+        }}
+        footer={[
+          <Button key="close" onClick={() => {
+            setViewModalOpen(false);
+            setViewingProject(null);
+          }}>
+            Close
+          </Button>
+        ]}
+        width={900}
+      >
+        {viewingProject && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <strong>ID:</strong> {viewingProject.id}
+              </div>
+              <div>
+                <strong>Title:</strong> {viewingProject.title_en || viewingProject.title || "-"}
+              </div>
+              <div>
+                <strong>Title (AR):</strong> {viewingProject.title_ar || "-"}
+              </div>
+              <div>
+                <strong>Title (FR):</strong> {viewingProject.title_fr || "-"}
+              </div>
+              <div>
+                <strong>Subtitle:</strong> {viewingProject.subtitle_en || viewingProject.subtitle || "-"}
+              </div>
+              <div>
+                <strong>Subtitle (AR):</strong> {viewingProject.subtitle_ar || "-"}
+              </div>
+              <div>
+                <strong>Subtitle (FR):</strong> {viewingProject.subtitle_fr || "-"}
+              </div>
+              <div>
+                <strong>Reach:</strong> {viewingProject.reach || "-"}
+              </div>
+              <div>
+                <strong>Views:</strong> {viewingProject.views || "-"}
+              </div>
+              <div>
+                <strong>Engagement Rate:</strong> {viewingProject.engagement_rate || "-"}%
+              </div>
+            </div>
+            
+            <div>
+              <strong>Objective (EN):</strong>
+              <p className="mt-1">{viewingProject.objective_en || viewingProject.objective || "-"}</p>
+            </div>
+            <div>
+              <strong>Objective (AR):</strong>
+              <p className="mt-1">{viewingProject.objective_ar || "-"}</p>
+            </div>
+            <div>
+              <strong>Objective (FR):</strong>
+              <p className="mt-1">{viewingProject.objective_fr || "-"}</p>
+            </div>
+            
+            <div>
+              <strong>Brief (EN):</strong>
+              <p className="mt-1">{viewingProject.brief_en || viewingProject.brief || "-"}</p>
+            </div>
+            <div>
+              <strong>Brief (AR):</strong>
+              <p className="mt-1">{viewingProject.brief_ar || "-"}</p>
+            </div>
+            <div>
+              <strong>Brief (FR):</strong>
+              <p className="mt-1">{viewingProject.brief_fr || "-"}</p>
+            </div>
+            
+            <div>
+              <strong>Strategy (EN):</strong>
+              <p className="mt-1">{viewingProject.strategy_en || viewingProject.strategy || "-"}</p>
+            </div>
+            <div>
+              <strong>Strategy (AR):</strong>
+              <p className="mt-1">{viewingProject.strategy_ar || "-"}</p>
+            </div>
+            <div>
+              <strong>Strategy (FR):</strong>
+              <p className="mt-1">{viewingProject.strategy_fr || "-"}</p>
+            </div>
+
+            {viewingProject.logo && (
+              <div>
+                <strong>Logo:</strong>
+                <div className="mt-2">
+                  <Image
+                    src={viewingProject.logo}
+                    width={100}
+                    height={100}
+                    style={{ objectFit: "cover" }}
+                    preview={{ mask: "Preview" }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(viewingProject.images) && viewingProject.images.length > 0 && (
+              <div>
+                <strong>Images:</strong>
+                <div className="mt-2">
+                  <Space size={[8, 8]} wrap>
+                    {viewingProject.images.map((img, index) => (
+                      <Image
+                        key={img || index}
+                        src={img}
+                        width={100}
+                        height={100}
+                        style={{ objectFit: "cover" }}
+                        preview={{ mask: "Preview" }}
+                      />
+                    ))}
+                  </Space>
+                </div>
+              </div>
+            )}
+
+            {Array.isArray(viewingProject.videos) && viewingProject.videos.length > 0 && (
+              <div>
+                <strong>Videos:</strong>
+                <div className="mt-2">
+                  <Space size={[8, 8]} wrap direction="vertical">
+                    {viewingProject.videos.map((video, index) => (
+                      <video
+                        key={video || index}
+                        src={video}
+                        controls
+                        style={{ maxWidth: "100%", maxHeight: "300px" }}
+                      />
+                    ))}
+                  </Space>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <strong>Created At:</strong> {new Date(viewingProject.created_at).toLocaleString()}
+              </div>
+              <div>
+                <strong>Updated At:</strong> {new Date(viewingProject.updated_at).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );
@@ -367,6 +619,8 @@ const ProjectForm = ({
   onLogoChange,
   imagesFileList,
   onImagesChange,
+  videosFileList,
+  onVideosChange,
   isEdit = false,
 }) => {
   return (
@@ -529,6 +783,22 @@ const ProjectForm = ({
             <UploadOutlined />
             <div style={{ marginTop: 8 }}>Upload Images</div>
           </div>
+        </Upload>
+      </Form.Item>
+
+      <Form.Item
+        label="Videos"
+        tooltip="Upload MP4 video files"
+      >
+        <Upload
+          fileList={videosFileList}
+          beforeUpload={() => false}
+          listType="text"
+          accept="video/mp4"
+          multiple
+          onChange={({ fileList }) => onVideosChange(fileList)}
+        >
+          <Button icon={<UploadOutlined />}>Upload Videos (MP4)</Button>
         </Upload>
       </Form.Item>
     </Form>

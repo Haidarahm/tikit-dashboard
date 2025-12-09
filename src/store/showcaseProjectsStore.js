@@ -5,6 +5,7 @@ import {
   addProject,
   updateProject,
   deleteProject,
+  importShowcaseProjects,
 } from "../apis/showcaseProjects.js";
 
 export const useShowcaseProjectsStore = create((set, get) => ({
@@ -104,6 +105,24 @@ export const useShowcaseProjectsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete showcase project"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importExcel: async (file) => {
+    set({ isLoading: true, error: null });
+    try {
+      const resp = await importShowcaseProjects(file);
+      await get().fetchList();
+      toast.success("Showcase projects imported successfully");
+      return resp;
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import showcase projects"
       );
       throw error;
     } finally {
