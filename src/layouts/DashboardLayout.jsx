@@ -15,6 +15,7 @@ import {
   ReadOutlined,
   FundProjectionScreenOutlined,
   ContactsOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -37,6 +38,8 @@ function DashboardLayout() {
     if (path.startsWith("/news")) return ["news"];
     if (path.startsWith("/registered-influencers"))
       return ["registered-influencers"];
+    if (path.startsWith("/subscribed-users"))
+      return ["subscribed-users"];
     return [];
   }, [location.pathname]);
 
@@ -123,6 +126,12 @@ function DashboardLayout() {
               icon: <ContactsOutlined />,
               label: "Registered Influencers",
               onClick: () => navigate("/registered-influencers"),
+            },
+            {
+              key: "subscribed-users",
+              icon: <MailOutlined />,
+              label: "Subscribed Users",
+              onClick: () => navigate("/subscribed-users"),
             },
             {
               key: "banner",
