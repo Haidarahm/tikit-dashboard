@@ -1,6 +1,6 @@
 import { Layout, Menu, Dropdown, Avatar } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.js";
 import {
   UserOutlined,
@@ -24,6 +24,7 @@ function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const [openKeys, setOpenKeys] = useState([]);
 
   const selectedKeys = useMemo(() => {
     const path = location.pathname;
@@ -41,6 +42,19 @@ function DashboardLayout() {
     if (path.startsWith("/subscribed-users"))
       return ["subscribed-users"];
     return [];
+  }, [location.pathname]);
+
+  // Auto-open submenus based on current path
+  useEffect(() => {
+    const path = location.pathname;
+    const newOpenKeys = [];
+    if (path.startsWith("/registered-influencers") || path.startsWith("/subscribed-users")) {
+      newOpenKeys.push("users-submenu");
+    }
+    if (path.startsWith("/banner") || path.startsWith("/about-banners")) {
+      newOpenKeys.push("banners-submenu");
+    }
+    setOpenKeys(newOpenKeys);
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -77,6 +91,8 @@ function DashboardLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={selectedKeys}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
           className="border-r-0"
           items={[
             {
@@ -122,28 +138,42 @@ function DashboardLayout() {
               onClick: () => navigate("/influencer/sections"),
             },
             {
-              key: "registered-influencers",
+              key: "users-submenu",
               icon: <ContactsOutlined />,
-              label: "Registered Influencers",
-              onClick: () => navigate("/registered-influencers"),
+              label: "Users",
+              children: [
+                {
+                  key: "registered-influencers",
+                  icon: <ContactsOutlined />,
+                  label: "Registered Influencers",
+                  onClick: () => navigate("/registered-influencers"),
+                },
+                {
+                  key: "subscribed-users",
+                  icon: <MailOutlined />,
+                  label: "Subscribed Users",
+                  onClick: () => navigate("/subscribed-users"),
+                },
+              ],
             },
             {
-              key: "subscribed-users",
-              icon: <MailOutlined />,
-              label: "Subscribed Users",
-              onClick: () => navigate("/subscribed-users"),
-            },
-            {
-              key: "banner",
+              key: "banners-submenu",
               icon: <VideoCameraOutlined />,
-              label: "Banner Videos",
-              onClick: () => navigate("/banner"),
-            },
-            {
-              key: "about-banners",
-              icon: <PlaySquareOutlined />,
-              label: "About Us Banners",
-              onClick: () => navigate("/about-banners"),
+              label: "Banners",
+              children: [
+                {
+                  key: "banner",
+                  icon: <VideoCameraOutlined />,
+                  label: "Banner Videos",
+                  onClick: () => navigate("/banner"),
+                },
+                {
+                  key: "about-banners",
+                  icon: <PlaySquareOutlined />,
+                  label: "About Us Banners",
+                  onClick: () => navigate("/about-banners"),
+                },
+              ],
             },
           ]}
         />
