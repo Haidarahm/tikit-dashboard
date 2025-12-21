@@ -210,10 +210,13 @@ function News() {
       {
         title: "Actions",
         key: "actions",
-        width: 240,
+        width: 180,
         render: (record) => (
           <Space>
-            <Button onClick={() => handleEditOpen(record)}>Update</Button>
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => handleEditOpen(record)}
+            />
             <Button
               icon={<DatabaseOutlined />}
               onClick={() => {
@@ -221,9 +224,7 @@ function News() {
                 setIsDetailsModalOpen(true);
                 fetchNewsDetails(record.id, { lang });
               }}
-            >
-              Data
-            </Button>
+            />
             <Popconfirm
               title="Delete this news card?"
               okText="Yes"
@@ -241,7 +242,7 @@ function News() {
                 }
               }}
             >
-              <Button danger>Delete</Button>
+              <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
           </Space>
         ),
