@@ -62,3 +62,59 @@ export async function importNewsExcel(file) {
   });
   return data;
 }
+
+const appendNewsDetailsFields = (formData, payload = {}) => {
+  const fields = [
+    "title_en",
+    "title_ar",
+    "title_fr",
+    "subtitle_en",
+    "subtitle_ar",
+    "subtitle_fr",
+    "description_en",
+    "description_ar",
+    "description_fr",
+  ];
+  fields.forEach((field) => {
+    if (payload[field] != null) {
+      formData.append(field, payload[field]);
+    }
+  });
+  if (payload?.images && Array.isArray(payload.images)) {
+    payload.images.forEach((image, index) => {
+      if (image != null) {
+        formData.append(`images[${index}]`, image);
+      }
+    });
+  }
+};
+
+export async function addNewsDetails(id, payload) {
+  const formData = new FormData();
+  appendNewsDetailsFields(formData, payload);
+  const { data } = await apiClient.post(`/news-details/${id}/add`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function updateNewsDetails(id, payload) {
+  const formData = new FormData();
+  appendNewsDetailsFields(formData, payload);
+  const { data } = await apiClient.post(`/news-details/update/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function getAllNewsDetails(id, { lang } = {}) {
+  const params = {};
+  if (lang) params.lang = lang;
+  const { data } = await apiClient.get(`/news-details/${id}/get`, { params });
+  return data;
+}
+
+export async function deleteNewsDetails(id) {
+  const { data } = await apiClient.delete(`/news-details/delete/${id}`);
+  return data;
+}
