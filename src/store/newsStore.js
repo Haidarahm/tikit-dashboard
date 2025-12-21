@@ -195,14 +195,13 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  updateNewsDetails: async (id, payload) => {
+  updateNewsDetails: async (id, payload, newsId = null) => {
     set({ isLoading: true, error: null });
     try {
       const updated = await updateNewsDetailsAPI(id, payload);
       set({ currentDetails: updated?.data || updated });
-      const { current } = get();
-      if (current?.id) {
-        await get().fetchNewsDetails(current.id);
+      if (newsId) {
+        await get().fetchNewsDetails(newsId);
       }
       toast.success("News details updated successfully");
       return updated;
@@ -217,13 +216,12 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  removeNewsDetails: async (id) => {
+  removeNewsDetails: async (id, newsId = null) => {
     set({ isLoading: true, error: null });
     try {
       await deleteNewsDetailsAPI(id);
-      const { current } = get();
-      if (current?.id) {
-        await get().fetchNewsDetails(current.id);
+      if (newsId) {
+        await get().fetchNewsDetails(newsId);
       }
       toast.success("News details deleted successfully");
     } catch (error) {

@@ -15,6 +15,9 @@ import {
   ReloadOutlined,
   UploadOutlined,
   PlusOutlined,
+  DatabaseOutlined,
+  EditOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useNewsStore } from "../store/newsStore.js";
@@ -41,6 +44,11 @@ function News() {
     update,
     remove,
     importFromExcel,
+    detailsItems,
+    fetchNewsDetails,
+    createNewsDetails,
+    updateNewsDetails,
+    removeNewsDetails,
   } = useNewsStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -51,6 +59,15 @@ function News() {
   const [editImage, setEditImage] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedNewsId, setSelectedNewsId] = useState(null);
+  const [isDetailsCreateOpen, setIsDetailsCreateOpen] = useState(false);
+  const [isDetailsEditOpen, setIsDetailsEditOpen] = useState(false);
+  const [editingDetailsId, setEditingDetailsId] = useState(null);
+  const [detailsCreateForm] = Form.useForm();
+  const [detailsEditForm] = Form.useForm();
+  const [detailsCreateImages, setDetailsCreateImages] = useState([]);
+  const [detailsEditImages, setDetailsEditImages] = useState([]);
 
   useEffect(() => {
     fetchList();
@@ -193,10 +210,20 @@ function News() {
       {
         title: "Actions",
         key: "actions",
-        width: 180,
+        width: 240,
         render: (record) => (
           <Space>
             <Button onClick={() => handleEditOpen(record)}>Update</Button>
+            <Button
+              icon={<DatabaseOutlined />}
+              onClick={() => {
+                setSelectedNewsId(record.id);
+                setIsDetailsModalOpen(true);
+                fetchNewsDetails(record.id, { lang });
+              }}
+            >
+              Data
+            </Button>
             <Popconfirm
               title="Delete this news card?"
               okText="Yes"
@@ -442,6 +469,386 @@ function News() {
               onChange={({ fileList }) => setEditImage(fileList)}
             >
               {editImage.length === 0 && (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="News Details"
+        open={isDetailsModalOpen}
+        onCancel={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedNewsId(null);
+        }}
+        footer={null}
+        width={1200}
+      >
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                detailsCreateForm.resetFields();
+                setDetailsCreateImages([]);
+                setIsDetailsCreateOpen(true);
+              }}
+            >
+              Add News Details
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                if (selectedNewsId) {
+                  fetchNewsDetails(selectedNewsId, { lang });
+                }
+              }}
+            >
+              Refresh
+            </Button>
+          </div>
+
+          <Table
+            rowKey={(record) => record.id}
+            columns={[
+              {
+                title: "ID",
+                dataIndex: "id",
+                key: "id",
+                width: 80,
+              },
+              {
+                title: "Title",
+                dataIndex: "title",
+                key: "title",
+                ellipsis: true,
+              },
+              {
+                title: "Subtitle",
+                dataIndex: "subtitle",
+                key: "subtitle",
+                ellipsis: true,
+              },
+              {
+                title: "Description",
+                dataIndex: "description",
+                key: "description",
+                ellipsis: true,
+                render: (text) => text || "-",
+              },
+              {
+                title: "Images",
+                dataIndex: "images",
+                key: "images",
+                width: 200,
+                render: (images) => {
+                  if (!images || !Array.isArray(images) || images.length === 0) {
+                    return "-";
+                  }
+                  return (
+                    <div className="flex gap-2 flex-wrap">
+                      {images.slice(0, 3).map((img, idx) => (
+                        <Image
+                          key={idx}
+                          src={img}
+                          width={50}
+                          height={50}
+                          style={{ objectFit: "cover" }}
+                          preview={{ mask: "Preview" }}
+                        />
+                      ))}
+                      {images.length > 3 && (
+                        <span className="text-gray-500">+{images.length - 3}</span>
+                      )}
+                    </div>
+                  );
+                },
+              },
+              {
+                title: "Actions",
+                key: "actions",
+                width: 150,
+                render: (record) => (
+                  <Space>
+                    <Button
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => {
+                        setEditingDetailsId(record.id);
+                        detailsEditForm.setFieldsValue({
+                          title_en: record.title_en || record.title || "",
+                          title_ar: record.title_ar || record.title || "",
+                          title_fr: record.title_fr || record.title || "",
+                          subtitle_en: record.subtitle_en || record.subtitle || "",
+                          subtitle_ar: record.subtitle_ar || record.subtitle || "",
+                          subtitle_fr: record.subtitle_fr || record.subtitle || "",
+                          description_en: record.description_en || record.description || "",
+                          description_ar: record.description_ar || record.description || "",
+                          description_fr: record.description_fr || record.description || "",
+                        });
+                        if (record.images && Array.isArray(record.images)) {
+                          setDetailsEditImages(
+                            record.images.map((img) => ({
+                              uid: img,
+                              name: img.split("/").pop(),
+                              status: "done",
+                              url: img,
+                            }))
+                          );
+                        } else {
+                          setDetailsEditImages([]);
+                        }
+                        setIsDetailsEditOpen(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Popconfirm
+                      title="Delete this news detail?"
+                      okText="Yes"
+                      cancelText="No"
+                      onConfirm={async () => {
+                        try {
+                          await removeNewsDetails(record.id, selectedNewsId);
+                        } catch (error) {
+                          if (error?.response?.data?.message) {
+                            toast.error(error.response.data.message);
+                          } else if (error?.message) {
+                            toast.error(error.message);
+                          }
+                        }
+                      }}
+                    >
+                      <Button size="small" danger icon={<DeleteOutlined />}>
+                        Delete
+                      </Button>
+                    </Popconfirm>
+                  </Space>
+                ),
+              },
+            ]}
+            dataSource={detailsItems}
+            loading={isLoading}
+            pagination={false}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        title="Add News Details"
+        open={isDetailsCreateOpen}
+        onCancel={() => {
+          setIsDetailsCreateOpen(false);
+          detailsCreateForm.resetFields();
+          setDetailsCreateImages([]);
+        }}
+        onOk={async () => {
+          try {
+            const values = await detailsCreateForm.validateFields();
+            const payload = {
+              ...values,
+            };
+            if (detailsCreateImages.length > 0) {
+              payload.images = detailsCreateImages
+                .map((img) => img.originFileObj)
+                .filter(Boolean);
+            }
+            await createNewsDetails(selectedNewsId, payload);
+            setIsDetailsCreateOpen(false);
+            detailsCreateForm.resetFields();
+            setDetailsCreateImages([]);
+            if (selectedNewsId) {
+              await fetchNewsDetails(selectedNewsId, { lang });
+            }
+          } catch (error) {
+            if (error?.response?.data?.message) {
+              toast.error(error.response.data.message);
+            } else if (error?.message) {
+              toast.error(error.message);
+            }
+          }
+        }}
+        okText="Create"
+        confirmLoading={isLoading}
+      >
+        <Form form={detailsCreateForm} layout="vertical">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Form.Item
+              name="title_en"
+              label="Title (EN)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
+              <Input placeholder="Enter English title" />
+            </Form.Item>
+            <Form.Item
+              name="title_ar"
+              label="Title (AR)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item
+              name="title_fr"
+              label="Title (FR)"
+              rules={[{ required: true, message: "Title is required" }]}
+            >
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_en"
+              label="Subtitle (EN)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
+              <Input placeholder="Enter English subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_ar"
+              label="Subtitle (AR)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="subtitle_fr"
+              label="Subtitle (FR)"
+              rules={[{ required: true, message: "Subtitle is required" }]}
+            >
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+            <Form.Item
+              name="description_en"
+              label="Description (EN)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item
+              name="description_ar"
+              label="Description (AR)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item
+              name="description_fr"
+              label="Description (FR)"
+              rules={[{ required: true, message: "Description is required" }]}
+            >
+              <Input.TextArea rows={3} placeholder="Enter French description" />
+            </Form.Item>
+          </div>
+          <Form.Item label="Images">
+            <Upload
+              listType="picture-card"
+              fileList={detailsCreateImages}
+              beforeUpload={() => false}
+              accept="image/*"
+              onChange={({ fileList }) => setDetailsCreateImages(fileList)}
+            >
+              {detailsCreateImages.length < 10 && (
+                <div>
+                  <UploadOutlined />
+                  <div style={{ marginTop: 8 }}>Upload</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Update News Details"
+        open={isDetailsEditOpen}
+        onCancel={() => {
+          setIsDetailsEditOpen(false);
+          detailsEditForm.resetFields();
+          setDetailsEditImages([]);
+          setEditingDetailsId(null);
+        }}
+        onOk={async () => {
+          try {
+            const values = await detailsEditForm.validateFields();
+            const payload = Object.entries(values).reduce((acc, [key, value]) => {
+              if (value != null && value !== "") {
+                acc[key] = value;
+              }
+              return acc;
+            }, {});
+            if (detailsEditImages.length > 0) {
+              const newImages = detailsEditImages
+                .map((img) => img.originFileObj)
+                .filter(Boolean);
+              if (newImages.length > 0) {
+                payload.images = newImages;
+              }
+            }
+            await updateNewsDetails(editingDetailsId, payload, selectedNewsId);
+            setIsDetailsEditOpen(false);
+            detailsEditForm.resetFields();
+            setDetailsEditImages([]);
+            setEditingDetailsId(null);
+          } catch (error) {
+            if (error?.response?.data?.message) {
+              toast.error(error.response.data.message);
+            } else if (error?.message) {
+              toast.error(error.message);
+            }
+          }
+        }}
+        okText="Update"
+        confirmLoading={isLoading}
+      >
+        <Form form={detailsEditForm} layout="vertical">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Form.Item name="title_en" label="Title (EN)">
+              <Input placeholder="Enter English title" />
+            </Form.Item>
+            <Form.Item name="title_ar" label="Title (AR)">
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item name="title_fr" label="Title (FR)">
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+            <Form.Item name="subtitle_en" label="Subtitle (EN)">
+              <Input placeholder="Enter English subtitle" />
+            </Form.Item>
+            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+            <Form.Item name="description_en" label="Description (EN)">
+              <Input.TextArea
+                rows={3}
+                placeholder="Enter English description"
+              />
+            </Form.Item>
+            <Form.Item name="description_ar" label="Description (AR)">
+              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+            </Form.Item>
+            <Form.Item name="description_fr" label="Description (FR)">
+              <Input.TextArea rows={3} placeholder="Enter French description" />
+            </Form.Item>
+          </div>
+          <Form.Item label="Images">
+            <Upload
+              listType="picture-card"
+              fileList={detailsEditImages}
+              beforeUpload={() => false}
+              accept="image/*"
+              onChange={({ fileList }) => setDetailsEditImages(fileList)}
+            >
+              {detailsEditImages.length < 10 && (
                 <div>
                   <UploadOutlined />
                   <div style={{ marginTop: 8 }}>Upload</div>
