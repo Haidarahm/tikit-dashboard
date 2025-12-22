@@ -118,3 +118,12 @@ export async function deleteNewsDetails(id) {
   const { data } = await apiClient.delete(`/news-details/delete/${id}`);
   return data;
 }
+
+export async function importNewsDetailsExcel(id, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await apiClient.post(`/news-details/${id}/import`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}

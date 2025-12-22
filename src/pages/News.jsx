@@ -49,6 +49,7 @@ function News() {
     createNewsDetails,
     updateNewsDetails,
     removeNewsDetails,
+    importNewsDetailsExcel,
   } = useNewsStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -68,6 +69,7 @@ function News() {
   const [detailsEditForm] = Form.useForm();
   const [detailsCreateImages, setDetailsCreateImages] = useState([]);
   const [detailsEditImages, setDetailsEditImages] = useState([]);
+  const [isDetailsImporting, setIsDetailsImporting] = useState(false);
 
   useEffect(() => {
     fetchList();
@@ -134,7 +136,6 @@ function News() {
         payload.image = editImage[0].originFileObj;
       }
       await update(editingId, payload);
-      toast.success("News card updated successfully");
       setIsEditOpen(false);
       resetEditModal();
     } catch (error) {
@@ -492,17 +493,49 @@ function News() {
       >
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                detailsCreateForm.resetFields();
-                setDetailsCreateImages([]);
-                setIsDetailsCreateOpen(true);
-              }}
-            >
-              Add News Details
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  detailsCreateForm.resetFields();
+                  setDetailsCreateImages([]);
+                  setIsDetailsCreateOpen(true);
+                }}
+              >
+                Add News Details
+              </Button>
+              <Upload
+                accept=".xlsx,.xls"
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  setIsDetailsImporting(true);
+                  try {
+                    await importNewsDetailsExcel(selectedNewsId, file);
+                    if (selectedNewsId) {
+                      await fetchNewsDetails(selectedNewsId, { lang });
+                    }
+                  } catch (error) {
+                    if (error?.response?.data?.message) {
+                      toast.error(error.response.data.message);
+                    } else if (error?.message) {
+                      toast.error(error.message);
+                    }
+                  } finally {
+                    setIsDetailsImporting(false);
+                  }
+                  return false;
+                }}
+              >
+                <Button
+                  icon={<UploadOutlined />}
+                  loading={isDetailsImporting}
+                  disabled={isDetailsImporting}
+                >
+                  Import Excel
+                </Button>
+              </Upload>
+            </div>
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {

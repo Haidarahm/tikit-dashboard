@@ -10,6 +10,7 @@ import {
   updateNewsDetails as updateNewsDetailsAPI,
   getAllNewsDetails as getAllNewsDetailsAPI,
   deleteNewsDetails as deleteNewsDetailsAPI,
+  importNewsDetailsExcel as importNewsDetailsExcelAPI,
 } from "../apis/news.js";
 
 export const useNewsStore = create((set, get) => ({
@@ -228,6 +229,23 @@ export const useNewsStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message || "Failed to delete news details"
+      );
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  importNewsDetailsExcel: async (id, file) => {
+    set({ isLoading: true, error: null });
+    try {
+      await importNewsDetailsExcelAPI(id, file);
+      await get().fetchNewsDetails(id);
+      toast.success("News details imported successfully");
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to import news details from Excel"
       );
       throw error;
     } finally {
