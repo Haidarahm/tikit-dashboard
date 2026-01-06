@@ -23,6 +23,7 @@ import {
   FaSnapchatGhost,
   FaPinterestP,
   FaGlobe,
+  FaBehance,
 } from "react-icons/fa";
 import { UploadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
@@ -47,6 +48,7 @@ const SOCIAL_OPTIONS = [
   { label: "TikTok", value: "tiktok" },
   { label: "Snapchat", value: "snapchat" },
   { label: "Pinterest", value: "pinterest" },
+  { label: "Behance", value: "behance" },
   { label: "Website", value: "website" },
 ];
 
@@ -59,6 +61,7 @@ const SOCIAL_ICON_MAP = {
   tiktok: FaTiktok,
   snapchat: FaSnapchatGhost,
   pinterest: FaPinterestP,
+  behance: FaBehance,
   website: FaGlobe,
 };
 
@@ -387,11 +390,26 @@ function TeamMembersManager({ typeId }) {
                     >
                       <Select
                         placeholder="Select social network"
-                        options={SOCIAL_OPTIONS}
+                        options={SOCIAL_OPTIONS.map((option) => {
+                          const Icon = SOCIAL_ICON_MAP[option.value] || FiExternalLink;
+                          return {
+                            value: option.value,
+                            label: (
+                              <Space>
+                                <Icon />
+                                <span>{option.label}</span>
+                              </Space>
+                            ),
+                            searchLabel: option.label, // For filtering
+                          };
+                        })}
                         allowClear
                         showSearch
-                        optionFilterProp="label"
-                        
+                        filterOption={(input, option) =>
+                          (option?.searchLabel || option?.label || "")
+                            .toLowerCase()
+                            .includes(input.toLowerCase())
+                        }
                       />
                     </Form.Item>
                     {fields.length > 1 && (

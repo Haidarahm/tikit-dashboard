@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  AutoComplete,
   Button,
   Card,
   Empty,
   Form,
   Modal,
   Popconfirm,
-  Select,
   Space,
   Spin,
   Tabs,
@@ -41,6 +41,16 @@ function TeamManagement() {
     ],
     []
   );
+
+  // Combine predefined types with existing team types from items
+  const allTeamTypeOptions = useMemo(() => {
+    const existingTypes = (items || []).map((item) => item.type).filter(Boolean);
+    const combined = [...new Set([...predefinedTypes, ...existingTypes])];
+    return combined.map((type) => ({
+      label: type,
+      value: type,
+    }));
+  }, [items, predefinedTypes]);
 
   useEffect(() => {
     fetchList();
@@ -231,14 +241,12 @@ function TeamManagement() {
             label="Type Name"
             rules={[{ required: true, message: "Type name is required" }]}
           >
-            <Select
-              placeholder="Select team type"
-              options={predefinedTypes.map((type) => ({
-                label: type,
-                value: type,
-              }))}
-              showSearch
-              optionFilterProp="label"
+            <AutoComplete
+              placeholder="Select or type a team type"
+              options={allTeamTypeOptions}
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
               allowClear
             />
           </Form.Item>
@@ -263,14 +271,12 @@ function TeamManagement() {
             label="Type Name"
             rules={[{ required: true, message: "Type name is required" }]}
           >
-            <Select
-              placeholder="Select team type"
-              options={predefinedTypes.map((type) => ({
-                label: type,
-                value: type,
-              }))}
-              showSearch
-              optionFilterProp="label"
+            <AutoComplete
+              placeholder="Select or type a team type"
+              options={allTeamTypeOptions}
+              filterOption={(input, option) =>
+                (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+              }
               allowClear
             />
           </Form.Item>
