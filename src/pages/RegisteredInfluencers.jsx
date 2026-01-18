@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
-import { Table, Button, Space, Tag, Popover } from "antd";
+import { Table, Button, Space, Tag, Popover, Modal, Descriptions, List, Card, Typography } from "antd";
 import {
   ReloadOutlined,
   CheckOutlined,
   CloseOutlined,
   MoreOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { useRegisteredInfluencersStore } from "../store/registeredInfluencersStore.js";
 import { toast } from "react-toastify";
+
+const { Link } = Typography;
 
 const RegisteredInfluencers = () => {
   const {
@@ -20,9 +23,13 @@ const RegisteredInfluencers = () => {
     setPage,
     setPerPage,
     updateStatus,
+    fetchItem,
+    selectedItem,
+    setSelectedItem,
   } = useRegisteredInfluencersStore();
 
   const [openPopovers, setOpenPopovers] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchList();
@@ -43,6 +50,19 @@ const RegisteredInfluencers = () => {
     },
     [updateStatus]
   );
+
+  const handleView = useCallback(
+    async (id) => {
+      await fetchItem(id);
+      setIsModalOpen(true);
+    },
+    [fetchItem]
+  );
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  };
 
   const columns = useMemo(
     () => [
@@ -174,8 +194,21 @@ const RegisteredInfluencers = () => {
           );
         },
       },
+      {
+        title: "View",
+        key: "view",
+        width: 80,
+        fixed: "right",
+        render: (_, record) => (
+          <Button
+            icon={<EyeOutlined />}
+            size="small"
+            onClick={() => handleView(record.id)}
+          />
+        ),
+      },
     ],
-    [handleStatusUpdate, openPopovers]
+    [handleStatusUpdate, openPopovers, handleView]
   );
 
   return (
@@ -210,6 +243,130 @@ const RegisteredInfluencers = () => {
           },
         }}
       />
+
+      <Modal
+        title="Registered Influencer Details"
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={[
+          <Button key="close" onClick={handleCloseModal}>
+            Close
+          </Button>,
+        ]}
+        width={800}
+      >
+        {selectedItem ? (
+          <div className="flex flex-col gap-6">
+            <Descriptions bordered size="small" column={1} title="Creator Info">
+              <Descriptions.Item label="ID">
+                {selectedItem.creator?.id}
+              </Descriptions.Item>
+              <Descriptions.Item label="Name">
+                {selectedItem.creator?.name}
+              </Descriptions.Item>
+              <Descriptions.Item label="Email">
+                {selectedItem.creator?.email}
+              </Descriptions.Item>
+              <Descriptions.Item label="Phone">
+                {selectedItem.creator?.phone}
+              </Descriptions.Item>
+              <Descriptions.Item label="Nationality">
+                {selectedItem.creator?.nationality}
+              </Descriptions.Item>
+              <Descriptions.Item label="Residence">
+                {selectedItem.creator?.residence}
+              </Descriptions.Item>
+              <Descriptions.Item label="Type">
+                {selectedItem.creator?.type}
+              </Descriptions.Item>
+              <Descriptions.Item label="Status">
+                <Tag
+                  color={
+                    selectedItem.creator?.status === "accepted"
+                      ? "green"
+                      : selectedItem.creator?.status === "rejected"
+                      ? "red"
+                      : "default"
+                  }
+                >
+                  {selectedItem.creator?.status}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Follower Count">
+                {selectedItem.creator?.followerCount?.toLocaleString()}
+              </Descriptions.Item>
+              <Descriptions.Item label="Why Join">
+                {selectedItem.creator?.whyJoin}
+              </Descriptions.Item>
+              <Descriptions.Item label="Media">
+                {selectedItem.creator?.media ? (
+                  <Link
+                    href={selectedItem.creator.media}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View {selectedItem.creator.mediaType || "File"}
+                  </Link>
+                ) : (
+                  "-"
+                )}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {selectedItem.niches && selectedItem.niches.length > 0 && (
+              <Card size="small" title="Niches">
+                <Space wrap>
+                  {selectedItem.niches.map((niche, index) => (
+                    <Tag key={index} color="blue">
+                      {niche}
+                    </Tag>
+                  ))}
+                </Space>
+              </Card>
+            )}
+
+            {selectedItem.social_links &&
+              selectedItem.social_links.length > 0 && (
+                <Card size="small" title="Social Links">
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={selectedItem.social_links}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          title={
+                            <Link
+                              href={item.link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="capitalize"
+                            >
+                              {item.platform}
+                            </Link>
+                          }
+                          description={
+                            item.prices &&
+                            item.prices.length > 0 && (
+                              <Space wrap>
+                                {item.prices.map((price) => (
+                                  <Tag key={price.id}>
+                                    {price.type}: {price.price}
+                                  </Tag>
+                                ))}
+                              </Space>
+                            )
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </Card>
+              )}
+          </div>
+        ) : (
+          <div className="p-4 text-center">Loading...</div>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import {
   getAllRegisteredInfluencers,
   updateInfluencerStatus,
+  getRegisteredInfluencerById,
 } from "../apis/registeredInfluencers.js";
 
 export const useRegisteredInfluencersStore = create((set, get) => ({
@@ -12,9 +13,11 @@ export const useRegisteredInfluencersStore = create((set, get) => ({
   perPage: 25,
   isLoading: false,
   error: null,
+  selectedItem: null,
 
   setPage: (page) => set({ page }),
   setPerPage: (perPage) => set({ perPage }),
+  setSelectedItem: (item) => set({ selectedItem: item }),
 
   fetchList: async () => {
     const { page, perPage } = get();
@@ -38,7 +41,7 @@ export const useRegisteredInfluencersStore = create((set, get) => ({
       set({ error });
       toast.error(
         error?.response?.data?.message ||
-          "Failed to fetch registered influencers"
+        "Failed to fetch registered influencers"
       );
     } finally {
       set({ isLoading: false });
@@ -57,6 +60,21 @@ export const useRegisteredInfluencersStore = create((set, get) => ({
         error?.response?.data?.message || "Failed to update influencer status"
       );
       throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  fetchItem: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const resp = await getRegisteredInfluencerById(id);
+      set({ selectedItem: resp.data });
+    } catch (error) {
+      set({ error });
+      toast.error(
+        error?.response?.data?.message || "Failed to fetch influencer details"
+      );
     } finally {
       set({ isLoading: false });
     }

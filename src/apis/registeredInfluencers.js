@@ -14,3 +14,8 @@ export async function updateInfluencerStatus(id, status) {
   });
   return data;
 }
+
+export async function getRegisteredInfluencerById(id) {
+  const { data } = await apiClient.get(`/influencers/${id}`);
+  return data;
+}
