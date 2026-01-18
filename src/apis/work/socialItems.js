@@ -39,9 +39,9 @@ export async function createSocial(payload) {
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
-    payload.images.forEach((image, index) => {
+    payload.images.forEach((image) => {
       if (image) {
-        formData.append(`images[${index}]`, image);
+        formData.append(`images[]`, image);
       }
     });
   }
@@ -81,9 +81,9 @@ export async function updateSocial(id, payload) {
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
-    payload.images.forEach((image, index) => {
+    payload.images.forEach((image) => {
       if (image) {
-        formData.append(`images[${index}]`, image);
+        formData.append(`images[]`, image);
       }
     });
   }
