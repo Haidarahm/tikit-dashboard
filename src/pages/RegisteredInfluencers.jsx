@@ -7,6 +7,16 @@ import {
   MoreOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import {
+  FaInstagram,
+  FaTiktok,
+  FaYoutube,
+  FaFacebook,
+  FaTwitter,
+  FaSnapchatGhost,
+  FaLinkedin,
+  FaGlobe,
+} from "react-icons/fa";
 import { useRegisteredInfluencersStore } from "../store/registeredInfluencersStore.js";
 import { toast } from "react-toastify";
 
@@ -331,34 +341,65 @@ const RegisteredInfluencers = () => {
                   <List
                     itemLayout="horizontal"
                     dataSource={selectedItem.social_links}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          title={
-                            <Link
-                              href={item.link}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="capitalize"
-                            >
-                              {item.platform}
-                            </Link>
-                          }
-                          description={
-                            item.prices &&
-                            item.prices.length > 0 && (
-                              <Space wrap>
-                                {item.prices.map((price) => (
-                                  <Tag key={price.id}>
-                                    {price.type}: {price.price}
-                                  </Tag>
-                                ))}
-                              </Space>
-                            )
-                          }
-                        />
-                      </List.Item>
-                    )}
+                    renderItem={(item) => {
+                      const getIcon = (platform) => {
+                        const p = platform?.toLowerCase();
+                        if (p?.includes("instagram"))
+                          return <FaInstagram size={24} color="#E1306C" />;
+                        if (p?.includes("tiktok"))
+                          return <FaTiktok size={24} color="#000000" />;
+                        if (p?.includes("youtube"))
+                          return <FaYoutube size={24} color="#FF0000" />;
+                        if (p?.includes("facebook"))
+                          return <FaFacebook size={24} color="#1877F2" />;
+                        if (p?.includes("twitter") || p?.includes("x"))
+                          return <FaTwitter size={24} color="#1DA1F2" />;
+                        if (p?.includes("snapchat"))
+                          return <FaSnapchatGhost size={24} color="#FFFC00" />;
+                        if (p?.includes("linkedin"))
+                          return <FaLinkedin size={24} color="#0A66C2" />;
+                        return <FaGlobe size={24} color="#555" />;
+                      };
+
+                      return (
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center justify-center p-2 hover:opacity-80 transition-opacity"
+                              >
+                                {getIcon(item.platform)}
+                              </a>
+                            }
+                            title={
+                              <Link
+                                href={item.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="capitalize font-medium"
+                              >
+                                {item.platform}
+                              </Link>
+                            }
+                            description={
+                              item.prices &&
+                              item.prices.length > 0 && (
+                                <Space wrap className="mt-1">
+                                  {item.prices.map((price) => (
+                                    <Tag key={price.id}>
+                                      {price.type}: {price.price}
+                                    </Tag>
+                                  ))}
+                                </Space>
+                              )
+                            }
+                          />
+                        </List.Item>
+                      );
+                    }}
                   />
                 </Card>
               )}
