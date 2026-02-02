@@ -748,7 +748,7 @@ const ProjectForm = ({
         </Form.Item>
       </div>
 
-      <Form.Item label="Logo" required={!isEdit} tooltip="Upload project logo">
+      <Form.Item label="Main Image" required={!isEdit} tooltip="Upload project Main Image">
         <Upload
           fileList={logoFileList}
           beforeUpload={() => false}
