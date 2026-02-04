@@ -18,9 +18,11 @@ import {
   DatabaseOutlined,
   EditOutlined,
   DeleteOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useNewsStore } from "../store/newsStore.js";
+import { useTranslateStore } from "../store/translateStore.js";
 
 const LANG_OPTIONS = [
   { label: "English", value: "en" },
@@ -70,6 +72,9 @@ function News() {
   const [detailsCreateImages, setDetailsCreateImages] = useState([]);
   const [detailsEditImages, setDetailsEditImages] = useState([]);
   const [isDetailsImporting, setIsDetailsImporting] = useState(false);
+  // Select individual fields from translate store to avoid unstable snapshots
+  const isTranslating = useTranslateStore((state) => state.isTranslating);
+  const translateText = useTranslateStore((state) => state.translateText);
 
   useEffect(() => {
     fetchList();
@@ -161,6 +166,30 @@ function News() {
       setIsImporting(false);
     }
     return false;
+  };
+
+  const handleTranslateField = async (fieldBase) => {
+    const enValue = createForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      createForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    }
   };
 
   const columns = useMemo(
@@ -332,7 +361,21 @@ function News() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
               name="title_en"
-              label="Title (EN)"
+              label={
+                <span className="flex items-center gap-2 flex-wrap">
+                  Title (EN)
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateField("title")}
+                    loading={isTranslating}
+                    style={{ padding: 0 }}
+                  >
+                    Translate to AR & FR
+                  </Button>
+                </span>
+              }
               rules={[{ required: true, message: "Title is required" }]}
             >
               <Input placeholder="Enter English title" />
@@ -353,7 +396,21 @@ function News() {
             </Form.Item>
             <Form.Item
               name="subtitle_en"
-              label="Subtitle (EN)"
+              label={
+                <span className="flex items-center gap-2 flex-wrap">
+                  Subtitle (EN)
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateField("subtitle")}
+                    loading={isTranslating}
+                    style={{ padding: 0 }}
+                  >
+                    Translate to AR & FR
+                  </Button>
+                </span>
+              }
               rules={[{ required: true, message: "Subtitle is required" }]}
             >
               <Input placeholder="Enter English subtitle" />
@@ -374,7 +431,21 @@ function News() {
             </Form.Item>
             <Form.Item
               name="description_en"
-              label="Description (EN)"
+              label={
+                <span className="flex items-center gap-2 flex-wrap">
+                  Description (EN)
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateField("description")}
+                    loading={isTranslating}
+                    style={{ padding: 0 }}
+                  >
+                    Translate to AR & FR
+                  </Button>
+                </span>
+              }
               rules={[{ required: true, message: "Description is required" }]}
             >
               <Input.TextArea
