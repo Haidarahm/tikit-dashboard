@@ -358,115 +358,129 @@ function News() {
         confirmLoading={isLoading}
       >
         <Form form={createForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item
-              name="title_en"
-              label={
-                <span className="flex items-center gap-2 flex-wrap">
-                  Title (EN)
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<TranslationOutlined />}
-                    onClick={() => handleTranslateField("title")}
-                    loading={isTranslating}
-                    style={{ padding: 0 }}
-                  >
-                    Translate to AR & FR
-                  </Button>
-                </span>
-              }
-              rules={[{ required: true, message: "Title is required" }]}
-            >
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true, message: "Title is required" }]}
-            >
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true, message: "Title is required" }]}
-            >
-              <Input placeholder="Enter French title" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_en"
-              label={
-                <span className="flex items-center gap-2 flex-wrap">
-                  Subtitle (EN)
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<TranslationOutlined />}
-                    onClick={() => handleTranslateField("subtitle")}
-                    loading={isTranslating}
-                    style={{ padding: 0 }}
-                  >
-                    Translate to AR & FR
-                  </Button>
-                </span>
-              }
-              rules={[{ required: true, message: "Subtitle is required" }]}
-            >
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-              rules={[{ required: true, message: "Subtitle is required" }]}
-            >
-              <Input placeholder="Enter Arabic subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-              rules={[{ required: true, message: "Subtitle is required" }]}
-            >
-              <Input placeholder="Enter French subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="description_en"
-              label={
-                <span className="flex items-center gap-2 flex-wrap">
-                  Description (EN)
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<TranslationOutlined />}
-                    onClick={() => handleTranslateField("description")}
-                    loading={isTranslating}
-                    style={{ padding: 0 }}
-                  >
-                    Translate to AR & FR
-                  </Button>
-                </span>
-              }
-              rules={[{ required: true, message: "Description is required" }]}
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item
-              name="description_ar"
-              label="Description (AR)"
-              rules={[{ required: true, message: "Description is required" }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
-            </Form.Item>
-            <Form.Item
-              name="description_fr"
-              label="Description (FR)"
-              rules={[{ required: true, message: "Description is required" }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter French description" />
-            </Form.Item>
+          <div className="space-y-6">
+            {/* Title Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Title</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="title_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Title (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateField("title")}
+                        loading={isTranslating}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true, message: "Title is required" }]}
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item
+                  name="title_ar"
+                  label="Title (AR)"
+                  rules={[{ required: true, message: "Title is required" }]}
+                >
+                  <Input placeholder="Enter Arabic title" />
+                </Form.Item>
+                <Form.Item
+                  name="title_fr"
+                  label="Title (FR)"
+                  rules={[{ required: true, message: "Title is required" }]}
+                >
+                  <Input placeholder="Enter French title" />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Subtitle Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Subtitle</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="subtitle_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Subtitle (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateField("subtitle")}
+                        loading={isTranslating}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true, message: "Subtitle is required" }]}
+                >
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item
+                  name="subtitle_ar"
+                  label="Subtitle (AR)"
+                  rules={[{ required: true, message: "Subtitle is required" }]}
+                >
+                  <Input placeholder="Enter Arabic subtitle" />
+                </Form.Item>
+                <Form.Item
+                  name="subtitle_fr"
+                  label="Subtitle (FR)"
+                  rules={[{ required: true, message: "Subtitle is required" }]}
+                >
+                  <Input placeholder="Enter French subtitle" />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="description_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Description (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateField("description")}
+                        loading={isTranslating}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true, message: "Description is required" }]}
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="description_ar"
+                  label="Description (AR)"
+                  rules={[{ required: true, message: "Description is required" }]}
+                >
+                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                </Form.Item>
+                <Form.Item
+                  name="description_fr"
+                  label="Description (FR)"
+                  rules={[{ required: true, message: "Description is required" }]}
+                >
+                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                </Form.Item>
+              </div>
+            </div>
           </div>
           <Form.Item label="Image" required>
             <Upload
