@@ -34,7 +34,7 @@ const appendNewsFields = (formData, payload = {}) => {
 export async function addNewsCard(payload) {
   const formData = new FormData();
   appendNewsFields(formData, payload);
-  const { data } = await apiClient.post("/news/add", formData, {
+  const { data } = await apiClient.post("/blogs/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -43,21 +43,21 @@ export async function addNewsCard(payload) {
 export async function updateNewsCard(id, payload) {
   const formData = new FormData();
   appendNewsFields(formData, payload);
-  const { data } = await apiClient.post(`/news/${id}/update`, formData, {
+  const { data } = await apiClient.post(`/blogs/${id}/update`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteNewsCard(id) {
-  const { data } = await apiClient.delete(`/news/${id}/delete`);
+  const { data } = await apiClient.delete(`/blogs/${id}/delete`);
   return data;
 }
 
 export async function importNewsExcel(file) {
   const formData = new FormData();
   formData.append("file", file);
-  const { data } = await apiClient.post("/news/import", formData, {
+  const { data } = await apiClient.post("/blogs/import", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -92,7 +92,7 @@ const appendNewsDetailsFields = (formData, payload = {}) => {
 export async function addNewsDetails(id, payload) {
   const formData = new FormData();
   appendNewsDetailsFields(formData, payload);
-  const { data } = await apiClient.post(`/news-details/${id}/add`, formData, {
+  const { data } = await apiClient.post(`/blogs-details/${id}/add`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -101,7 +101,7 @@ export async function addNewsDetails(id, payload) {
 export async function updateNewsDetails(id, payload) {
   const formData = new FormData();
   appendNewsDetailsFields(formData, payload);
-  const { data } = await apiClient.post(`/news-details/update/${id}`, formData, {
+  const { data } = await apiClient.post(`/blogs-details/update/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
@@ -110,19 +110,19 @@ export async function updateNewsDetails(id, payload) {
 export async function getAllNewsDetails(id, { lang } = {}) {
   const params = {};
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/news-details/${id}/get`, { params });
+  const { data } = await apiClient.get(`/blogs-details/${id}/get`, { params });
   return data;
 }
 
 export async function deleteNewsDetails(id) {
-  const { data } = await apiClient.delete(`/news-details/delete/${id}`);
+  const { data } = await apiClient.delete(`/blogs-details/delete/${id}`);
   return data;
 }
 
 export async function importNewsDetailsExcel(id, file) {
   const formData = new FormData();
   formData.append("file", file);
-  const { data } = await apiClient.post(`/news-details/${id}/import`, formData, {
+  const { data } = await apiClient.post(`/blogs-details/${id}/import`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
