@@ -72,8 +72,18 @@ function News() {
   const [detailsCreateImages, setDetailsCreateImages] = useState([]);
   const [detailsEditImages, setDetailsEditImages] = useState([]);
   const [isDetailsImporting, setIsDetailsImporting] = useState(false);
-  // Select individual fields from translate store to avoid unstable snapshots
-  const isTranslating = useTranslateStore((state) => state.isTranslating);
+  
+  // Separate loading states for each translation button
+  const [translatingTitle, setTranslatingTitle] = useState(false);
+  const [translatingSubtitle, setTranslatingSubtitle] = useState(false);
+  const [translatingDescription, setTranslatingDescription] = useState(false);
+  const [translatingDetailsTitle, setTranslatingDetailsTitle] = useState(false);
+  const [translatingDetailsSubtitle, setTranslatingDetailsSubtitle] = useState(false);
+  const [translatingDetailsDescription, setTranslatingDetailsDescription] = useState(false);
+  const [translatingDetailsEditTitle, setTranslatingDetailsEditTitle] = useState(false);
+  const [translatingDetailsEditSubtitle, setTranslatingDetailsEditSubtitle] = useState(false);
+  const [translatingDetailsEditDescription, setTranslatingDetailsEditDescription] = useState(false);
+  
   const translateText = useTranslateStore((state) => state.translateText);
 
   useEffect(() => {
@@ -175,6 +185,16 @@ function News() {
       return;
     }
 
+    // Set loading state for specific field
+    const setLoading = {
+      title: setTranslatingTitle,
+      subtitle: setTranslatingSubtitle,
+      description: setTranslatingDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
     try {
       const result = await translateText(String(enValue));
       if (!result) return;
@@ -189,6 +209,8 @@ function News() {
       );
     } catch {
       // Error toast already handled in store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,6 +221,16 @@ function News() {
       return;
     }
 
+    // Set loading state for specific field
+    const setLoading = {
+      title: setTranslatingDetailsTitle,
+      subtitle: setTranslatingDetailsSubtitle,
+      description: setTranslatingDetailsDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
     try {
       const result = await translateText(String(enValue));
       if (!result) return;
@@ -213,6 +245,8 @@ function News() {
       );
     } catch {
       // Error toast already handled in store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -223,6 +257,16 @@ function News() {
       return;
     }
 
+    // Set loading state for specific field
+    const setLoading = {
+      title: setTranslatingDetailsEditTitle,
+      subtitle: setTranslatingDetailsEditSubtitle,
+      description: setTranslatingDetailsEditDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
     try {
       const result = await translateText(String(enValue));
       if (!result) return;
@@ -237,6 +281,8 @@ function News() {
       );
     } catch {
       // Error toast already handled in store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -395,7 +441,7 @@ function News() {
       />
 
       <Modal
-        title="Add News"
+        title="Add Blog"
         open={isCreateOpen}
         onCancel={() => {
           setIsCreateOpen(false);
@@ -421,7 +467,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateField("title")}
-                        loading={isTranslating}
+                        loading={translatingTitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -461,7 +507,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateField("subtitle")}
-                        loading={isTranslating}
+                        loading={translatingSubtitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -501,7 +547,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateField("description")}
-                        loading={isTranslating}
+                        loading={translatingDescription}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -856,7 +902,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsField("title")}
-                        loading={isTranslating}
+                        loading={translatingDetailsTitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -896,7 +942,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsField("subtitle")}
-                        loading={isTranslating}
+                        loading={translatingDetailsSubtitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -936,7 +982,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsField("description")}
-                        loading={isTranslating}
+                        loading={translatingDetailsDescription}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -1042,7 +1088,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsEditField("title")}
-                        loading={isTranslating}
+                        loading={translatingDetailsEditTitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -1073,7 +1119,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsEditField("subtitle")}
-                        loading={isTranslating}
+                        loading={translatingDetailsEditSubtitle}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>
@@ -1104,7 +1150,7 @@ function News() {
                         size="small"
                         icon={<TranslationOutlined />}
                         onClick={() => handleTranslateDetailsEditField("description")}
-                        loading={isTranslating}
+                        loading={translatingDetailsEditDescription}
                         style={{ padding: 0, fontSize: "12px", height: "auto" }}
                       />
                     </span>

@@ -5,7 +5,7 @@ export async function getAllNews({ page, per_page, lang } = {}) {
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/news/get", { params });
+  const { data } = await apiClient.get("/blogs/get", { params });
   return data;
 }
 

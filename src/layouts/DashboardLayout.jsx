@@ -104,7 +104,7 @@ function DashboardLayout() {
             {
               key: "news",
               icon: <ReadOutlined />,
-              label: "Blogs / News",
+              label: "Blogs ",
               onClick: () => navigate("/news"),
             },
             {
