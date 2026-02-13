@@ -12,10 +12,11 @@ import {
   Space,
   Popconfirm,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, TranslationOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useServicesStore } from "../store/servicesStore.js";
 import { useSubServicesStore } from "../store/subServicesStore.js";
+import { useTranslateStore } from "../store/translateStore.js";
 
 function SubServices() {
   // Services source for filter
@@ -65,6 +66,16 @@ function SubServices() {
   const [editVideoFileList, setEditVideoFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
+  
+  // Translation loading states
+  const [translatingAddTitle, setTranslatingAddTitle] = useState(false);
+  const [translatingAddSubtitle, setTranslatingAddSubtitle] = useState(false);
+  const [translatingAddDescription, setTranslatingAddDescription] = useState(false);
+  const [translatingEditTitle, setTranslatingEditTitle] = useState(false);
+  const [translatingEditSubtitle, setTranslatingEditSubtitle] = useState(false);
+  const [translatingEditDescription, setTranslatingEditDescription] = useState(false);
+  
+  const translateText = useTranslateStore((state) => state.translateText);
 
   // Fetch all services titles (increase per page temporarily)
   useEffect(() => {
@@ -100,6 +111,76 @@ function SubServices() {
       setIsImporting(false);
     }
     return false;
+  };
+
+  const handleTranslateAddField = async (fieldBase) => {
+    const enValue = addForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingAddTitle,
+      subtitle: setTranslatingAddSubtitle,
+      description: setTranslatingAddDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      addForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslateEditField = async (fieldBase) => {
+    const enValue = editForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingEditTitle,
+      subtitle: setTranslatingEditSubtitle,
+      description: setTranslatingEditDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      editForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = useMemo(
@@ -320,75 +401,129 @@ function SubServices() {
         okText="Create"
       >
         <Form form={addForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter French title" />
-            </Form.Item>
+          <div className="space-y-6">
+            {/* Title Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Title</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="title_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Title (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateAddField("title")}
+                        loading={translatingAddTitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item
+                  name="title_ar"
+                  label="Title (AR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter Arabic title" />
+                </Form.Item>
+                <Form.Item
+                  name="title_fr"
+                  label="Title (FR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter French title" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter Arabic subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter French subtitle" />
-            </Form.Item>
+            {/* Subtitle Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Subtitle</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="subtitle_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Subtitle (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateAddField("subtitle")}
+                        loading={translatingAddSubtitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item
+                  name="subtitle_ar"
+                  label="Subtitle (AR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter Arabic subtitle" />
+                </Form.Item>
+                <Form.Item
+                  name="subtitle_fr"
+                  label="Subtitle (FR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input placeholder="Enter French subtitle" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item
-              name="description_en"
-              label="Description (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item
-              name="description_ar"
-              label="Description (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
-            </Form.Item>
-            <Form.Item
-              name="description_fr"
-              label="Description (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter French description" />
-            </Form.Item>
+            {/* Description Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="description_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Description (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateAddField("description")}
+                        loading={translatingAddDescription}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="description_ar"
+                  label="Description (AR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                </Form.Item>
+                <Form.Item
+                  name="description_fr"
+                  label="Description (FR)"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                </Form.Item>
+              </div>
+            </div>
           </div>
 
           <Form.Item label="Media Type">
@@ -490,75 +625,102 @@ function SubServices() {
         okText="Update"
       >
         <Form form={editForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter French title" />
-            </Form.Item>
+          <div className="space-y-6">
+            {/* Title Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Title</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="title_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Title (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("title")}
+                        loading={translatingEditTitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item name="title_ar" label="Title (AR)">
+                  <Input placeholder="Enter Arabic title" />
+                </Form.Item>
+                <Form.Item name="title_fr" label="Title (FR)">
+                  <Input placeholder="Enter French title" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_ar"
-              label="Subtitle (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter Arabic subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_fr"
-              label="Subtitle (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter French subtitle" />
-            </Form.Item>
+            {/* Subtitle Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Subtitle</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="subtitle_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Subtitle (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("subtitle")}
+                        loading={translatingEditSubtitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item name="subtitle_ar" label="Subtitle (AR)">
+                  <Input placeholder="Enter Arabic subtitle" />
+                </Form.Item>
+                <Form.Item name="subtitle_fr" label="Subtitle (FR)">
+                  <Input placeholder="Enter French subtitle" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item
-              name="description_en"
-              label="Description (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item
-              name="description_ar"
-              label="Description (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
-            </Form.Item>
-            <Form.Item
-              name="description_fr"
-              label="Description (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={3} placeholder="Enter French description" />
-            </Form.Item>
+            {/* Description Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="description_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Description (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("description")}
+                        loading={translatingEditDescription}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item name="description_ar" label="Description (AR)">
+                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                </Form.Item>
+                <Form.Item name="description_fr" label="Description (FR)">
+                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                </Form.Item>
+              </div>
+            </div>
           </div>
 
           <Form.Item label="Media Type">

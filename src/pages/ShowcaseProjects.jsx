@@ -17,9 +17,11 @@ import {
   PlusOutlined,
   ReloadOutlined,
   UploadOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useShowcaseProjectsStore } from "../store/showcaseProjectsStore.js";
+import { useTranslateStore } from "../store/translateStore.js";
 
 const { Text } = Typography;
 
@@ -63,6 +65,14 @@ const ShowcaseProjects = () => {
   const [expandedBriefs, setExpandedBriefs] = useState(new Set());
   const [expandedStrategies, setExpandedStrategies] = useState(new Set());
   const [importFileList, setImportFileList] = useState([]);
+  
+  // Translation loading states
+  const [translatingCreateTitle, setTranslatingCreateTitle] = useState(false);
+  const [translatingCreateSubtitle, setTranslatingCreateSubtitle] = useState(false);
+  const [translatingEditTitle, setTranslatingEditTitle] = useState(false);
+  const [translatingEditSubtitle, setTranslatingEditSubtitle] = useState(false);
+  
+  const translateText = useTranslateStore((state) => state.translateText);
 
   useEffect(() => {
     fetchList();
@@ -94,6 +104,74 @@ const ShowcaseProjects = () => {
       setImportFileList([]);
     } catch (error) {
       // toast already handled in store
+    }
+  };
+
+  const handleTranslateCreateField = async (fieldBase) => {
+    const enValue = createForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingCreateTitle,
+      subtitle: setTranslatingCreateSubtitle,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      createForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslateEditField = async (fieldBase) => {
+    const enValue = editForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingEditTitle,
+      subtitle: setTranslatingEditSubtitle,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      editForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -427,6 +505,10 @@ const ShowcaseProjects = () => {
           onImagesChange={setImagesFileList}
           videosFileList={videosFileList}
           onVideosChange={setVideosFileList}
+          onTranslateTitle={() => handleTranslateCreateField("title")}
+          onTranslateSubtitle={() => handleTranslateCreateField("subtitle")}
+          translatingTitle={translatingCreateTitle}
+          translatingSubtitle={translatingCreateSubtitle}
         />
       </Modal>
 
@@ -451,6 +533,10 @@ const ShowcaseProjects = () => {
           videosFileList={editVideosFileList}
           onVideosChange={setEditVideosFileList}
           isEdit
+          onTranslateTitle={() => handleTranslateEditField("title")}
+          onTranslateSubtitle={() => handleTranslateEditField("subtitle")}
+          translatingTitle={translatingEditTitle}
+          translatingSubtitle={translatingEditSubtitle}
         />
       </Modal>
 
@@ -622,13 +708,31 @@ const ProjectForm = ({
   videosFileList,
   onVideosChange,
   isEdit = false,
+  onTranslateTitle,
+  onTranslateSubtitle,
+  translatingTitle = false,
+  translatingSubtitle = false,
 }) => {
   return (
     <Form form={form} layout="vertical">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Form.Item
           name="title_en"
-          label="Title (EN)"
+          label={
+            <span className="flex items-center gap-2">
+              <span>Title (EN)</span>
+              {onTranslateTitle && (
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<TranslationOutlined />}
+                  onClick={onTranslateTitle}
+                  loading={translatingTitle}
+                  style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                />
+              )}
+            </span>
+          }
           rules={isEdit ? [] : [{ required: true, message: "Title is required" }]}
         >
           <Input placeholder="Enter English title" />
@@ -649,7 +753,21 @@ const ProjectForm = ({
         </Form.Item>
         <Form.Item
           name="subtitle_en"
-          label="Subtitle (EN)"
+          label={
+            <span className="flex items-center gap-2">
+              <span>Subtitle (EN)</span>
+              {onTranslateSubtitle && (
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<TranslationOutlined />}
+                  onClick={onTranslateSubtitle}
+                  loading={translatingSubtitle}
+                  style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                />
+              )}
+            </span>
+          }
           rules={isEdit ? [] : [{ required: true, message: "Subtitle is required" }]}
         >
           <Input placeholder="Enter English subtitle" />

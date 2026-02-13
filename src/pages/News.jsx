@@ -77,6 +77,9 @@ function News() {
   const [translatingTitle, setTranslatingTitle] = useState(false);
   const [translatingSubtitle, setTranslatingSubtitle] = useState(false);
   const [translatingDescription, setTranslatingDescription] = useState(false);
+  const [translatingEditTitle, setTranslatingEditTitle] = useState(false);
+  const [translatingEditSubtitle, setTranslatingEditSubtitle] = useState(false);
+  const [translatingEditDescription, setTranslatingEditDescription] = useState(false);
   const [translatingDetailsTitle, setTranslatingDetailsTitle] = useState(false);
   const [translatingDetailsSubtitle, setTranslatingDetailsSubtitle] = useState(false);
   const [translatingDetailsDescription, setTranslatingDetailsDescription] = useState(false);
@@ -236,6 +239,42 @@ function News() {
       if (!result) return;
 
       detailsCreateForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslateEditField = async (fieldBase) => {
+    const enValue = editForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    // Set loading state for specific field
+    const setLoading = {
+      title: setTranslatingEditTitle,
+      subtitle: setTranslatingEditSubtitle,
+      description: setTranslatingEditDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      editForm.setFieldsValue({
         [`${fieldBase}_en`]: result.en || enValue,
         [`${fieldBase}_ar`]: result.ar || "",
         [`${fieldBase}_fr`]: result.fr || "",
@@ -608,37 +647,102 @@ function News() {
         confirmLoading={isLoading}
       >
         <Form form={editForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Item name="title_en" label="Title (EN)">
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item name="title_ar" label="Title (AR)">
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item name="title_fr" label="Title (FR)">
-              <Input placeholder="Enter French title" />
-            </Form.Item>
-            <Form.Item name="subtitle_en" label="Subtitle (EN)">
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
-              <Input placeholder="Enter Arabic subtitle" />
-            </Form.Item>
-            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
-              <Input placeholder="Enter French subtitle" />
-            </Form.Item>
-            <Form.Item name="description_en" label="Description (EN)">
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item name="description_ar" label="Description (AR)">
-              <Input.TextArea rows={3} placeholder="Enter Arabic description" />
-            </Form.Item>
-            <Form.Item name="description_fr" label="Description (FR)">
-              <Input.TextArea rows={3} placeholder="Enter French description" />
-            </Form.Item>
+          <div className="space-y-6">
+            {/* Title Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Title</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="title_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Title (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("title")}
+                        loading={translatingEditTitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item name="title_ar" label="Title (AR)">
+                  <Input placeholder="Enter Arabic title" />
+                </Form.Item>
+                <Form.Item name="title_fr" label="Title (FR)">
+                  <Input placeholder="Enter French title" />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Subtitle Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Subtitle</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="subtitle_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Subtitle (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("subtitle")}
+                        loading={translatingEditSubtitle}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item name="subtitle_ar" label="Subtitle (AR)">
+                  <Input placeholder="Enter Arabic subtitle" />
+                </Form.Item>
+                <Form.Item name="subtitle_fr" label="Subtitle (FR)">
+                  <Input placeholder="Enter French subtitle" />
+                </Form.Item>
+              </div>
+            </div>
+
+            {/* Description Section */}
+            <div>
+              <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  name="description_en"
+                  label={
+                    <span className="flex items-center gap-2">
+                      <span>Description (EN)</span>
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<TranslationOutlined />}
+                        onClick={() => handleTranslateEditField("description")}
+                        loading={translatingEditDescription}
+                        style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                      />
+                    </span>
+                  }
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item name="description_ar" label="Description (AR)">
+                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                </Form.Item>
+                <Form.Item name="description_fr" label="Description (FR)">
+                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                </Form.Item>
+              </div>
+            </div>
           </div>
           <Form.Item label="Image">
             <Upload

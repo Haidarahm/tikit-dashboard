@@ -20,10 +20,12 @@ import {
   DeleteOutlined,
   PlusOutlined,
   UploadOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons";
 import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useWorksSectionStore } from "../../store/works/worksSectionStore.js";
+import { useTranslateStore } from "../../store/translateStore.js";
 
 const WorksSection = () => {
   const navigate = useNavigate();
@@ -52,6 +54,16 @@ const WorksSection = () => {
   const [editForm] = Form.useForm();
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  
+  // Translation loading states
+  const [translatingAddTitle, setTranslatingAddTitle] = useState(false);
+  const [translatingAddSubtitle, setTranslatingAddSubtitle] = useState(false);
+  const [translatingAddDescription, setTranslatingAddDescription] = useState(false);
+  const [translatingEditTitle, setTranslatingEditTitle] = useState(false);
+  const [translatingEditSubtitle, setTranslatingEditSubtitle] = useState(false);
+  const [translatingEditDescription, setTranslatingEditDescription] = useState(false);
+  
+  const translateText = useTranslateStore((state) => state.translateText);
 
   useEffect(() => {
     fetchList();
@@ -62,6 +74,76 @@ const WorksSection = () => {
       await importExcel(file);
     } catch (error) {
       // Error is already handled in the store
+    }
+  };
+
+  const handleTranslateAddField = async (fieldBase) => {
+    const enValue = addForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingAddTitle,
+      subtitle: setTranslatingAddSubtitle,
+      description: setTranslatingAddDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      addForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslateEditField = async (fieldBase) => {
+    const enValue = editForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase} (EN) text first.`);
+      return;
+    }
+
+    const setLoading = {
+      title: setTranslatingEditTitle,
+      subtitle: setTranslatingEditSubtitle,
+      description: setTranslatingEditDescription,
+    }[fieldBase];
+    
+    if (!setLoading) return;
+
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+
+      editForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+      toast.success(
+        `Translated ${fieldBase} to Arabic and French successfully.`
+      );
+    } catch {
+      // Error toast already handled in store
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -401,7 +483,19 @@ const WorksSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Form.Item
               name="title_en"
-              label="Title (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Title (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("title")}
+                    loading={translatingAddTitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input placeholder="Enter English title" />
@@ -423,7 +517,19 @@ const WorksSection = () => {
 
             <Form.Item
               name="subtitle_en"
-              label="Subtitle (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("subtitle")}
+                    loading={translatingAddSubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input placeholder="Enter English subtitle" />
@@ -445,7 +551,19 @@ const WorksSection = () => {
 
             <Form.Item
               name="description_en"
-              label="Description (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Description (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("description")}
+                    loading={translatingAddDescription}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input.TextArea
@@ -514,7 +632,22 @@ const WorksSection = () => {
       >
         <Form form={editForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item name="title_en" label="Title (EN)">
+            <Form.Item
+              name="title_en"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Title (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("title")}
+                    loading={translatingEditTitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
+            >
               <Input placeholder="Enter English title" />
             </Form.Item>
             <Form.Item name="title_ar" label="Title (AR)">
@@ -524,7 +657,22 @@ const WorksSection = () => {
               <Input placeholder="Enter French title" />
             </Form.Item>
 
-            <Form.Item name="subtitle_en" label="Subtitle (EN)">
+            <Form.Item
+              name="subtitle_en"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("subtitle")}
+                    loading={translatingEditSubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
+            >
               <Input placeholder="Enter English subtitle" />
             </Form.Item>
             <Form.Item name="subtitle_ar" label="Subtitle (AR)">
@@ -534,7 +682,22 @@ const WorksSection = () => {
               <Input placeholder="Enter French subtitle" />
             </Form.Item>
 
-            <Form.Item name="description_en" label="Description (EN)">
+            <Form.Item
+              name="description_en"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Description (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("description")}
+                    loading={translatingEditDescription}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
+            >
               <Input.TextArea
                 rows={3}
                 placeholder="Enter English description"
