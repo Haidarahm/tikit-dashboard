@@ -350,13 +350,13 @@ function News() {
               }}
             />
             <Popconfirm
-              title="Delete this news card?"
+              title="Delete this blog card?"
               okText="Yes"
               cancelText="No"
               onConfirm={async () => {
                 try {
                   await remove(record.id);
-                  toast.success("News card deleted successfully");
+                  toast.success("Blog card deleted successfully");
                 } catch (error) {
                   if (error?.response?.data?.message) {
                     toast.error(error.response.data.message);
@@ -379,9 +379,9 @@ function News() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold">Blogs / News</h2>
+          <h2 className="text-2xl font-semibold">Blogs</h2>
           <p className="text-gray-600">
-            Manage news cards including localized titles, subtitles, and images.
+            Manage blog cards including localized titles, subtitles, and images.
           </p>
         </div>
         <Space wrap>
@@ -418,7 +418,7 @@ function News() {
               setIsCreateOpen(true);
             }}
           >
-            Add News
+            Add Blog
           </Button>
         </Space>
       </div>
@@ -597,7 +597,7 @@ function News() {
       </Modal>
 
       <Modal
-        title="Update News"
+        title="Update Blog"
         open={isEditOpen}
         onCancel={() => {
           setIsEditOpen(false);
@@ -661,7 +661,7 @@ function News() {
       </Modal>
 
       <Modal
-        title="News Details"
+        title="Blog Details"
         open={isDetailsModalOpen}
         onCancel={() => {
           setIsDetailsModalOpen(false);
@@ -682,7 +682,7 @@ function News() {
                   setIsDetailsCreateOpen(true);
                 }}
               >
-                Add News Details
+                Add Blog Details
               </Button>
               <Upload
                 accept=".xlsx,.xls"
@@ -821,7 +821,7 @@ function News() {
                       }}
                     />
                     <Popconfirm
-                      title="Delete this news detail?"
+                      title="Delete this blog detail?"
                       okText="Yes"
                       cancelText="No"
                       onConfirm={async () => {
@@ -850,7 +850,7 @@ function News() {
       </Modal>
 
       <Modal
-        title="Add News Details"
+        title="Add Blog Details"
         open={isDetailsCreateOpen}
         onCancel={() => {
           setIsDetailsCreateOpen(false);
@@ -1031,7 +1031,7 @@ function News() {
       </Modal>
 
       <Modal
-        title="Update News Details"
+        title="Update Blog Details"
         open={isDetailsEditOpen}
         onCancel={() => {
           setIsDetailsEditOpen(false);

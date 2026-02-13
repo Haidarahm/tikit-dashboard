@@ -64,7 +64,7 @@ export const useNewsStore = create((set, get) => ({
       return items;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to load news");
+      toast.error(error?.response?.data?.message || "Failed to load blogs");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -77,12 +77,12 @@ export const useNewsStore = create((set, get) => ({
       const created = await addNewsCard(payload);
       set({ current: created?.data || created });
       await get().fetchList();
-      toast.success("News card created successfully");
+      toast.success("Blog card created successfully");
       return created;
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to create news card"
+        error?.response?.data?.message || "Failed to create blog card"
       );
       throw error;
     } finally {
@@ -96,12 +96,12 @@ export const useNewsStore = create((set, get) => ({
       const updated = await updateNewsCard(id, payload);
       set({ current: updated?.data || updated });
       await get().fetchList();
-      toast.success("News card updated successfully");
+      toast.success("Blog card updated successfully");
       return updated;
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to update news card"
+        error?.response?.data?.message || "Failed to update blog card"
       );
       throw error;
     } finally {
@@ -117,7 +117,7 @@ export const useNewsStore = create((set, get) => ({
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to delete news card"
+        error?.response?.data?.message || "Failed to delete blog card"
       );
       throw error;
     } finally {
@@ -130,11 +130,11 @@ export const useNewsStore = create((set, get) => ({
     try {
       await importNewsExcel(file);
       await get().fetchList();
-      toast.success("News imported successfully");
+      toast.success("Blogs imported successfully");
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to import news from Excel"
+        error?.response?.data?.message || "Failed to import blogs from Excel"
       );
       throw error;
     } finally {
@@ -169,7 +169,7 @@ export const useNewsStore = create((set, get) => ({
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to load news details"
+        error?.response?.data?.message || "Failed to load blog details"
       );
       throw error;
     } finally {
@@ -183,12 +183,12 @@ export const useNewsStore = create((set, get) => ({
       const created = await addNewsDetailsAPI(id, payload);
       set({ currentDetails: created?.data || created });
       await get().fetchNewsDetails(id);
-      toast.success("News details created successfully");
+      toast.success("Blog details created successfully");
       return created;
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to create news details"
+        error?.response?.data?.message || "Failed to create blog details"
       );
       throw error;
     } finally {
@@ -204,12 +204,12 @@ export const useNewsStore = create((set, get) => ({
       if (newsId) {
         await get().fetchNewsDetails(newsId);
       }
-      toast.success("News details updated successfully");
+      toast.success("Blog details updated successfully");
       return updated;
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to update news details"
+        error?.response?.data?.message || "Failed to update blog details"
       );
       throw error;
     } finally {
@@ -224,11 +224,11 @@ export const useNewsStore = create((set, get) => ({
       if (newsId) {
         await get().fetchNewsDetails(newsId);
       }
-      toast.success("News details deleted successfully");
+      toast.success("Blog details deleted successfully");
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to delete news details"
+        error?.response?.data?.message || "Failed to delete blog details"
       );
       throw error;
     } finally {
@@ -241,11 +241,11 @@ export const useNewsStore = create((set, get) => ({
     try {
       await importNewsDetailsExcelAPI(id, file);
       await get().fetchNewsDetails(id);
-      toast.success("News details imported successfully");
+      toast.success("Blog details imported successfully");
     } catch (error) {
       set({ error });
       toast.error(
-        error?.response?.data?.message || "Failed to import news details from Excel"
+        error?.response?.data?.message || "Failed to import blog details from Excel"
       );
       throw error;
     } finally {
