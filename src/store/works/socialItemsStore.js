@@ -14,27 +14,27 @@ export const useSocialItemsStore = create((set, get) => ({
   page: 1,
   perPage: 5,
   lang: "en",
-  workId: null,
+  slug: null,
   current: null,
   isLoading: false,
   error: null,
 
-  setWorkId: (workId) => set({ workId }),
+  setSlug: (slug) => set({ slug }),
   setPage: (page) => set({ page }),
   setPerPage: (perPage) => set({ perPage }),
   setLang: (lang) => set({ lang }),
 
-  fetchList: async (workId = null) => {
+  fetchList: async (slug = null) => {
     const { page, perPage, lang } = get();
-    const targetWorkId = workId ?? get().workId;
-    if (!targetWorkId) {
+    const targetSlug = slug ?? get().slug;
+    if (!targetSlug) {
       set({ items: [], total: 0 });
       return;
     }
     set({ isLoading: true, error: null });
     try {
       const resp = await getSocialItems({
-        work_id: targetWorkId,
+        slug: targetSlug,
         page,
         per_page: perPage,
         lang,
@@ -114,15 +114,15 @@ export const useSocialItemsStore = create((set, get) => ({
   },
 
   importExcel: async (file) => {
-    const workId = get().workId;
-    if (!workId) {
+    const slug = get().slug;
+    if (!slug) {
       toast.error("Select a work before importing.");
       return;
     }
 
     set({ isLoading: true, error: null });
     try {
-      const result = await importExcelfile(workId, file);
+      const result = await importExcelfile(slug, file);
       await get().fetchList();
       toast.success("Social items imported successfully");
       return result;

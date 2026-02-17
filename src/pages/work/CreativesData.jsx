@@ -28,7 +28,7 @@ import { toast } from "react-toastify";
 import { useCreativeItemsStore } from "../../store/works/creativeItemsStore.js";
 
 const CreativesData = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const {
     items,
     total,
@@ -40,7 +40,7 @@ const CreativesData = () => {
     setPage,
     setPerPage,
     setLang,
-    setWorkId,
+    setSlug,
     create,
     update,
     remove,
@@ -71,12 +71,12 @@ const CreativesData = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      setWorkId(id);
-      fetchList(id);
+    if (slug) {
+      setSlug(slug);
+      fetchList(slug);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, page, perPage, lang]);
+  }, [slug, page, perPage, lang]);
 
   const excelMimeTypes = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -115,7 +115,7 @@ const CreativesData = () => {
     try {
       const values = await addForm.validateFields();
       const payload = {
-        work_id: id,
+        work_id: slug,
         title_en: values.title_en,
         title_ar: values.title_ar,
         title_fr: values.title_fr,
@@ -280,7 +280,7 @@ const CreativesData = () => {
           <Upload
             accept=".xlsx,.xls"
             showUploadList={false}
-            disabled={!id}
+            disabled={!slug}
             beforeUpload={(file) => {
               handleImportExcel(file);
               return false;
@@ -288,7 +288,7 @@ const CreativesData = () => {
           >
             <Button
               icon={<UploadOutlined />}
-              disabled={!id}
+              disabled={!slug}
               className="flex items-center"
             >
               Import Excel

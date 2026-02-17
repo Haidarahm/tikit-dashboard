@@ -249,20 +249,20 @@ const WorksSection = () => {
     setEditImageFileList([]);
   };
 
-  const handleViewData = (workId, workType) => {
+  const handleViewData = (workSlug, workType) => {
     if (workType === "social") {
-      navigate(`/works/social/${workId}`);
+      navigate(`/works/social/${workSlug}`);
     } else if (workType === "influence") {
-      navigate(`/works/influence/${workId}`);
+      navigate(`/works/influence/${workSlug}`);
     } else if (workType === "digital") {
-      navigate(`/works/digital/${workId}`);
+      navigate(`/works/digital/${workSlug}`);
     } else if (workType === "creative") {
-      navigate(`/works/creative/${workId}`);
+      navigate(`/works/creative/${workSlug}`);
     } else if (workType === "event") {
-      navigate(`/works/event/${workId}`);
+      navigate(`/works/event/${workSlug}`);
     } else {
       // Default to influence for backward compatibility
-      navigate(`/works/influence/${workId}`);
+      navigate(`/works/influence/${workSlug}`);
     }
   };
 
@@ -345,7 +345,7 @@ const WorksSection = () => {
             <Button
               type="text"
               icon={<FaDatabase />}
-              onClick={() => handleViewData(work.id, work.type)}
+              onClick={() => handleViewData(work.slug, work.type)}
             />
           </Tooltip>
           <Tooltip title="Edit">

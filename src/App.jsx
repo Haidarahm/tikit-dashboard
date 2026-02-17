@@ -41,11 +41,11 @@ function App() {
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
             <Route path="/news" element={<News />} />
             <Route path="/works" element={<WorksSection />} />
-            <Route path="/works/influence/:id" element={<InfluencersItems />} />
-            <Route path="/works/social/:id" element={<SocialsData />} />
-            <Route path="/works/digital/:id" element={<DigitalsData />} />
-            <Route path="/works/creative/:id" element={<CreativesData />} />
-            <Route path="/works/event/:id" element={<EventsData />} />
+            <Route path="/works/influence/:slug" element={<InfluencersItems />} />
+            <Route path="/works/social/:slug" element={<SocialsData />} />
+            <Route path="/works/digital/:slug" element={<DigitalsData />} />
+            <Route path="/works/creative/:slug" element={<CreativesData />} />
+            <Route path="/works/event/:slug" element={<EventsData />} />
             <Route path="/influencer/sections" element={<Sections />} />
             <Route path="/influencer/data/:id" element={<InfluencersData />} />
             <Route

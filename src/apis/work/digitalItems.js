@@ -1,17 +1,19 @@
 import { apiClient } from "../client.js";
 
 export async function getAllDigitalItems({
-  work_id,
+  slug,
   page,
   per_page,
   lang,
 } = {}) {
+  if (!slug) {
+    throw new Error("Slug is required");
+  }
   const params = {};
-  if (work_id != null) params.work_id = work_id;
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/work-digitals/get", { params });
+  const { data } = await apiClient.get(`/work-digitals/${slug}`, { params });
   return data;
 }
 
@@ -97,12 +99,12 @@ export async function updateDigitalItem(id, payload) {
   return data;
 }
 
-export async function importExcelfile(id, file) {
+export async function importExcelfile(slug, file) {
   const formData = new FormData();
   formData.append("file", file);
 
   const { data } = await apiClient.post(
-    `/work-digitals/${id}/import`,
+    `/work-digitals/${slug}/import`,
     formData,
     { headers: { "Content-Type": "multipart/form-data" } }
   );

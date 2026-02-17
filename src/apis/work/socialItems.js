@@ -1,12 +1,14 @@
 import { apiClient } from "../client.js";
 
-export async function getSocialItems({ work_id, page, per_page, lang } = {}) {
+export async function getSocialItems({ slug, page, per_page, lang } = {}) {
+  if (!slug) {
+    throw new Error("Slug is required");
+  }
   const params = {};
-  if (work_id != null) params.work_id = work_id;
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
   if (lang != null) params.lang = lang;
-  const { data } = await apiClient.get("/work-socials/get", { params });
+  const { data } = await apiClient.get(`/work-socials/${slug}`, { params });
   return data;
 }
 
@@ -98,12 +100,12 @@ export async function updateSocial(id, payload) {
   return data;
 }
 
-export async function importExcelfile(id, file) {
+export async function importExcelfile(slug, file) {
   const formData = new FormData();
   formData.append("file", file);
 
   const { data } = await apiClient.post(
-    `/work-socials/${id}/import`,
+    `/work-socials/${slug}/import`,
     formData,
     { headers: { "Content-Type": "multipart/form-data" } }
   );
