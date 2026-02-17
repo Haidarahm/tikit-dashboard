@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import Services from "./pages/Services.jsx";
-import SubServices from "./pages/SubServices.jsx";
 import Sections from "./pages/influencer/Sections.jsx";
 import Banner from "./pages/Banner.jsx";
 import AboutBanners from "./pages/AboutBanners.jsx";
@@ -36,7 +35,6 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route index element={<Navigate to="/services" replace />} />
             <Route path="/services" element={<Services />} />
-            <Route path="/services/sub" element={<SubServices />} />
             <Route path="/team" element={<TeamManagement />} />
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
             <Route path="/news" element={<News />} />

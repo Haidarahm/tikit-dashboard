@@ -6,7 +6,6 @@ import {
   UserOutlined,
   LogoutOutlined,
   AppstoreOutlined,
-  BarcodeOutlined,
   UnorderedListOutlined,
   VideoCameraOutlined,
   FolderOutlined,
@@ -32,7 +31,6 @@ function DashboardLayout() {
     if (path.startsWith("/banner")) return ["banner"];
     if (path.startsWith("/influencer/sections")) return ["sections"];
     if (path.startsWith("/works")) return ["works"];
-    if (path.startsWith("/services/sub")) return ["services-sub"];
     if (path.startsWith("/services")) return ["services"];
     if (path.startsWith("/team")) return ["team"];
     if (path.startsWith("/showcase-projects")) return ["showcase-projects"];
@@ -112,12 +110,6 @@ function DashboardLayout() {
               icon: <AppstoreOutlined />,
               label: "Services",
               onClick: () => navigate("/services"),
-            },
-            {
-              key: "services-sub",
-              icon: <BarcodeOutlined />,
-              label: "Sub Services",
-              onClick: () => navigate("/services/sub"),
             },
             {
               key: "showcase-projects",
