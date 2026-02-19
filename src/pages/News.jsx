@@ -73,6 +73,7 @@ function News() {
   const [detailsCreateImages, setDetailsCreateImages] = useState([]);
   const [detailsEditImages, setDetailsEditImages] = useState([]);
   const [isDetailsImporting, setIsDetailsImporting] = useState(false);
+  const [expandedDetailsDescriptions, setExpandedDetailsDescriptions] = useState({});
   
   // Separate loading states for each translation button
   const [translatingTitle, setTranslatingTitle] = useState(false);
@@ -773,6 +774,7 @@ function News() {
           setIsDetailsModalOpen(false);
           setSelectedNewsId(null);
           setSelectedNewsSlug(null);
+          setExpandedDetailsDescriptions({});
         }}
         footer={null}
         width={1200}
@@ -859,8 +861,37 @@ function News() {
                 title: "Description",
                 dataIndex: "description",
                 key: "description",
-                ellipsis: true,
-                render: (text) => text || "-",
+                width: 300,
+                render: (text, record) => {
+                  const isExpanded = expandedDetailsDescriptions[record.id];
+                  const maxLength = 50;
+
+                  if (!text) return "-";
+
+                  if (text.length <= maxLength) {
+                    return <div className="whitespace-pre-wrap">{text}</div>;
+                  }
+
+                  return (
+                    <div>
+                      <div className="whitespace-pre-wrap mb-1">
+                        {isExpanded ? text : `${text.substring(0, maxLength)}...`}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedDetailsDescriptions({
+                            ...expandedDetailsDescriptions,
+                            [record.id]: !isExpanded,
+                          });
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        {isExpanded ? "Read less" : "Read more"}
+                      </button>
+                    </div>
+                  );
+                },
               },
               {
                 title: "Images",
