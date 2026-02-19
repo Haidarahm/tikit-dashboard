@@ -1,4 +1,4 @@
-import { Layout, Menu, Dropdown, Avatar } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Button } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.js";
@@ -15,6 +15,8 @@ import {
   FundProjectionScreenOutlined,
   ContactsOutlined,
   MailOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 
 const { Header, Sider, Content } = Layout;
@@ -24,6 +26,7 @@ function DashboardLayout() {
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
   const [openKeys, setOpenKeys] = useState([]);
+  const [collapsed, setCollapsed] = useState(false);
 
   const selectedKeys = useMemo(() => {
     const path = location.pathname;
@@ -75,6 +78,10 @@ function DashboardLayout() {
       <Sider
         breakpoint="lg"
         collapsedWidth="0"
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        trigger={null}
         theme="dark"
         width={260}
         className="shadow-lg"
@@ -175,7 +182,14 @@ function DashboardLayout() {
           className="bg-gray-800 shadow-md border-b border-gray-700 flex items-center justify-between px-4 md:px-6"
           style={{ height: 64 }}
         >
-          <div className="flex items-center"></div>
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined className="text-lg" /> : <MenuFoldOutlined className="text-lg" />}
+            onClick={() => setCollapsed(!collapsed)}
+            style={{ color: "rgba(255,255,255,0.85)", fontSize: 18 }}
+            className="flex items-center justify-center hover:!text-white"
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          />
           <div className="flex items-center">
             <Dropdown
               menu={{ items: userMenuItems }}
