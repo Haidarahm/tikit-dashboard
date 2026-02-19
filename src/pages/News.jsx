@@ -64,6 +64,7 @@ function News() {
   const [isImporting, setIsImporting] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedNewsId, setSelectedNewsId] = useState(null);
+  const [selectedNewsSlug, setSelectedNewsSlug] = useState(null);
   const [isDetailsCreateOpen, setIsDetailsCreateOpen] = useState(false);
   const [isDetailsEditOpen, setIsDetailsEditOpen] = useState(false);
   const [editingDetailsId, setEditingDetailsId] = useState(null);
@@ -384,8 +385,9 @@ function News() {
               icon={<DatabaseOutlined />}
               onClick={() => {
                 setSelectedNewsId(record.id);
+                setSelectedNewsSlug(record.slug);
                 setIsDetailsModalOpen(true);
-                fetchNewsDetails(record.id, { lang });
+                fetchNewsDetails(record.slug, { lang });
               }}
             />
             <Popconfirm
@@ -770,6 +772,7 @@ function News() {
         onCancel={() => {
           setIsDetailsModalOpen(false);
           setSelectedNewsId(null);
+          setSelectedNewsSlug(null);
         }}
         footer={null}
         width={1200}
@@ -794,9 +797,9 @@ function News() {
                 beforeUpload={async (file) => {
                   setIsDetailsImporting(true);
                   try {
-                    await importNewsDetailsExcel(selectedNewsId, file);
-                    if (selectedNewsId) {
-                      await fetchNewsDetails(selectedNewsId, { lang });
+                    await importNewsDetailsExcel(selectedNewsId, file, selectedNewsSlug);
+                    if (selectedNewsSlug) {
+                      await fetchNewsDetails(selectedNewsSlug, { lang });
                     }
                   } catch (error) {
                     if (error?.response?.data?.message) {
@@ -822,8 +825,8 @@ function News() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                if (selectedNewsId) {
-                  fetchNewsDetails(selectedNewsId, { lang });
+                if (selectedNewsSlug) {
+                  fetchNewsDetails(selectedNewsSlug, { lang });
                 }
               }}
             >
@@ -930,7 +933,7 @@ function News() {
                       cancelText="No"
                       onConfirm={async () => {
                         try {
-                          await removeNewsDetails(record.id, selectedNewsId);
+                          await removeNewsDetails(record.id, selectedNewsSlug);
                         } catch (error) {
                           if (error?.response?.data?.message) {
                             toast.error(error.response.data.message);
@@ -972,12 +975,12 @@ function News() {
                 .map((img) => img.originFileObj)
                 .filter(Boolean);
             }
-            await createNewsDetails(selectedNewsId, payload);
+            await createNewsDetails(selectedNewsId, payload, selectedNewsSlug);
             setIsDetailsCreateOpen(false);
             detailsCreateForm.resetFields();
             setDetailsCreateImages([]);
-            if (selectedNewsId) {
-              await fetchNewsDetails(selectedNewsId, { lang });
+            if (selectedNewsSlug) {
+              await fetchNewsDetails(selectedNewsSlug, { lang });
             }
           } catch (error) {
             if (error?.response?.data?.message) {
@@ -1160,7 +1163,7 @@ function News() {
                 payload.images = newImages;
               }
             }
-            await updateNewsDetails(editingDetailsId, payload, selectedNewsId);
+            await updateNewsDetails(editingDetailsId, payload, selectedNewsSlug);
             setIsDetailsEditOpen(false);
             detailsEditForm.resetFields();
             setDetailsEditImages([]);

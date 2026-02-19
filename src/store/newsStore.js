@@ -142,11 +142,11 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  fetchNewsDetails: async (id, { lang } = {}) => {
+  fetchNewsDetails: async (slug, { lang } = {}) => {
     const { lang: storeLang } = get();
     set({ isLoading: true, error: null });
     try {
-      const resp = await getAllNewsDetailsAPI(id, { lang: lang ?? storeLang });
+      const resp = await getAllNewsDetailsAPI(slug, { lang: lang ?? storeLang });
       const rawItems = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
@@ -177,12 +177,12 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  createNewsDetails: async (id, payload) => {
+  createNewsDetails: async (id, payload, slug = null) => {
     set({ isLoading: true, error: null });
     try {
       const created = await addNewsDetailsAPI(id, payload);
       set({ currentDetails: created?.data || created });
-      await get().fetchNewsDetails(id);
+      if (slug) await get().fetchNewsDetails(slug);
       toast.success("Blog details created successfully");
       return created;
     } catch (error) {
@@ -196,13 +196,13 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  updateNewsDetails: async (id, payload, newsId = null) => {
+  updateNewsDetails: async (id, payload, newsSlug = null) => {
     set({ isLoading: true, error: null });
     try {
       const updated = await updateNewsDetailsAPI(id, payload);
       set({ currentDetails: updated?.data || updated });
-      if (newsId) {
-        await get().fetchNewsDetails(newsId);
+      if (newsSlug) {
+        await get().fetchNewsDetails(newsSlug);
       }
       toast.success("Blog details updated successfully");
       return updated;
@@ -217,12 +217,12 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  removeNewsDetails: async (id, newsId = null) => {
+  removeNewsDetails: async (id, newsSlug = null) => {
     set({ isLoading: true, error: null });
     try {
       await deleteNewsDetailsAPI(id);
-      if (newsId) {
-        await get().fetchNewsDetails(newsId);
+      if (newsSlug) {
+        await get().fetchNewsDetails(newsSlug);
       }
       toast.success("Blog details deleted successfully");
     } catch (error) {
@@ -236,11 +236,11 @@ export const useNewsStore = create((set, get) => ({
     }
   },
 
-  importNewsDetailsExcel: async (id, file) => {
+  importNewsDetailsExcel: async (id, file, slug = null) => {
     set({ isLoading: true, error: null });
     try {
       await importNewsDetailsExcelAPI(id, file);
-      await get().fetchNewsDetails(id);
+      if (slug) await get().fetchNewsDetails(slug);
       toast.success("Blog details imported successfully");
     } catch (error) {
       set({ error });

@@ -107,10 +107,10 @@ export async function updateNewsDetails(id, payload) {
   return data;
 }
 
-export async function getAllNewsDetails(id, { lang } = {}) {
+export async function getAllNewsDetails(slug, { lang } = {}) {
   const params = {};
   if (lang) params.lang = lang;
-  const { data } = await apiClient.get(`/blogs-details/${id}/get`, { params });
+  const { data } = await apiClient.get(`/blogs-details/${slug}/get`, { params });
   return data;
 }
 
