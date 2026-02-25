@@ -516,9 +516,11 @@ const SocialsData = () => {
             <Form.Item
               name="engagement_rate"
               label="Engagement Rate (%)"
+              normalize={(v) => (v === "" || v == null ? undefined : parseFloat(v))}
               rules={[{ required: true, type: "number", min: 0, max: 100 }]}
             >
-              <InputNumber
+              <Input
+                type="number"
                 placeholder="Enter engagement rate"
                 className="w-full"
                 min={0}
@@ -610,8 +612,13 @@ const SocialsData = () => {
                 min={0}
               />
             </Form.Item>
-            <Form.Item name="engagement_rate" label="Engagement Rate (%)">
-              <InputNumber
+            <Form.Item
+              name="engagement_rate"
+              label="Engagement Rate (%)"
+              normalize={(v) => (v === "" || v == null ? undefined : parseFloat(v))}
+            >
+              <Input
+                type="number"
                 placeholder="Enter engagement rate"
                 className="w-full"
                 min={0}
