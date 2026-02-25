@@ -95,9 +95,6 @@ export const Sections = () => {
         [`${fieldBase}_ar`]: result.ar || "",
         [`${fieldBase}_fr`]: result.fr || "",
       });
-      toast.success(
-        `Translated ${fieldBase} to Arabic and French successfully.`
-      );
     } catch {
       // Error toast already handled in store
     } finally {
@@ -129,9 +126,6 @@ export const Sections = () => {
         [`${fieldBase}_ar`]: result.ar || "",
         [`${fieldBase}_fr`]: result.fr || "",
       });
-      toast.success(
-        `Translated ${fieldBase} to Arabic and French successfully.`
-      );
     } catch {
       // Error toast already handled in store
     } finally {

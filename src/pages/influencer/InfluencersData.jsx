@@ -21,6 +21,7 @@ import {
   PlusOutlined,
   CloseOutlined,
   UploadOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons";
 import {
   FaInstagram,
@@ -34,6 +35,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useInfluencerStore } from "../../store/influencers/influencerStore.js";
+import { useTranslateStore } from "../../store/translateStore.js";
 
 const InfluencersData = () => {
   const { id } = useParams();
@@ -123,6 +125,71 @@ const InfluencersData = () => {
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editLinks, setEditLinks] = useState([{ link: "", link_type: "" }]);
   const [editingId, setEditingId] = useState(null);
+
+  const [translatingAddName, setTranslatingAddName] = useState(false);
+  const [translatingAddPrimarySubtitle, setTranslatingAddPrimarySubtitle] = useState(false);
+  const [translatingAddSecondarySubtitle, setTranslatingAddSecondarySubtitle] = useState(false);
+  const [translatingEditName, setTranslatingEditName] = useState(false);
+  const [translatingEditPrimarySubtitle, setTranslatingEditPrimarySubtitle] = useState(false);
+  const [translatingEditSecondarySubtitle, setTranslatingEditSecondarySubtitle] = useState(false);
+
+  const translateText = useTranslateStore((state) => state.translateText);
+
+  const handleTranslateAddField = async (fieldBase) => {
+    const enValue = addForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase.replace("_", " ")} (EN) text first.`);
+      return;
+    }
+    const setLoading = {
+      name: setTranslatingAddName,
+      primary_subtitle: setTranslatingAddPrimarySubtitle,
+      secondary_subtitle: setTranslatingAddSecondarySubtitle,
+    }[fieldBase];
+    if (!setLoading) return;
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+      addForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+    } catch {
+      // Error already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTranslateEditField = async (fieldBase) => {
+    const enValue = editForm.getFieldValue(`${fieldBase}_en`);
+    if (!enValue || !String(enValue).trim()) {
+      toast.warning(`Please enter ${fieldBase.replace("_", " ")} (EN) text first.`);
+      return;
+    }
+    const setLoading = {
+      name: setTranslatingEditName,
+      primary_subtitle: setTranslatingEditPrimarySubtitle,
+      secondary_subtitle: setTranslatingEditSecondarySubtitle,
+    }[fieldBase];
+    if (!setLoading) return;
+    setLoading(true);
+    try {
+      const result = await translateText(String(enValue));
+      if (!result) return;
+      editForm.setFieldsValue({
+        [`${fieldBase}_en`]: result.en || enValue,
+        [`${fieldBase}_ar`]: result.ar || "",
+        [`${fieldBase}_fr`]: result.fr || "",
+      });
+    } catch {
+      // Error already handled in store
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -486,7 +553,19 @@ const InfluencersData = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Form.Item
               name="name_en"
-              label="Name (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Name (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("name")}
+                    loading={translatingAddName}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input placeholder="Enter English name" />
@@ -508,7 +587,19 @@ const InfluencersData = () => {
 
             <Form.Item
               name="primary_subtitle_en"
-              label="Primary Subtitle (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Primary Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("primary_subtitle")}
+                    loading={translatingAddPrimarySubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input placeholder="Enter English primary subtitle" />
@@ -530,7 +621,19 @@ const InfluencersData = () => {
 
             <Form.Item
               name="secondary_subtitle_en"
-              label="Secondary Subtitle (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Secondary Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateAddField("secondary_subtitle")}
+                    loading={translatingAddSecondarySubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
               rules={[{ required: true }]}
             >
               <Input placeholder="Enter English secondary subtitle" />
@@ -624,7 +727,22 @@ const InfluencersData = () => {
       >
         <Form form={editForm} layout="vertical">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item name="name_en" label="Name (EN)">
+            <Form.Item
+              name="name_en"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Name (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("name")}
+                    loading={translatingEditName}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
+            >
               <Input placeholder="Enter English name" />
             </Form.Item>
             <Form.Item name="name_ar" label="Name (AR)">
@@ -634,7 +752,22 @@ const InfluencersData = () => {
               <Input placeholder="Enter French name" />
             </Form.Item>
 
-            <Form.Item name="primary_subtitle_en" label="Primary Subtitle (EN)">
+            <Form.Item
+              name="primary_subtitle_en"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Primary Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("primary_subtitle")}
+                    loading={translatingEditPrimarySubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
+            >
               <Input placeholder="Enter English primary subtitle" />
             </Form.Item>
             <Form.Item name="primary_subtitle_ar" label="Primary Subtitle (AR)">
@@ -646,7 +779,19 @@ const InfluencersData = () => {
 
             <Form.Item
               name="secondary_subtitle_en"
-              label="Secondary Subtitle (EN)"
+              label={
+                <span className="flex items-center gap-2">
+                  <span>Secondary Subtitle (EN)</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={<TranslationOutlined />}
+                    onClick={() => handleTranslateEditField("secondary_subtitle")}
+                    loading={translatingEditSecondarySubtitle}
+                    style={{ padding: 0, fontSize: "12px", height: "auto" }}
+                  />
+                </span>
+              }
             >
               <Input placeholder="Enter English secondary subtitle" />
             </Form.Item>

@@ -12,10 +12,7 @@ export async function getSocialItems({ slug, page, per_page, lang } = {}) {
   return data;
 }
 
-export async function createSocial(payload) {
-  const formData = new FormData();
-
-  // Add regular fields
+const appendSocialFields = (formData, payload) => {
   const fields = [
     "work_id",
     "follower_growth",
@@ -30,16 +27,24 @@ export async function createSocial(payload) {
     "title_ar",
     "title_fr",
   ];
+  const numericFields = ["follower_growth", "engagement_rate"];
   fields.forEach((f) => {
-    if (payload[f] != null) formData.append(f, payload[f]);
+    if (payload[f] != null) {
+      const val = payload[f];
+      formData.append(
+        f,
+        numericFields.includes(f) && typeof val === "number" ? String(val) : val
+      );
+    }
   });
+};
 
-  // Add logo
+export async function createSocial(payload) {
+  const formData = new FormData();
+  appendSocialFields(formData, payload);
   if (payload?.logo) {
     formData.append("logo", payload.logo);
   }
-
-  // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
     payload.images.forEach((image) => {
       if (image) {
@@ -47,7 +52,6 @@ export async function createSocial(payload) {
       }
     });
   }
-
   const { data } = await apiClient.post("/work-socials/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -56,27 +60,7 @@ export async function createSocial(payload) {
 
 export async function updateSocial(id, payload) {
   const formData = new FormData();
-
-  // Add regular fields
-  const fields = [
-    "work_id",
-    "follower_growth",
-    "engagement_rate",
-    "objective_ar",
-    "objective_en",
-    "objective_fr",
-    "approach_ar",
-    "approach_en",
-    "approach_fr",
-    "title_en",
-    "title_ar",
-    "title_fr",
-  ];
-  fields.forEach((f) => {
-    if (payload[f] != null) formData.append(f, payload[f]);
-  });
-
-  // Add logo
+  appendSocialFields(formData, payload);
   if (payload?.logo) {
     formData.append("logo", payload.logo);
   }
