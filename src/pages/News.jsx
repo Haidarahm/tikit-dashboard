@@ -19,6 +19,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   TranslationOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useNewsStore } from "../store/newsStore.js";
@@ -73,13 +74,13 @@ function News() {
   const [isDetailsCreateOpen, setIsDetailsCreateOpen] = useState(false);
   const [isDetailsEditOpen, setIsDetailsEditOpen] = useState(false);
   const [editingDetailsId, setEditingDetailsId] = useState(null);
+  const [detailsViewItem, setDetailsViewItem] = useState(null);
   const [detailsCreateForm] = Form.useForm();
   const [detailsEditForm] = Form.useForm();
   const [detailsCreateImages, setDetailsCreateImages] = useState([]);
   const [detailsEditImages, setDetailsEditImages] = useState([]);
   const [isDetailsImporting, setIsDetailsImporting] = useState(false);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
-  const [expandedDetailsDescriptions, setExpandedDetailsDescriptions] = useState({});
   
   // Separate loading states for each translation button
   const [translatingTitle, setTranslatingTitle] = useState(false);
@@ -829,7 +830,7 @@ function News() {
           setIsDetailsModalOpen(false);
           setSelectedNewsId(null);
           setSelectedNewsSlug(null);
-          setExpandedDetailsDescriptions({});
+          setDetailsViewItem(null);
         }}
         footer={null}
         width={1200}
@@ -913,42 +914,6 @@ function News() {
                 ellipsis: true,
               },
               {
-                title: "Description",
-                dataIndex: "description",
-                key: "description",
-                width: 300,
-                render: (text, record) => {
-                  const isExpanded = expandedDetailsDescriptions[record.id];
-                  const maxLength = 50;
-
-                  if (!text) return "-";
-
-                  if (text.length <= maxLength) {
-                    return <div className="whitespace-pre-wrap">{text}</div>;
-                  }
-
-                  return (
-                    <div>
-                      <div className="whitespace-pre-wrap mb-1">
-                        {isExpanded ? text : `${text.substring(0, maxLength)}...`}
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedDetailsDescriptions({
-                            ...expandedDetailsDescriptions,
-                            [record.id]: !isExpanded,
-                          });
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        {isExpanded ? "Read less" : "Read more"}
-                      </button>
-                    </div>
-                  );
-                },
-              },
-              {
                 title: "Images",
                 dataIndex: "images",
                 key: "images",
@@ -979,9 +944,14 @@ function News() {
               {
                 title: "Actions",
                 key: "actions",
-                width: 150,
+                width: 180,
                 render: (record) => (
                   <Space>
+                    <Button
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => setDetailsViewItem(record)}
+                    />
                     <Button
                       size="small"
                       icon={<EditOutlined />}
@@ -1040,6 +1010,84 @@ function News() {
             pagination={false}
           />
         </div>
+      </Modal>
+
+      <Modal
+        title="View Blog Detail"
+        open={!!detailsViewItem}
+        onCancel={() => setDetailsViewItem(null)}
+        footer={
+          <Button type="primary" onClick={() => setDetailsViewItem(null)}>
+            Close
+          </Button>
+        }
+        width={640}
+      >
+        {detailsViewItem && (() => {
+          const titleByLang =
+            lang === "en"
+              ? detailsViewItem.title_en ?? detailsViewItem.title
+              : lang === "ar"
+                ? detailsViewItem.title_ar ?? detailsViewItem.title
+                : detailsViewItem.title_fr ?? detailsViewItem.title;
+          const subtitleByLang =
+            lang === "en"
+              ? detailsViewItem.subtitle_en ?? detailsViewItem.subtitle
+              : lang === "ar"
+                ? detailsViewItem.subtitle_ar ?? detailsViewItem.subtitle
+                : detailsViewItem.subtitle_fr ?? detailsViewItem.subtitle;
+          const descriptionByLang =
+            lang === "en"
+              ? detailsViewItem.description_en ?? detailsViewItem.description
+              : lang === "ar"
+                ? detailsViewItem.description_ar ?? detailsViewItem.description
+                : detailsViewItem.description_fr ?? detailsViewItem.description;
+          return (
+            <div className="space-y-5">
+              <div>
+                <span className="text-gray-500 font-medium">ID</span>
+                <div className="mt-1">{detailsViewItem.id}</div>
+              </div>
+              <div>
+                <span className="text-gray-500 text-sm">Title</span>
+                <div className="mt-0.5">{titleByLang || "-"}</div>
+              </div>
+              <div>
+                <span className="text-gray-500 text-sm">Subtitle</span>
+                <div className="mt-0.5">{subtitleByLang || "-"}</div>
+              </div>
+              <div>
+                <span className="text-gray-500 text-sm">Description</span>
+                <div
+                  className="news-detail-view-description mt-1 min-h-[1em]"
+                  dangerouslySetInnerHTML={{ __html: descriptionByLang || "" }}
+                />
+              </div>
+              <div>
+                <span className="text-gray-500 font-medium">Images</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {detailsViewItem.images &&
+                  Array.isArray(detailsViewItem.images) &&
+                  detailsViewItem.images.length > 0 ? (
+                    detailsViewItem.images.map((img, idx) => (
+                      <Image
+                        key={idx}
+                        src={img}
+                        width={120}
+                        height={120}
+                        style={{ objectFit: "cover" }}
+                        className="rounded"
+                        preview={{ mask: "Preview" }}
+                      />
+                    ))
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </Modal>
 
       <Modal
