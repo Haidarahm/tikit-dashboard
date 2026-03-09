@@ -34,6 +34,58 @@ export function stripHtml(html) {
   return tmp.textContent || tmp.innerText || "";
 }
 
+/**
+ * Split HTML into segments: either a tag (e.g. "<b>", "</p>") or a text node.
+ */
+function splitHtmlSegments(html) {
+  const segments = [];
+  const re = /(<[^>]+>)|([^<]+)/g;
+  let m;
+  while ((m = re.exec(html)) !== null) {
+    if (m[1]) segments.push({ type: "tag", value: m[1] });
+    else if (m[2]) segments.push({ type: "text", value: m[2] });
+  }
+  return segments;
+}
+
+/**
+ * Translate HTML content while preserving structure (bold, links, lists).
+ * translateFn(text) should return Promise<{ ar: string, fr: string }>.
+ * Returns Promise<{ arHtml: string, frHtml: string }>.
+ */
+export async function translateHtmlPreservingStructure(html, translateFn) {
+  if (!html || typeof html !== "string") return { arHtml: "", frHtml: "" };
+  const segments = splitHtmlSegments(html);
+  const arParts = [];
+  const frParts = [];
+  for (const seg of segments) {
+    if (seg.type === "tag") {
+      arParts.push(seg.value);
+      frParts.push(seg.value);
+    } else {
+      const trimmed = seg.value.trim();
+      if (!trimmed) {
+        arParts.push(seg.value);
+        frParts.push(seg.value);
+        continue;
+      }
+      const leading = seg.value.slice(0, seg.value.indexOf(trimmed));
+      const trailing = seg.value.slice(seg.value.indexOf(trimmed) + trimmed.length);
+      try {
+        const result = await translateFn(trimmed);
+        const ar = result?.ar ?? trimmed;
+        const fr = result?.fr ?? trimmed;
+        arParts.push(leading + ar + trailing);
+        frParts.push(leading + fr + trailing);
+      } catch {
+        arParts.push(seg.value);
+        frParts.push(seg.value);
+      }
+    }
+  }
+  return { arHtml: arParts.join(""), frHtml: frParts.join("") };
+}
+
 function MenuBar({ editor }) {
   const addLink = () => {
     const url = window.prompt("URL");

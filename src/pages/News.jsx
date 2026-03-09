@@ -23,7 +23,11 @@ import {
 import { toast } from "react-toastify";
 import { useNewsStore } from "../store/newsStore.js";
 import { useTranslateStore } from "../store/translateStore.js";
-import RichTextEditor, { normalizeDescriptionHtml, stripHtml } from "../components/RichTextEditor.jsx";
+import RichTextEditor, {
+  normalizeDescriptionHtml,
+  stripHtml,
+  translateHtmlPreservingStructure,
+} from "../components/RichTextEditor.jsx";
 
 const LANG_OPTIONS = [
   { label: "English", value: "en" },
@@ -225,27 +229,41 @@ function News() {
       return;
     }
 
-    // Set loading state for specific field
     const setLoading = {
       title: setTranslatingDetailsTitle,
       subtitle: setTranslatingDetailsSubtitle,
       description: setTranslatingDetailsDescription,
     }[fieldBase];
-    
     if (!setLoading) return;
 
     setLoading(true);
     try {
-      const textToTranslate = fieldBase === "description" ? stripHtml(enValue) : String(enValue);
-      if (!textToTranslate.trim()) return;
-      const result = await translateText(textToTranslate);
-      if (!result) return;
-
-      detailsCreateForm.setFieldsValue({
-        [`${fieldBase}_en`]: result.en || enValue,
-        [`${fieldBase}_ar`]: result.ar || "",
-        [`${fieldBase}_fr`]: result.fr || "",
-      });
+      if (fieldBase === "description") {
+        const { arHtml, frHtml } = await translateHtmlPreservingStructure(
+          enValue,
+          async (text) => {
+            const t = text.trim();
+            if (!t) return { ar: "", fr: "" };
+            const result = await translateText(t);
+            return result ? { ar: result.ar || "", fr: result.fr || "" } : { ar: "", fr: "" };
+          }
+        );
+        detailsCreateForm.setFieldsValue({
+          [`${fieldBase}_en`]: enValue,
+          [`${fieldBase}_ar`]: arHtml,
+          [`${fieldBase}_fr`]: frHtml,
+        });
+      } else {
+        const textToTranslate = String(enValue).trim();
+        if (!textToTranslate) return;
+        const result = await translateText(textToTranslate);
+        if (!result) return;
+        detailsCreateForm.setFieldsValue({
+          [`${fieldBase}_en`]: result.en || enValue,
+          [`${fieldBase}_ar`]: result.ar || "",
+          [`${fieldBase}_fr`]: result.fr || "",
+        });
+      }
     } catch {
       // Error toast already handled in store
     } finally {
@@ -293,27 +311,41 @@ function News() {
       return;
     }
 
-    // Set loading state for specific field
     const setLoading = {
       title: setTranslatingDetailsEditTitle,
       subtitle: setTranslatingDetailsEditSubtitle,
       description: setTranslatingDetailsEditDescription,
     }[fieldBase];
-    
     if (!setLoading) return;
 
     setLoading(true);
     try {
-      const textToTranslate = fieldBase === "description" ? stripHtml(enValue) : String(enValue);
-      if (!textToTranslate.trim()) return;
-      const result = await translateText(textToTranslate);
-      if (!result) return;
-
-      detailsEditForm.setFieldsValue({
-        [`${fieldBase}_en`]: result.en || enValue,
-        [`${fieldBase}_ar`]: result.ar || "",
-        [`${fieldBase}_fr`]: result.fr || "",
-      });
+      if (fieldBase === "description") {
+        const { arHtml, frHtml } = await translateHtmlPreservingStructure(
+          enValue,
+          async (text) => {
+            const t = text.trim();
+            if (!t) return { ar: "", fr: "" };
+            const result = await translateText(t);
+            return result ? { ar: result.ar || "", fr: result.fr || "" } : { ar: "", fr: "" };
+          }
+        );
+        detailsEditForm.setFieldsValue({
+          [`${fieldBase}_en`]: enValue,
+          [`${fieldBase}_ar`]: arHtml,
+          [`${fieldBase}_fr`]: frHtml,
+        });
+      } else {
+        const textToTranslate = String(enValue).trim();
+        if (!textToTranslate) return;
+        const result = await translateText(textToTranslate);
+        if (!result) return;
+        detailsEditForm.setFieldsValue({
+          [`${fieldBase}_en`]: result.en || enValue,
+          [`${fieldBase}_ar`]: result.ar || "",
+          [`${fieldBase}_fr`]: result.fr || "",
+        });
+      }
     } catch {
       // Error toast already handled in store
     } finally {
