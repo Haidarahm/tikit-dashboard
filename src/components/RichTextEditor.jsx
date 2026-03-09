@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -96,6 +96,7 @@ function MenuBar({ editor }) {
 
   if (!editor) return null;
 
+  const activeClass = "!bg-blue-100 !text-blue-700 border border-blue-300";
   return (
     <div className="flex flex-wrap gap-1 border-b border-gray-200 pb-2 mb-2">
       <Button
@@ -103,7 +104,7 @@ function MenuBar({ editor }) {
         size="small"
         icon={<BoldOutlined />}
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive("bold") ? "bg-gray-200" : ""}
+        className={editor.isActive("bold") ? activeClass : ""}
         title="Bold"
       />
       <Button
@@ -111,7 +112,7 @@ function MenuBar({ editor }) {
         size="small"
         icon={<ItalicOutlined />}
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive("italic") ? "bg-gray-200" : ""}
+        className={editor.isActive("italic") ? activeClass : ""}
         title="Italic"
       />
       <Button
@@ -119,7 +120,7 @@ function MenuBar({ editor }) {
         size="small"
         icon={<UnorderedListOutlined />}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive("bulletList") ? "bg-gray-200" : ""}
+        className={editor.isActive("bulletList") ? activeClass : ""}
         title="Bullet list"
       />
       <Button
@@ -127,7 +128,7 @@ function MenuBar({ editor }) {
         size="small"
         icon={<OrderedListOutlined />}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive("orderedList") ? "bg-gray-200" : ""}
+        className={editor.isActive("orderedList") ? activeClass : ""}
         title="Numbered list"
       />
       <Button
@@ -135,7 +136,7 @@ function MenuBar({ editor }) {
         size="small"
         icon={<LinkOutlined />}
         onClick={addLink}
-        className={editor.isActive("link") ? "bg-gray-200" : ""}
+        className={editor.isActive("link") ? activeClass : ""}
         title="Insert link"
       />
     </div>
@@ -144,6 +145,7 @@ function MenuBar({ editor }) {
 
 export default function RichTextEditor({ value = "", onChange, placeholder, readOnly, ...rest }) {
   const isInternalChange = useRef(false);
+  const [, setToolbarUpdate] = useState(0);
 
   const editor = useEditor({
     extensions: [
@@ -167,6 +169,18 @@ export default function RichTextEditor({ value = "", onChange, placeholder, read
       onChange?.(html === "<p></p>" ? "" : html);
     },
   });
+
+  // Re-render toolbar when selection or content changes so active states (bold, italic, etc.) update
+  useEffect(() => {
+    if (!editor) return;
+    const onUpdate = () => setToolbarUpdate((n) => n + 1);
+    editor.on("selectionUpdate", onUpdate);
+    editor.on("transaction", onUpdate);
+    return () => {
+      editor.off("selectionUpdate", onUpdate);
+      editor.off("transaction", onUpdate);
+    };
+  }, [editor]);
 
   // Sync external value into editor (e.g. form reset or translate)
   useEffect(() => {
