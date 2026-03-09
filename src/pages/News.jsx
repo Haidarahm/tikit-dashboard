@@ -23,6 +23,7 @@ import {
 import { toast } from "react-toastify";
 import { useNewsStore } from "../store/newsStore.js";
 import { useTranslateStore } from "../store/translateStore.js";
+import RichTextEditor, { normalizeDescriptionHtml, stripHtml } from "../components/RichTextEditor.jsx";
 
 const LANG_OPTIONS = [
   { label: "English", value: "en" },
@@ -235,7 +236,9 @@ function News() {
 
     setLoading(true);
     try {
-      const result = await translateText(String(enValue));
+      const textToTranslate = fieldBase === "description" ? stripHtml(enValue) : String(enValue);
+      if (!textToTranslate.trim()) return;
+      const result = await translateText(textToTranslate);
       if (!result) return;
 
       detailsCreateForm.setFieldsValue({
@@ -301,7 +304,9 @@ function News() {
 
     setLoading(true);
     try {
-      const result = await translateText(String(enValue));
+      const textToTranslate = fieldBase === "description" ? stripHtml(enValue) : String(enValue);
+      if (!textToTranslate.trim()) return;
+      const result = await translateText(textToTranslate);
       if (!result) return;
 
       detailsEditForm.setFieldsValue({
@@ -1018,6 +1023,9 @@ function News() {
             const values = await detailsCreateForm.validateFields();
             const payload = {
               ...values,
+              description_en: normalizeDescriptionHtml(values.description_en),
+              description_ar: normalizeDescriptionHtml(values.description_ar),
+              description_fr: normalizeDescriptionHtml(values.description_fr),
             };
             if (detailsCreateImages.length > 0) {
               payload.images = detailsCreateImages
@@ -1127,7 +1135,7 @@ function News() {
             {/* Description Section */}
             <div>
               <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 <Form.Item
                   name="description_en"
                   label={
@@ -1145,29 +1153,26 @@ function News() {
                   }
                   rules={[{ required: true, message: "Description is required" }]}
                 >
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="Enter English description"
-                  />
+                  <RichTextEditor placeholder="Enter English description" />
                 </Form.Item>
                 <Form.Item
                   name="description_ar"
                   label="Description (AR)"
                   rules={[{ required: true, message: "Description is required" }]}
                 >
-                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                  <RichTextEditor placeholder="Enter Arabic description" />
                 </Form.Item>
                 <Form.Item
                   name="description_fr"
                   label="Description (FR)"
                   rules={[{ required: true, message: "Description is required" }]}
                 >
-                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                  <RichTextEditor placeholder="Enter French description" />
                 </Form.Item>
               </div>
             </div>
           </div>
-          <Form.Item label="Images">
+          <Form.Item label="Images" className="news-details-upload-section">
             <Upload
               listType="picture-card"
               fileList={detailsCreateImages}
@@ -1195,7 +1200,7 @@ function News() {
           setDetailsEditImages([]);
           setEditingDetailsId(null);
         }}
-        onOk={async () => {
+          onOk={async () => {
           try {
             const values = await detailsEditForm.validateFields();
             const payload = Object.entries(values).reduce((acc, [key, value]) => {
@@ -1204,6 +1209,9 @@ function News() {
               }
               return acc;
             }, {});
+            if (payload.description_en != null) payload.description_en = normalizeDescriptionHtml(payload.description_en);
+            if (payload.description_ar != null) payload.description_ar = normalizeDescriptionHtml(payload.description_ar);
+            if (payload.description_fr != null) payload.description_fr = normalizeDescriptionHtml(payload.description_fr);
             if (detailsEditImages.length > 0) {
               const newImages = detailsEditImages
                 .map((img) => img.originFileObj)
@@ -1295,7 +1303,7 @@ function News() {
             {/* Description Section */}
             <div>
               <h4 className="text-sm font-semibold mb-3 text-gray-700">Description</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-4">
                 <Form.Item
                   name="description_en"
                   label={
@@ -1312,21 +1320,18 @@ function News() {
                     </span>
                   }
                 >
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="Enter English description"
-                  />
+                  <RichTextEditor placeholder="Enter English description" />
                 </Form.Item>
                 <Form.Item name="description_ar" label="Description (AR)">
-                  <Input.TextArea rows={3} placeholder="Enter Arabic description" />
+                  <RichTextEditor placeholder="Enter Arabic description" />
                 </Form.Item>
                 <Form.Item name="description_fr" label="Description (FR)">
-                  <Input.TextArea rows={3} placeholder="Enter French description" />
+                  <RichTextEditor placeholder="Enter French description" />
                 </Form.Item>
               </div>
             </div>
           </div>
-          <Form.Item label="Images">
+          <Form.Item label="Images" className="news-details-upload-section">
             <Upload
               listType="picture-card"
               fileList={detailsEditImages}

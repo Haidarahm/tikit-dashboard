@@ -91,3 +91,18 @@ h1, h2, h3, h4, h5, h6 {
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
+
+/* Blog Details: larger upload area under description */
+.news-details-upload-section .ant-upload-list-picture-card-container,
+.news-details-upload-section .ant-upload.ant-upload-select {
+  width: 140px;
+  height: 140px;
+}
+.news-details-upload-section .ant-upload-list-picture-card .ant-upload-list-item {
+  width: 140px;
+  height: 140px;
+}
+.news-details-upload-section .ant-upload-list-picture-card-container {
+  margin-inline-end: 12px;
+  margin-bottom: 12px;
+}
