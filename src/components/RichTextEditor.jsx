@@ -151,10 +151,25 @@ export default function RichTextEditor({ value = "", onChange, placeholder, read
         .rich-text-editor-wrapper .ProseMirror p {
           margin: 0.25em 0;
         }
-        .rich-text-editor-wrapper .ProseMirror ul,
-        .rich-text-editor-wrapper .ProseMirror ol {
+        .rich-text-editor-wrapper .ProseMirror ul {
+          list-style-type: disc;
+          list-style-position: outside;
           padding-left: 1.5em;
           margin: 0.25em 0;
+        }
+        .rich-text-editor-wrapper .ProseMirror ul li {
+          display: list-item;
+          margin: 0.2em 0;
+        }
+        .rich-text-editor-wrapper .ProseMirror ol {
+          list-style-type: decimal;
+          list-style-position: outside;
+          padding-left: 1.5em;
+          margin: 0.25em 0;
+        }
+        .rich-text-editor-wrapper .ProseMirror ol li {
+          display: list-item;
+          margin: 0.2em 0;
         }
         .rich-text-editor-wrapper .ProseMirror a {
           color: #1890ff;
