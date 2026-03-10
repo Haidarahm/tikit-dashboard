@@ -26,6 +26,7 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../store/works/influencersItemsStore.js";
+import { useTranslateStore } from "../../store/translateStore.js";
 import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
 import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
 
@@ -47,6 +48,7 @@ const InfluencersItems = () => {
     update,
     remove,
     importExcel: importInfluencersExcel,
+    workId,
   } = useInfluencersItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -65,6 +67,42 @@ const InfluencersItems = () => {
     open: false,
     item: null,
   });
+  const [isCreateTranslating, setIsCreateTranslating] = useState(false);
+  const [isEditTranslating, setIsEditTranslating] = useState(false);
+
+  const translateText = useTranslateStore((state) => state.translateText);
+
+  /** Translate EN fields to AR/FR for Influencer item (plain text). */
+  const translateInfluencerFields = async ({
+    title_en,
+    objective_en,
+    brief_en,
+    strategy_en,
+  }) => {
+    const out = {
+      title_ar: "",
+      title_fr: "",
+      objective_ar: "",
+      objective_fr: "",
+      brief_ar: "",
+      brief_fr: "",
+      strategy_ar: "",
+      strategy_fr: "",
+    };
+    const translatePlain = async (text, field) => {
+      if (!text || !String(text).trim()) return;
+      const result = await translateText(String(text).trim());
+      if (result) {
+        out[`${field}_ar`] = result.ar ?? "";
+        out[`${field}_fr`] = result.fr ?? "";
+      }
+    };
+    await translatePlain(title_en, "title");
+    await translatePlain(objective_en, "objective");
+    await translatePlain(brief_en, "brief");
+    await translatePlain(strategy_en, "strategy");
+    return out;
+  };
 
   useEffect(() => {
     if (slug) {
@@ -76,22 +114,30 @@ const InfluencersItems = () => {
   const handleAdd = async () => {
     try {
       const values = await addForm.validateFields();
-      const payload = {
-        work_id: slug,
+      setIsCreateTranslating(true);
+      const translated = await translateInfluencerFields({
         title_en: values.title_en,
-        title_ar: values.title_ar,
-        title_fr: values.title_fr,
+        objective_en: values.objective_en,
         brief_en: values.brief_en,
-        brief_ar: values.brief_ar,
-        brief_fr: values.brief_fr,
         strategy_en: values.strategy_en,
-        strategy_ar: values.strategy_ar,
-        strategy_fr: values.strategy_fr,
+      });
+      setIsCreateTranslating(false);
+      const payload = {
+        work_id: workId,
+        title_en: values.title_en,
+        title_ar: translated.title_ar,
+        title_fr: translated.title_fr,
+        brief_en: values.brief_en,
+        brief_ar: translated.brief_ar,
+        brief_fr: translated.brief_fr,
+        strategy_en: values.strategy_en,
+        strategy_ar: translated.strategy_ar,
+        strategy_fr: translated.strategy_fr,
         reach: values.reach,
         views: values.views,
         objective_en: values.objective_en,
-        objective_ar: values.objective_ar,
-        objective_fr: values.objective_fr,
+        objective_ar: translated.objective_ar,
+        objective_fr: translated.objective_fr,
         engagement_rate: values.engagement_rate,
         images: imageFileList
           .map((file) => file.originFileObj)
@@ -122,6 +168,7 @@ const InfluencersItems = () => {
       setLogoFileList([]);
       setReelsFileList([]);
     } catch (err) {
+      setIsCreateTranslating(false);
       if (err?.response?.data?.message) {
         toast.error(err.response.data.message);
       } else if (err?.message) {
@@ -133,22 +180,38 @@ const InfluencersItems = () => {
   const handleEdit = async () => {
     try {
       const values = await editForm.validateFields();
+      setIsEditTranslating(true);
+      const translated = await translateInfluencerFields({
+        title_en: values.title_en,
+        objective_en: values.objective_en,
+        brief_en: values.brief_en,
+        strategy_en: values.strategy_en,
+      });
+      setIsEditTranslating(false);
       const payload = {};
 
-      if (values.title_en) payload.title_en = values.title_en;
-      if (values.title_ar) payload.title_ar = values.title_ar;
-      if (values.title_fr) payload.title_fr = values.title_fr;
-      if (values.brief_en) payload.brief_en = values.brief_en;
-      if (values.brief_ar) payload.brief_ar = values.brief_ar;
-      if (values.brief_fr) payload.brief_fr = values.brief_fr;
-      if (values.strategy_en) payload.strategy_en = values.strategy_en;
-      if (values.strategy_ar) payload.strategy_ar = values.strategy_ar;
-      if (values.strategy_fr) payload.strategy_fr = values.strategy_fr;
+      if (values.title_en) {
+        payload.title_en = values.title_en;
+        payload.title_ar = translated.title_ar;
+        payload.title_fr = translated.title_fr;
+      }
+      if (values.brief_en) {
+        payload.brief_en = values.brief_en;
+        payload.brief_ar = translated.brief_ar;
+        payload.brief_fr = translated.brief_fr;
+      }
+      if (values.strategy_en) {
+        payload.strategy_en = values.strategy_en;
+        payload.strategy_ar = translated.strategy_ar;
+        payload.strategy_fr = translated.strategy_fr;
+      }
       if (values.reach) payload.reach = values.reach;
       if (values.views) payload.views = values.views;
-      if (values.objective_en) payload.objective_en = values.objective_en;
-      if (values.objective_ar) payload.objective_ar = values.objective_ar;
-      if (values.objective_fr) payload.objective_fr = values.objective_fr;
+      if (values.objective_en) {
+        payload.objective_en = values.objective_en;
+        payload.objective_ar = translated.objective_ar;
+        payload.objective_fr = translated.objective_fr;
+      }
       if (values.engagement_rate)
         payload.engagement_rate = values.engagement_rate;
 
@@ -178,6 +241,7 @@ const InfluencersItems = () => {
       setEditReelsFileList([]);
       setEditingId(null);
     } catch (err) {
+      setIsEditTranslating(false);
       if (err?.response?.data?.message) {
         toast.error(err.response.data.message);
       } else if (err?.message) {
@@ -201,20 +265,12 @@ const InfluencersItems = () => {
     setIsEditOpen(true);
     editForm.setFieldsValue({
       title_en: item.title_en || "",
-      title_ar: item.title_ar || "",
-      title_fr: item.title_fr || "",
       reach: item.reach || 0,
       views: item.views || 0,
       objective_en: item.objective_en || "",
-      objective_ar: item.objective_ar || "",
-      objective_fr: item.objective_fr || "",
       engagement_rate: item.engagement_rate || 0,
       brief_en: item.brief_en || "",
-      brief_ar: item.brief_ar || "",
-      brief_fr: item.brief_fr || "",
       strategy_en: item.strategy_en || "",
-      strategy_ar: item.strategy_ar || "",
-      strategy_fr: item.strategy_fr || "",
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
@@ -385,7 +441,7 @@ const InfluencersItems = () => {
           setReelsFileList([]);
         }}
         onOk={handleAdd}
-        confirmLoading={isLoading}
+        confirmLoading={isLoading || isCreateTranslating}
         okText="Create"
         width={900}
       >
@@ -398,20 +454,6 @@ const InfluencersItems = () => {
             >
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item
-              name="title_ar"
-              label="Title (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item
-              name="title_fr"
-              label="Title (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter French title" />
-            </Form.Item>
 
             <Form.Item
               name="objective_en"
@@ -420,39 +462,14 @@ const InfluencersItems = () => {
             >
               <Input.TextArea rows={2} placeholder="Enter English objective" />
             </Form.Item>
-            <Form.Item
-              name="objective_ar"
-              label="Objective (AR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={2} placeholder="Enter Arabic objective" />
-            </Form.Item>
-            <Form.Item
-              name="objective_fr"
-              label="Objective (FR)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={2} placeholder="Enter French objective" />
-            </Form.Item>
+            {/* AR/FR objectives are auto-translated on submit */}
 
             <Form.Item name="brief_en" label="Brief (EN)">
               <Input.TextArea rows={2} placeholder="Enter English brief" />
             </Form.Item>
-            <Form.Item name="brief_ar" label="Brief (AR)">
-              <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
-            </Form.Item>
-            <Form.Item name="brief_fr" label="Brief (FR)">
-              <Input.TextArea rows={2} placeholder="Enter French brief" />
-            </Form.Item>
 
             <Form.Item name="strategy_en" label="Strategy (EN)">
               <Input.TextArea rows={2} placeholder="Enter English strategy" />
-            </Form.Item>
-            <Form.Item name="strategy_ar" label="Strategy (AR)">
-              <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
-            </Form.Item>
-            <Form.Item name="strategy_fr" label="Strategy (FR)">
-              <Input.TextArea rows={2} placeholder="Enter French strategy" />
             </Form.Item>
 
             <Form.Item
@@ -545,7 +562,7 @@ const InfluencersItems = () => {
           setEditingId(null);
         }}
         onOk={handleEdit}
-        confirmLoading={isLoading}
+        confirmLoading={isLoading || isEditTranslating}
         okText="Update"
         width={900}
       >
@@ -554,41 +571,17 @@ const InfluencersItems = () => {
             <Form.Item name="title_en" label="Title (EN)">
               <Input placeholder="Enter English title" />
             </Form.Item>
-            <Form.Item name="title_ar" label="Title (AR)">
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item name="title_fr" label="Title (FR)">
-              <Input placeholder="Enter French title" />
-            </Form.Item>
 
             <Form.Item name="objective_en" label="Objective (EN)">
               <Input.TextArea rows={2} placeholder="Enter English objective" />
-            </Form.Item>
-            <Form.Item name="objective_ar" label="Objective (AR)">
-              <Input.TextArea rows={2} placeholder="Enter Arabic objective" />
-            </Form.Item>
-            <Form.Item name="objective_fr" label="Objective (FR)">
-              <Input.TextArea rows={2} placeholder="Enter French objective" />
             </Form.Item>
 
             <Form.Item name="brief_en" label="Brief (EN)">
               <Input.TextArea rows={2} placeholder="Enter English brief" />
             </Form.Item>
-            <Form.Item name="brief_ar" label="Brief (AR)">
-              <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
-            </Form.Item>
-            <Form.Item name="brief_fr" label="Brief (FR)">
-              <Input.TextArea rows={2} placeholder="Enter French brief" />
-            </Form.Item>
 
             <Form.Item name="strategy_en" label="Strategy (EN)">
               <Input.TextArea rows={2} placeholder="Enter English strategy" />
-            </Form.Item>
-            <Form.Item name="strategy_ar" label="Strategy (AR)">
-              <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
-            </Form.Item>
-            <Form.Item name="strategy_fr" label="Strategy (FR)">
-              <Input.TextArea rows={2} placeholder="Enter French strategy" />
             </Form.Item>
 
             <Form.Item name="reach" label="Reach">

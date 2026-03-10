@@ -15,6 +15,7 @@ export const useInfluencersItemsStore = create((set, get) => ({
   perPage: 5,
   lang: "en",
   slug: null,
+  workId: null,
   current: null,
   isLoading: false,
   error: null,
@@ -62,7 +63,15 @@ export const useInfluencersItemsStore = create((set, get) => ({
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
-      set({ items: normalizedItems, total, page: nextPage, perPage: nextPerPage });
+      const workId =
+        resp?.work_id ?? resp?.data?.work_id ?? items[0]?.work_id ?? null;
+      set({
+        items: normalizedItems,
+        total,
+        page: nextPage,
+        perPage: nextPerPage,
+        workId,
+      });
     } catch (error) {
       set({ error });
       toast.error(
