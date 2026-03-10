@@ -26,6 +26,8 @@ import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { useWorksSectionStore } from "../../store/works/worksSectionStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
+import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
+import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
 
 const WorksSection = () => {
   const navigate = useNavigate();
@@ -371,46 +373,16 @@ const WorksSection = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Language:</span>
-            <Select
+            <WorkLangSelect
               value={lang}
               style={{ width: 140 }}
-              options={[
-                { label: "English", value: "en" },
-                { label: "Arabic", value: "ar" },
-                { label: "French", value: "fr" },
-              ]}
               onChange={(value) => {
                 setLang(value);
                 setPage(1);
               }}
             />
           </div>
-          <Upload
-            accept=".xlsx,.xls"
-            beforeUpload={(file) => {
-              const isExcel =
-                file.type ===
-                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-                file.type === "application/vnd.ms-excel" ||
-                file.name.endsWith(".xlsx") ||
-                file.name.endsWith(".xls");
-              if (!isExcel) {
-                toast.error("Please upload an Excel file (.xlsx or .xls)");
-                return false;
-              }
-              return false; // Prevent auto upload
-            }}
-            onChange={(info) => {
-              if (info.fileList.length > 0) {
-                const file = info.fileList[0].originFileObj;
-                handleImportExcel(file);
-              }
-            }}
-            maxCount={1}
-            showUploadList={false}
-          >
-            <Button icon={<UploadOutlined />}>Import Excel</Button>
-          </Upload>
+          <ExcelImportButton onImport={handleImportExcel}>Import Excel</ExcelImportButton>
           <Button
             type="primary"
             icon={<PlusOutlined />}

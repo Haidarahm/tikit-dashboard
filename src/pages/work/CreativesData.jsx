@@ -26,6 +26,8 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useCreativeItemsStore } from "../../store/works/creativeItemsStore.js";
+import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
+import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
 
 const CreativesData = () => {
   const { slug } = useParams();
@@ -77,39 +79,6 @@ const CreativesData = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, page, perPage, lang]);
-
-  const excelMimeTypes = [
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel",
-  ];
-
-  const isExcelFile = (file) => {
-    if (!file) return false;
-    const name = file.name?.toLowerCase() || "";
-    return (
-      excelMimeTypes.includes(file.type) ||
-      name.endsWith(".xlsx") ||
-      name.endsWith(".xls")
-    );
-  };
-
-  const handleImportExcel = async (file) => {
-    if (!file) return;
-    if (!isExcelFile(file)) {
-      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
-      return;
-    }
-
-    try {
-      await importCreativeExcel(file);
-    } catch (err) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to import creative items"
-      );
-    }
-  };
 
   const handleAdd = async () => {
     try {
@@ -263,37 +232,19 @@ const CreativesData = () => {
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="flex items-center gap-3 bg-white rounded-md px-3 py-2 shadow-sm">
             <span className="text-sm text-gray-600">Language</span>
-            <Select
+            <WorkLangSelect
               value={lang}
-              style={{ width: 160 }}
-              options={[
-                { label: "English", value: "en" },
-                { label: "Arabic", value: "ar" },
-                { label: "French", value: "fr" },
-              ]}
               onChange={(value) => {
                 setLang(value);
                 setPage(1);
               }}
             />
           </div>
-          <Upload
-            accept=".xlsx,.xls"
-            showUploadList={false}
+          <ExcelImportButton
             disabled={!slug}
-            beforeUpload={(file) => {
-              handleImportExcel(file);
-              return false;
-            }}
-          >
-            <Button
-              icon={<UploadOutlined />}
-              disabled={!slug}
-              className="flex items-center"
-            >
-              Import Excel
-            </Button>
-          </Upload>
+            className="flex items-center"
+            onImport={importCreativeExcel}
+          />
 
           <Button
             type="primary"

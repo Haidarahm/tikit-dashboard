@@ -26,6 +26,8 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../store/works/influencersItemsStore.js";
+import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
+import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
 
 const InfluencersItems = () => {
   const { slug } = useParams();
@@ -68,39 +70,6 @@ const InfluencersItems = () => {
       fetchList(slug);
     }
   }, [slug, page, perPage, lang]);
-
-  const excelMimeTypes = [
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel",
-  ];
-
-  const isExcelFile = (file) => {
-    if (!file) return false;
-    const name = file.name?.toLowerCase() || "";
-    return (
-      excelMimeTypes.includes(file.type) ||
-      name.endsWith(".xlsx") ||
-      name.endsWith(".xls")
-    );
-  };
-
-  const handleImportExcel = async (file) => {
-    if (!file) return;
-    if (!isExcelFile(file)) {
-      toast.error("Please upload a valid Excel file (.xlsx or .xls).");
-      return;
-    }
-
-    try {
-      await importInfluencersExcel(file);
-    } catch (err) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to import influencer items"
-      );
-    }
-  };
 
   const handleAdd = async () => {
     try {
@@ -233,37 +202,20 @@ const InfluencersItems = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Language:</span>
-            <Select
+            <WorkLangSelect
               value={lang}
               style={{ width: 140 }}
-              options={[
-                { label: "English", value: "en" },
-                { label: "Arabic", value: "ar" },
-                { label: "French", value: "fr" },
-              ]}
               onChange={(value) => {
                 setLang(value);
                 setPage(1);
               }}
             />
           </div>
-          <Upload
-            accept=".xlsx,.xls"
-            showUploadList={false}
+          <ExcelImportButton
             disabled={!slug}
-            beforeUpload={(file) => {
-              handleImportExcel(file);
-              return false;
-            }}
-          >
-            <Button
-              icon={<UploadOutlined />}
-              disabled={!slug}
-              className="flex items-center"
-            >
-              Import Excel
-            </Button>
-          </Upload>
+            className="flex items-center"
+            onImport={importInfluencersExcel}
+          />
           <Button
             type="primary"
             icon={<PlusOutlined />}
