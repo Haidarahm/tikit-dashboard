@@ -53,11 +53,13 @@ const InfluencersItems = () => {
   const [addForm] = Form.useForm();
   const [imageFileList, setImageFileList] = useState([]);
   const [logoFileList, setLogoFileList] = useState([]);
+  const [reelsFileList, setReelsFileList] = useState([]);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm] = Form.useForm();
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [editLogoFileList, setEditLogoFileList] = useState([]);
+  const [editReelsFileList, setEditReelsFileList] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [viewModal, setViewModal] = useState({
     open: false,
@@ -79,6 +81,12 @@ const InfluencersItems = () => {
         title_en: values.title_en,
         title_ar: values.title_ar,
         title_fr: values.title_fr,
+        brief_en: values.brief_en,
+        brief_ar: values.brief_ar,
+        brief_fr: values.brief_fr,
+        strategy_en: values.strategy_en,
+        strategy_ar: values.strategy_ar,
+        strategy_fr: values.strategy_fr,
         reach: values.reach,
         views: values.views,
         objective_en: values.objective_en,
@@ -86,6 +94,9 @@ const InfluencersItems = () => {
         objective_fr: values.objective_fr,
         engagement_rate: values.engagement_rate,
         images: imageFileList
+          .map((file) => file.originFileObj)
+          .filter((file) => file),
+        reels: reelsFileList
           .map((file) => file.originFileObj)
           .filter((file) => file),
       };
@@ -109,6 +120,7 @@ const InfluencersItems = () => {
       addForm.resetFields();
       setImageFileList([]);
       setLogoFileList([]);
+      setReelsFileList([]);
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err.response.data.message);
@@ -126,6 +138,12 @@ const InfluencersItems = () => {
       if (values.title_en) payload.title_en = values.title_en;
       if (values.title_ar) payload.title_ar = values.title_ar;
       if (values.title_fr) payload.title_fr = values.title_fr;
+      if (values.brief_en) payload.brief_en = values.brief_en;
+      if (values.brief_ar) payload.brief_ar = values.brief_ar;
+      if (values.brief_fr) payload.brief_fr = values.brief_fr;
+      if (values.strategy_en) payload.strategy_en = values.strategy_en;
+      if (values.strategy_ar) payload.strategy_ar = values.strategy_ar;
+      if (values.strategy_fr) payload.strategy_fr = values.strategy_fr;
       if (values.reach) payload.reach = values.reach;
       if (values.views) payload.views = values.views;
       if (values.objective_en) payload.objective_en = values.objective_en;
@@ -145,11 +163,19 @@ const InfluencersItems = () => {
         payload.logo = editLogoFileList[0].originFileObj;
       }
 
+      const newReels = editReelsFileList
+        .map((file) => file.originFileObj)
+        .filter((file) => file);
+      if (newReels.length > 0) {
+        payload.reels = newReels;
+      }
+
       await update(editingId, payload);
       setIsEditOpen(false);
       editForm.resetFields();
       setEditImageFileList([]);
       setEditLogoFileList([]);
+      setEditReelsFileList([]);
       setEditingId(null);
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -183,9 +209,16 @@ const InfluencersItems = () => {
       objective_ar: item.objective_ar || "",
       objective_fr: item.objective_fr || "",
       engagement_rate: item.engagement_rate || 0,
+      brief_en: item.brief_en || "",
+      brief_ar: item.brief_ar || "",
+      brief_fr: item.brief_fr || "",
+      strategy_en: item.strategy_en || "",
+      strategy_ar: item.strategy_ar || "",
+      strategy_fr: item.strategy_fr || "",
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
+    setEditReelsFileList([]);
   };
 
   const openViewModal = (item) => {
@@ -349,6 +382,7 @@ const InfluencersItems = () => {
           addForm.resetFields();
           setImageFileList([]);
           setLogoFileList([]);
+          setReelsFileList([]);
         }}
         onOk={handleAdd}
         confirmLoading={isLoading}
@@ -399,6 +433,26 @@ const InfluencersItems = () => {
               rules={[{ required: true }]}
             >
               <Input.TextArea rows={2} placeholder="Enter French objective" />
+            </Form.Item>
+
+            <Form.Item name="brief_en" label="Brief (EN)">
+              <Input.TextArea rows={2} placeholder="Enter English brief" />
+            </Form.Item>
+            <Form.Item name="brief_ar" label="Brief (AR)">
+              <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
+            </Form.Item>
+            <Form.Item name="brief_fr" label="Brief (FR)">
+              <Input.TextArea rows={2} placeholder="Enter French brief" />
+            </Form.Item>
+
+            <Form.Item name="strategy_en" label="Strategy (EN)">
+              <Input.TextArea rows={2} placeholder="Enter English strategy" />
+            </Form.Item>
+            <Form.Item name="strategy_ar" label="Strategy (AR)">
+              <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
+            </Form.Item>
+            <Form.Item name="strategy_fr" label="Strategy (FR)">
+              <Input.TextArea rows={2} placeholder="Enter French strategy" />
             </Form.Item>
 
             <Form.Item
@@ -462,6 +516,19 @@ const InfluencersItems = () => {
               {imageFileList.length < 10 && "+ Upload"}
             </Upload>
           </Form.Item>
+
+          <Form.Item label="Upload Reels (Videos) (optional)">
+            <Upload
+              fileList={reelsFileList}
+              beforeUpload={() => false}
+              listType="text"
+              accept="video/*"
+              multiple
+              onChange={({ fileList }) => setReelsFileList(fileList)}
+            >
+              <Button icon={<UploadOutlined />}>Upload Videos</Button>
+            </Upload>
+          </Form.Item>
         </Form>
       </Modal>
 
@@ -474,6 +541,7 @@ const InfluencersItems = () => {
           editForm.resetFields();
           setEditImageFileList([]);
           setEditLogoFileList([]);
+          setEditReelsFileList([]);
           setEditingId(null);
         }}
         onOk={handleEdit}
@@ -501,6 +569,26 @@ const InfluencersItems = () => {
             </Form.Item>
             <Form.Item name="objective_fr" label="Objective (FR)">
               <Input.TextArea rows={2} placeholder="Enter French objective" />
+            </Form.Item>
+
+            <Form.Item name="brief_en" label="Brief (EN)">
+              <Input.TextArea rows={2} placeholder="Enter English brief" />
+            </Form.Item>
+            <Form.Item name="brief_ar" label="Brief (AR)">
+              <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
+            </Form.Item>
+            <Form.Item name="brief_fr" label="Brief (FR)">
+              <Input.TextArea rows={2} placeholder="Enter French brief" />
+            </Form.Item>
+
+            <Form.Item name="strategy_en" label="Strategy (EN)">
+              <Input.TextArea rows={2} placeholder="Enter English strategy" />
+            </Form.Item>
+            <Form.Item name="strategy_ar" label="Strategy (AR)">
+              <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
+            </Form.Item>
+            <Form.Item name="strategy_fr" label="Strategy (FR)">
+              <Input.TextArea rows={2} placeholder="Enter French strategy" />
             </Form.Item>
 
             <Form.Item name="reach" label="Reach">
@@ -550,6 +638,19 @@ const InfluencersItems = () => {
               onChange={({ fileList }) => setEditImageFileList(fileList)}
             >
               {editImageFileList.length < 10 && "+ Upload"}
+            </Upload>
+          </Form.Item>
+
+          <Form.Item label="Upload New Reels (Videos) (optional)">
+            <Upload
+              fileList={editReelsFileList}
+              beforeUpload={() => false}
+              listType="text"
+              accept="video/*"
+              multiple
+              onChange={({ fileList }) => setEditReelsFileList(fileList)}
+            >
+              <Button icon={<UploadOutlined />}>Upload Videos</Button>
             </Upload>
           </Form.Item>
         </Form>
@@ -651,6 +752,47 @@ const InfluencersItems = () => {
                 </p>
               </div>
             )}
+
+            {/* Brief Section */}
+            {(viewModal.item.brief || viewModal.item.brief_en) && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700">Brief</h4>
+                <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                  {viewModal.item.brief || viewModal.item.brief_en}
+                </p>
+              </div>
+            )}
+
+            {/* Strategy Section */}
+            {(viewModal.item.strategy || viewModal.item.strategy_en) && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700">Strategy</h4>
+                <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                  {viewModal.item.strategy || viewModal.item.strategy_en}
+                </p>
+              </div>
+            )}
+
+            {/* Reels Section */}
+            {viewModal.item.reels &&
+              Array.isArray(viewModal.item.reels) &&
+              viewModal.item.reels.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-gray-700">
+                    Reels ({viewModal.item.reels.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {viewModal.item.reels.map((src, idx) => (
+                      <video
+                        key={idx}
+                        src={src}
+                        controls
+                        className="w-full rounded-lg border border-gray-200 bg-black"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {/* Media Gallery Section */}
             {viewModal.item.media && viewModal.item.media.length > 0 && (

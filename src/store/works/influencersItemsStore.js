@@ -44,10 +44,25 @@ export const useInfluencersItemsStore = create((set, get) => ({
         : Array.isArray(resp)
         ? resp
         : [];
+      const normalizedItems = items.map((item) => ({
+        ...item,
+        title_en: item.title_en ?? item.title ?? "",
+        title_ar: item.title_ar ?? item.title ?? "",
+        title_fr: item.title_fr ?? item.title ?? "",
+        objective_en: item.objective_en ?? item.objective ?? "",
+        objective_ar: item.objective_ar ?? item.objective ?? "",
+        objective_fr: item.objective_fr ?? item.objective ?? "",
+        brief_en: item.brief_en ?? item.brief ?? "",
+        brief_ar: item.brief_ar ?? item.brief ?? "",
+        brief_fr: item.brief_fr ?? item.brief ?? "",
+        strategy_en: item.strategy_en ?? item.strategy ?? "",
+        strategy_ar: item.strategy_ar ?? item.strategy ?? "",
+        strategy_fr: item.strategy_fr ?? item.strategy ?? "",
+      }));
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
-      set({ items, total, page: nextPage, perPage: nextPerPage });
+      set({ items: normalizedItems, total, page: nextPage, perPage: nextPerPage });
     } catch (error) {
       set({ error });
       toast.error(

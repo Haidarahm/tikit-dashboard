@@ -4,7 +4,7 @@ export async function getAllRegisteredInfluencers({ page, per_page } = {}) {
   const params = {};
   if (page != null) params.page = page;
   if (per_page != null) params.per_page = per_page;
-  const { data } = await apiClient.get("/influencers", { params });
+  const { data } = await apiClient.get("/influencers/get", { params });
   return data;
 }
 

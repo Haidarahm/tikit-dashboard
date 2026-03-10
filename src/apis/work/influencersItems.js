@@ -21,6 +21,12 @@ export async function addItem(payload) {
     "title_en",
     "title_ar",
     "title_fr",
+    "brief_en",
+    "brief_ar",
+    "brief_fr",
+    "strategy_en",
+    "strategy_ar",
+    "strategy_fr",
     "reach",
     "views",
     "objective_ar",
@@ -46,6 +52,15 @@ export async function addItem(payload) {
     });
   }
 
+  // Add reels (videos): reels[index]
+  if (payload?.reels && Array.isArray(payload.reels)) {
+    payload.reels.forEach((reel, idx) => {
+      if (reel) {
+        formData.append(`reels[${idx}]`, reel);
+      }
+    });
+  }
+
   const { data } = await apiClient.post("/work-influences/add", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -61,6 +76,12 @@ export async function updateItem(id, payload) {
     "title_en",
     "title_ar",
     "title_fr",
+    "brief_en",
+    "brief_ar",
+    "brief_fr",
+    "strategy_en",
+    "strategy_ar",
+    "strategy_fr",
     "reach",
     "views",
     "objective_ar",
@@ -82,6 +103,15 @@ export async function updateItem(id, payload) {
     payload.images.forEach((image) => {
       if (image) {
         formData.append(`images[]`, image);
+      }
+    });
+  }
+
+  // Add reels (videos): reels[index]
+  if (payload?.reels && Array.isArray(payload.reels)) {
+    payload.reels.forEach((reel, idx) => {
+      if (reel) {
+        formData.append(`reels[${idx}]`, reel);
       }
     });
   }
