@@ -181,6 +181,7 @@ function News() {
         description_en: values.description_en,
         description_ar: translated.description_ar,
         description_fr: translated.description_fr,
+        focus_keyword: values.focus_keyword,
       };
       if (createImage[0]?.originFileObj) {
         payload.image = createImage[0].originFileObj;
@@ -204,6 +205,7 @@ function News() {
       title_en: record.title_en || record.title || "",
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
+      focus_keyword: record.focus_keyword || "",
     });
     setIsEditOpen(true);
   };
@@ -228,6 +230,7 @@ function News() {
         description_en: values.description_en,
         description_ar: translated.description_ar,
         description_fr: translated.description_fr,
+        focus_keyword: values.focus_keyword,
       };
       if (editImage[0]?.originFileObj) {
         payload.image = editImage[0].originFileObj;
@@ -482,6 +485,13 @@ function News() {
                 placeholder="Enter English description"
               />
             </Form.Item>
+            <Form.Item
+              name="focus_keyword"
+              label="Focus Keyword"
+              rules={[{ required: true, message: "Focus keyword is required" }]}
+            >
+              <Input placeholder="Enter focus keyword" />
+            </Form.Item>
           </div>
           <Form.Item label="Image" required>
             <Upload
@@ -527,6 +537,9 @@ function News() {
                 rows={3}
                 placeholder="Enter English description"
               />
+            </Form.Item>
+            <Form.Item name="focus_keyword" label="Focus Keyword">
+              <Input placeholder="Enter focus keyword" />
             </Form.Item>
           </div>
           <Form.Item label="Image">

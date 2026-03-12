@@ -51,6 +51,7 @@ export const useNewsStore = create((set, get) => ({
         description_en: item.description_en ?? item.description ?? "",
         description_ar: item.description_ar ?? item.description ?? "",
         description_fr: item.description_fr ?? item.description ?? "",
+        focus_keyword: item.focus_keyword ?? "",
       }));
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
