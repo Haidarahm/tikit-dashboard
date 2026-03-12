@@ -446,67 +446,81 @@ const InfluencersItems = () => {
         width={900}
       >
         <Form form={addForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input placeholder="Enter English title" />
-            </Form.Item>
+          <div className="space-y-4">
+            <div className="rounded-md border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Content Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form.Item
+                  name="title_en"
+                  label="Title (EN)"
+                  rules={[{ required: true }]}
+                  className="md:col-span-2"
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
 
-            <Form.Item
-              name="objective_en"
-              label="Objective (EN)"
-              rules={[{ required: true }]}
-            >
-              <Input.TextArea rows={2} placeholder="Enter English objective" />
-            </Form.Item>
-            {/* AR/FR objectives are auto-translated on submit */}
+                <Form.Item
+                  name="objective_en"
+                  label="Objective (EN)"
+                  rules={[{ required: true }]}
+                >
+                  <Input.TextArea rows={2} placeholder="Enter English objective" />
+                </Form.Item>
 
-            <Form.Item name="brief_en" label="Brief (EN)">
-              <Input.TextArea rows={2} placeholder="Enter English brief" />
-            </Form.Item>
+                <Form.Item name="brief_en" label="Brief (EN)">
+                  <Input.TextArea rows={2} placeholder="Enter English brief" />
+                </Form.Item>
 
-            <Form.Item name="strategy_en" label="Strategy (EN)">
-              <Input.TextArea rows={2} placeholder="Enter English strategy" />
-            </Form.Item>
+                <Form.Item name="strategy_en" label="Strategy (EN)" className="md:col-span-2">
+                  <Input.TextArea rows={2} placeholder="Enter English strategy" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item
-              name="reach"
-              label="Reach"
-              rules={[{ required: true, type: "number", min: 0 }]}
-            >
-              <InputNumber
-                placeholder="Enter reach"
-                className="w-full"
-                min={0}
-              />
-            </Form.Item>
-            <Form.Item
-              name="views"
-              label="Views"
-              rules={[{ required: true, type: "number", min: 0 }]}
-            >
-              <InputNumber
-                placeholder="Enter views"
-                className="w-full"
-                min={0}
-              />
-            </Form.Item>
-            <Form.Item
-              name="engagement_rate"
-              label="Engagement Rate (%)"
-              rules={[{ required: true, type: "number", min: 0, max: 100 }]}
-            >
-              <InputNumber
-                placeholder="Enter engagement rate"
-                className="w-full"
-                min={0}
-                max={100}
-                step={0.01}
-              />
-            </Form.Item>
+            <div className="rounded-md border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Performance Metrics
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Form.Item
+                  name="reach"
+                  label="Reach"
+                  rules={[{ required: true, type: "number", min: 0 }]}
+                >
+                  <InputNumber
+                    placeholder="Reach"
+                    className="w-full"
+                    min={0}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="views"
+                  label="Views"
+                  rules={[{ required: true, type: "number", min: 0 }]}
+                >
+                  <InputNumber
+                    placeholder="Views"
+                    className="w-full"
+                    min={0}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="engagement_rate"
+                  label="Engagement Rate (%)"
+                  rules={[{ required: true, type: "number", min: 0, max: 100 }]}
+                >
+                  <InputNumber
+                    placeholder="%"
+                    className="w-full"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                  />
+                </Form.Item>
+              </div>
+            </div>
           </div>
 
           <Form.Item label="Upload Logo" required>
@@ -567,46 +581,60 @@ const InfluencersItems = () => {
         width={900}
       >
         <Form form={editForm} layout="vertical">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Form.Item name="title_en" label="Title (EN)">
-              <Input placeholder="Enter English title" />
-            </Form.Item>
+          <div className="space-y-4">
+            <div className="rounded-md border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Content Details
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form.Item name="title_en" label="Title (EN)" className="md:col-span-2">
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
 
-            <Form.Item name="objective_en" label="Objective (EN)">
-              <Input.TextArea rows={2} placeholder="Enter English objective" />
-            </Form.Item>
+                <Form.Item name="objective_en" label="Objective (EN)">
+                  <Input.TextArea rows={2} placeholder="Enter English objective" />
+                </Form.Item>
 
-            <Form.Item name="brief_en" label="Brief (EN)">
-              <Input.TextArea rows={2} placeholder="Enter English brief" />
-            </Form.Item>
+                <Form.Item name="brief_en" label="Brief (EN)">
+                  <Input.TextArea rows={2} placeholder="Enter English brief" />
+                </Form.Item>
 
-            <Form.Item name="strategy_en" label="Strategy (EN)">
-              <Input.TextArea rows={2} placeholder="Enter English strategy" />
-            </Form.Item>
+                <Form.Item name="strategy_en" label="Strategy (EN)" className="md:col-span-2">
+                  <Input.TextArea rows={2} placeholder="Enter English strategy" />
+                </Form.Item>
+              </div>
+            </div>
 
-            <Form.Item name="reach" label="Reach">
-              <InputNumber
-                placeholder="Enter reach"
-                className="w-full"
-                min={0}
-              />
-            </Form.Item>
-            <Form.Item name="views" label="Views">
-              <InputNumber
-                placeholder="Enter views"
-                className="w-full"
-                min={0}
-              />
-            </Form.Item>
-            <Form.Item name="engagement_rate" label="Engagement Rate (%)">
-              <InputNumber
-                placeholder="Enter engagement rate"
-                className="w-full"
-                min={0}
-                max={100}
-                step={0.01}
-              />
-            </Form.Item>
+            <div className="rounded-md border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                Performance Metrics
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Form.Item name="reach" label="Reach">
+                  <InputNumber
+                    placeholder="Reach"
+                    className="w-full"
+                    min={0}
+                  />
+                </Form.Item>
+                <Form.Item name="views" label="Views">
+                  <InputNumber
+                    placeholder="Views"
+                    className="w-full"
+                    min={0}
+                  />
+                </Form.Item>
+                <Form.Item name="engagement_rate" label="Engagement Rate (%)">
+                  <InputNumber
+                    placeholder="%"
+                    className="w-full"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                  />
+                </Form.Item>
+              </div>
+            </div>
           </div>
 
           <Form.Item label="Upload New Logo (optional)">
