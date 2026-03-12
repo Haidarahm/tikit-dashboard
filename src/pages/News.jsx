@@ -9,6 +9,7 @@ import {
   Select,
   Space,
   Table,
+  Tooltip,
   Upload,
 } from "antd";
 import {
@@ -82,7 +83,6 @@ function News() {
   const [isDetailsTranslating, setIsDetailsTranslating] = useState(false);
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
-  const [expandedDescriptions, setExpandedDescriptions] = useState({});
   
   const translateText = useTranslateStore((state) => state.translateText);
 
@@ -276,49 +276,51 @@ function News() {
         title: "Title",
         dataIndex: "title",
         key: "title",
-        ellipsis: true,
+        render: (text) => (
+          <Tooltip title={text || ""}>
+            <span className="block max-w-[150px] truncate">
+              {text || "-"}
+            </span>
+          </Tooltip>
+        ),
       },
       {
         title: "Subtitle",
         dataIndex: "subtitle",
         key: "subtitle",
-        ellipsis: true,
+        render: (text) => (
+          <Tooltip title={text || ""}>
+            <span className="block max-w-[150px] truncate">
+              {text || "-"}
+            </span>
+          </Tooltip>
+        ),
       },
       {
         title: "Description",
         dataIndex: "description",
         key: "description",
         width: 300,
-        render: (text, record) => {
-          const isExpanded = expandedDescriptions[record.id];
-          const maxLength = 50;
-
-          if (!text) return "-";
-
-          if (text.length <= maxLength) {
-            return <div className="whitespace-pre-wrap">{text}</div>;
-          }
-
-          return (
-            <div>
-              <div className="whitespace-pre-wrap mb-1">
-                {isExpanded ? text : `${text.substring(0, maxLength)}...`}
-              </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedDescriptions({
-                    ...expandedDescriptions,
-                    [record.id]: !isExpanded,
-                  });
-                }}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                {isExpanded ? "Read less" : "Read more"}
-              </button>
-            </div>
-          );
-        },
+        render: (text) => (
+          <Tooltip title={text || ""}>
+            <span className="block max-w-[220px] truncate">
+              {text || "-"}
+            </span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "Focus Keyword",
+        dataIndex: "focus_keyword",
+        key: "focus_keyword",
+        width: 220,
+        render: (value) => (
+          <Tooltip title={value || ""}>
+            <span className="block max-w-[160px] truncate">
+              {value || "-"}
+            </span>
+          </Tooltip>
+        ),
       },
       {
         title: "Image",
@@ -380,7 +382,7 @@ function News() {
         ),
       },
     ],
-    [remove, handleEditOpen, expandedDescriptions]
+    [remove, handleEditOpen]
   );
 
   return (
