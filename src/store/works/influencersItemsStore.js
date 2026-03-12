@@ -12,7 +12,7 @@ export const useInfluencersItemsStore = create((set, get) => ({
   items: [],
   total: 0,
   page: 1,
-  perPage: 5,
+  perPage: 8,
   lang: "en",
   slug: null,
   workId: null,
