@@ -75,6 +75,7 @@ const InfluencersItems = () => {
   /** Translate EN fields to AR/FR for Influencer item (plain text). */
   const translateInfluencerFields = async ({
     title_en,
+    subtitle_en,
     objective_en,
     brief_en,
     strategy_en,
@@ -82,6 +83,8 @@ const InfluencersItems = () => {
     const out = {
       title_ar: "",
       title_fr: "",
+      subtitle_ar: "",
+      subtitle_fr: "",
       objective_ar: "",
       objective_fr: "",
       brief_ar: "",
@@ -98,6 +101,7 @@ const InfluencersItems = () => {
       }
     };
     await translatePlain(title_en, "title");
+    await translatePlain(subtitle_en, "subtitle");
     await translatePlain(objective_en, "objective");
     await translatePlain(brief_en, "brief");
     await translatePlain(strategy_en, "strategy");
@@ -117,6 +121,7 @@ const InfluencersItems = () => {
       setIsCreateTranslating(true);
       const translated = await translateInfluencerFields({
         title_en: values.title_en,
+        subtitle_en: values.subtitle_en,
         objective_en: values.objective_en,
         brief_en: values.brief_en,
         strategy_en: values.strategy_en,
@@ -127,6 +132,9 @@ const InfluencersItems = () => {
         title_en: values.title_en,
         title_ar: translated.title_ar,
         title_fr: translated.title_fr,
+        subtitle_en: values.subtitle_en,
+        subtitle_ar: translated.subtitle_ar,
+        subtitle_fr: translated.subtitle_fr,
         brief_en: values.brief_en,
         brief_ar: translated.brief_ar,
         brief_fr: translated.brief_fr,
@@ -183,6 +191,7 @@ const InfluencersItems = () => {
       setIsEditTranslating(true);
       const translated = await translateInfluencerFields({
         title_en: values.title_en,
+        subtitle_en: values.subtitle_en,
         objective_en: values.objective_en,
         brief_en: values.brief_en,
         strategy_en: values.strategy_en,
@@ -194,6 +203,11 @@ const InfluencersItems = () => {
         payload.title_en = values.title_en;
         payload.title_ar = translated.title_ar;
         payload.title_fr = translated.title_fr;
+      }
+      if (values.subtitle_en) {
+        payload.subtitle_en = values.subtitle_en;
+        payload.subtitle_ar = translated.subtitle_ar;
+        payload.subtitle_fr = translated.subtitle_fr;
       }
       if (values.brief_en) {
         payload.brief_en = values.brief_en;
@@ -265,6 +279,7 @@ const InfluencersItems = () => {
     setIsEditOpen(true);
     editForm.setFieldsValue({
       title_en: item.title_en || "",
+      subtitle_en: item.subtitle_en || "",
       reach: item.reach || 0,
       views: item.views || 0,
       objective_en: item.objective_en || "",
@@ -460,6 +475,9 @@ const InfluencersItems = () => {
                 >
                   <Input placeholder="Enter English title" />
                 </Form.Item>
+                <Form.Item name="subtitle_en" label="Subtitle (EN)" className="md:col-span-2">
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
 
                 <Form.Item
                   name="objective_en"
@@ -523,7 +541,7 @@ const InfluencersItems = () => {
             </div>
           </div>
 
-          <Form.Item label="Upload Logo" required>
+          <Form.Item label="Upload Logo / Main Image" required>
             <Upload
               fileList={logoFileList}
               beforeUpload={() => false}
@@ -589,6 +607,9 @@ const InfluencersItems = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Form.Item name="title_en" label="Title (EN)" className="md:col-span-2">
                   <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item name="subtitle_en" label="Subtitle (EN)" className="md:col-span-2">
+                  <Input placeholder="Enter English subtitle" />
                 </Form.Item>
 
                 <Form.Item name="objective_en" label="Objective (EN)">
@@ -694,6 +715,9 @@ const InfluencersItems = () => {
               <h3 className="text-xl font-bold text-gray-900">
                 {viewModal.item.title || "No Title"}
               </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {viewModal.item.subtitle || viewModal.item.subtitle_en || "-"}
+              </p>
             </div>
 
             {/* Logo Section */}

@@ -21,6 +21,9 @@ export async function addItem(payload) {
     "title_en",
     "title_ar",
     "title_fr",
+    "subtitle_en",
+    "subtitle_ar",
+    "subtitle_fr",
     "brief_en",
     "brief_ar",
     "brief_fr",
@@ -45,11 +48,11 @@ export async function addItem(payload) {
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
-    payload.images.forEach((image) => {
-      if (image) {
-        formData.append(`images[]`, image);
-      }
-    });
+    payload.images
+      .filter(Boolean)
+      .forEach((image, idx) => {
+        formData.append(`images[${idx}]`, image);
+      });
   }
 
   // Add reels (videos): reels[index]
@@ -76,6 +79,9 @@ export async function updateItem(id, payload) {
     "title_en",
     "title_ar",
     "title_fr",
+    "subtitle_en",
+    "subtitle_ar",
+    "subtitle_fr",
     "brief_en",
     "brief_ar",
     "brief_fr",
@@ -100,11 +106,11 @@ export async function updateItem(id, payload) {
 
   // Add multiple images
   if (payload?.images && Array.isArray(payload.images)) {
-    payload.images.forEach((image) => {
-      if (image) {
-        formData.append(`images[]`, image);
-      }
-    });
+    payload.images
+      .filter(Boolean)
+      .forEach((image, idx) => {
+        formData.append(`images[${idx}]`, image);
+      });
   }
 
   // Add reels (videos): reels[index]

@@ -50,6 +50,9 @@ export const useInfluencersItemsStore = create((set, get) => ({
         title_en: item.title_en ?? item.title ?? "",
         title_ar: item.title_ar ?? item.title ?? "",
         title_fr: item.title_fr ?? item.title ?? "",
+        subtitle_en: item.subtitle_en ?? item.subtitle ?? "",
+        subtitle_ar: item.subtitle_ar ?? item.subtitle ?? "",
+        subtitle_fr: item.subtitle_fr ?? item.subtitle ?? "",
         objective_en: item.objective_en ?? item.objective ?? "",
         objective_ar: item.objective_ar ?? item.objective ?? "",
         objective_fr: item.objective_fr ?? item.objective ?? "",
@@ -64,7 +67,7 @@ export const useInfluencersItemsStore = create((set, get) => ({
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
       const workId =
-        resp?.work_id ?? resp?.data?.work_id ?? items[0]?.work_id ?? null;
+        resp?.work?.id ?? resp?.work_id ?? resp?.data?.work_id ?? items[0]?.work_id ?? null;
       set({
         items: normalizedItems,
         total,
