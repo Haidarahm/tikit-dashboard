@@ -182,6 +182,7 @@ function News() {
         description_ar: translated.description_ar,
         description_fr: translated.description_fr,
         focus_keyword: values.focus_keyword,
+        written_by: values.written_by,
       };
       if (createImage[0]?.originFileObj) {
         payload.image = createImage[0].originFileObj;
@@ -206,6 +207,7 @@ function News() {
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
+      written_by: record.written_by || "",
     });
     setIsEditOpen(true);
   };
@@ -231,6 +233,7 @@ function News() {
         description_ar: translated.description_ar,
         description_fr: translated.description_fr,
         focus_keyword: values.focus_keyword,
+        written_by: values.written_by,
       };
       if (editImage[0]?.originFileObj) {
         payload.image = editImage[0].originFileObj;
@@ -317,6 +320,19 @@ function News() {
         render: (value) => (
           <Tooltip title={value || ""}>
             <span className="block max-w-[160px] truncate">
+              {value || "-"}
+            </span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: "Written By",
+        dataIndex: "written_by",
+        key: "written_by",
+        width: 180,
+        render: (value) => (
+          <Tooltip title={value || ""}>
+            <span className="block max-w-[140px] truncate">
               {value || "-"}
             </span>
           </Tooltip>
@@ -494,6 +510,13 @@ function News() {
             >
               <Input placeholder="Enter focus keyword" />
             </Form.Item>
+            <Form.Item
+              name="written_by"
+              label="Written By"
+              rules={[{ required: true, message: "Writer is required" }]}
+            >
+              <Input placeholder="Enter writer name" />
+            </Form.Item>
           </div>
           <Form.Item label="Image" required>
             <Upload
@@ -542,6 +565,9 @@ function News() {
             </Form.Item>
             <Form.Item name="focus_keyword" label="Focus Keyword">
               <Input placeholder="Enter focus keyword" />
+            </Form.Item>
+            <Form.Item name="written_by" label="Written By">
+              <Input placeholder="Enter writer name" />
             </Form.Item>
           </div>
           <Form.Item label="Image">
