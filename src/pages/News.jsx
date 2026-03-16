@@ -84,17 +84,18 @@ function News() {
   const [isDetailsTranslating, setIsDetailsTranslating] = useState(false);
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
+  const [defaultWrittenBy, setDefaultWrittenBy] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(NEWS_WRITER_STORAGE_KEY) || "";
+  });
   
   const translateText = useTranslateStore((state) => state.translateText);
 
-  const getStoredWriter = () => {
-    if (typeof window === "undefined") return "";
-    return localStorage.getItem(NEWS_WRITER_STORAGE_KEY) || "";
-  };
-
   const persistWriter = (value) => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(NEWS_WRITER_STORAGE_KEY, value || "");
+    const nextValue = value || "";
+    localStorage.setItem(NEWS_WRITER_STORAGE_KEY, nextValue);
+    setDefaultWrittenBy(nextValue);
   };
 
   /** Translate EN fields to AR/FR before sending Blog Details. Description keeps HTML structure. */
@@ -163,7 +164,7 @@ function News() {
 
   const resetCreateModal = () => {
     createForm.resetFields();
-    createForm.setFieldsValue({ written_by: getStoredWriter() });
+    createForm.setFieldsValue({ written_by: defaultWrittenBy });
     setCreateImage([]);
   };
 
@@ -219,7 +220,7 @@ function News() {
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
-      written_by: record.written_by || getStoredWriter(),
+      written_by: record.written_by || defaultWrittenBy,
     });
     setIsEditOpen(true);
   };
@@ -338,19 +339,6 @@ function News() {
         ),
       },
       {
-        title: "Written By",
-        dataIndex: "written_by",
-        key: "written_by",
-        width: 180,
-        render: (value) => (
-          <Tooltip title={value || ""}>
-            <span className="block max-w-[140px] truncate">
-              {value || "-"}
-            </span>
-          </Tooltip>
-        ),
-      },
-      {
         title: "Image",
         dataIndex: "image",
         key: "image",
@@ -423,6 +411,12 @@ function News() {
           </p>
         </div>
         <Space wrap>
+          <Input
+            value={defaultWrittenBy}
+            style={{ width: 220 }}
+            placeholder="Default writer name"
+            onChange={(e) => persistWriter(e.target.value)}
+          />
           <Select
             value={lang}
             style={{ width: 160 }}
