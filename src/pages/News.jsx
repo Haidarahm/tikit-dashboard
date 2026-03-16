@@ -35,6 +35,7 @@ const LANG_OPTIONS = [
   { label: "Arabic", value: "ar" },
   { label: "French", value: "fr" },
 ];
+const NEWS_WRITER_STORAGE_KEY = "news_written_by";
 
 function News() {
   const {
@@ -85,6 +86,16 @@ function News() {
   const [isEditTranslating, setIsEditTranslating] = useState(false);
   
   const translateText = useTranslateStore((state) => state.translateText);
+
+  const getStoredWriter = () => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(NEWS_WRITER_STORAGE_KEY) || "";
+  };
+
+  const persistWriter = (value) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(NEWS_WRITER_STORAGE_KEY, value || "");
+  };
 
   /** Translate EN fields to AR/FR before sending Blog Details. Description keeps HTML structure. */
   const translateDetailsFields = async ({ title_en, subtitle_en, description_en }) => {
@@ -152,6 +163,7 @@ function News() {
 
   const resetCreateModal = () => {
     createForm.resetFields();
+    createForm.setFieldsValue({ written_by: getStoredWriter() });
     setCreateImage([]);
   };
 
@@ -207,7 +219,7 @@ function News() {
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
-      written_by: record.written_by || "",
+      written_by: record.written_by || getStoredWriter(),
     });
     setIsEditOpen(true);
   };
@@ -515,7 +527,10 @@ function News() {
               label="Written By"
               rules={[{ required: true, message: "Writer is required" }]}
             >
-              <Input placeholder="Enter writer name" />
+              <Input
+                placeholder="Enter writer name"
+                onChange={(e) => persistWriter(e.target.value)}
+              />
             </Form.Item>
           </div>
           <Form.Item label="Image" required>
@@ -567,7 +582,10 @@ function News() {
               <Input placeholder="Enter focus keyword" />
             </Form.Item>
             <Form.Item name="written_by" label="Written By">
-              <Input placeholder="Enter writer name" />
+              <Input
+                placeholder="Enter writer name"
+                onChange={(e) => persistWriter(e.target.value)}
+              />
             </Form.Item>
           </div>
           <Form.Item label="Image">
