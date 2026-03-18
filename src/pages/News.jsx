@@ -255,17 +255,17 @@ function News() {
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
-      written_by: record.written_by || defaultWrittenBy,
-      meta_title: record.meta_title || record.title_en || record.title || "",
-      meta_description:
-        record.meta_description || record.description_en || record.description || "",
+      written_by: record.written_by || "",
+      meta_title: record.meta_title || "",
+      meta_description: record.meta_description || "",
     });
     setIsEditOpen(true);
   };
 
   const handleUpdate = async () => {
     try {
-      const values = await editForm.validateFields();
+      await editForm.validateFields();
+      const values = editForm.getFieldsValue(true);
       setIsEditTranslating(true);
       const translated = await translateBlogFields({
         title_en: values.title_en,
@@ -288,6 +288,7 @@ function News() {
         meta_title: values.meta_title,
         meta_description: values.meta_description,
       };
+      persistWriter(values.written_by);
       if (editImage[0]?.originFileObj) {
         payload.image = editImage[0].originFileObj;
       }
@@ -800,7 +801,11 @@ function News() {
                     placeholder="Enter English description"
                   />
                 </Form.Item>
-                <Form.Item name="written_by" label="Written By">
+                <Form.Item
+                  name="written_by"
+                  label="Written By"
+                  rules={[{ required: true, message: "Writer is required" }]}
+                >
                   <Input
                     placeholder="Enter writer name"
                     onChange={(e) => persistWriter(e.target.value)}
