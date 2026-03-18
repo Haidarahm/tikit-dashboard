@@ -652,54 +652,86 @@ function News() {
       >
         {viewBlogItem ? (
           <div className="space-y-4">
-            <div>
-              <span className="text-gray-500 text-sm">Title</span>
-              <div className="mt-0.5">{viewBlogItem.title || "-"}</div>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm">Subtitle</span>
-              <div className="mt-0.5">{viewBlogItem.subtitle || "-"}</div>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm">Description</span>
-              <div className="mt-0.5 whitespace-pre-wrap">
-                {viewBlogItem.description || "-"}
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Blog Data</h4>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-gray-500 text-sm">Title</span>
+                  <div className="mt-0.5">{viewBlogItem.title || "-"}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Subtitle</span>
+                  <div className="mt-0.5">{viewBlogItem.subtitle || "-"}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Description</span>
+                  <div className="mt-0.5 whitespace-pre-wrap">
+                    {viewBlogItem.description || "-"}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Written By</span>
+                  <div className="mt-0.5 whitespace-pre-wrap">
+                    {viewBlogItem.written_by || "-"}
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <span className="text-gray-500 text-sm">Focus Keyword</span>
-              <div className="mt-0.5">{viewBlogItem.focus_keyword || "-"}</div>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm">Written By</span>
-              <div className="mt-0.5 whitespace-pre-wrap">
-                {viewBlogItem.written_by || "-"}
+
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Meta Data</h4>
+              <div className="space-y-3">
+                <div>
+                  <span className="text-gray-500 text-sm">Focus Keyword</span>
+                  <div className="mt-0.5">{viewBlogItem.focus_keyword || "-"}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Meta Title</span>
+                  <div className="mt-0.5">{viewBlogItem.meta_title || "-"}</div>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Meta Description</span>
+                  <div className="mt-0.5 whitespace-pre-wrap">
+                    {viewBlogItem.meta_description || "-"}
+                  </div>
+                </div>
               </div>
             </div>
-            <div>
-              <span className="text-gray-500 text-sm">Meta Title</span>
-              <div className="mt-0.5">{viewBlogItem.meta_title || "-"}</div>
+
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Media</h4>
+              {viewBlogItem.image ? (
+                <Image
+                  src={viewBlogItem.image}
+                  width={180}
+                  height={110}
+                  style={{ objectFit: "cover" }}
+                  preview={{ mask: "Preview" }}
+                />
+              ) : (
+                <span className="text-gray-500 text-sm">-</span>
+              )}
             </div>
-            <div>
-              <span className="text-gray-500 text-sm">Meta Description</span>
-              <div className="mt-0.5 whitespace-pre-wrap">
-                {viewBlogItem.meta_description || "-"}
-              </div>
-            </div>
-            <div>
-              <span className="text-gray-500 text-sm">Image</span>
-              <div className="mt-2">
-                {viewBlogItem.image ? (
-                  <Image
-                    src={viewBlogItem.image}
-                    width={160}
-                    height={100}
-                    style={{ objectFit: "cover" }}
-                    preview={{ mask: "Preview" }}
-                  />
-                ) : (
-                  "-"
-                )}
+
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">System Info</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-500">ID:</span>{" "}
+                  <span>{viewBlogItem.id ?? "-"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Slug:</span>{" "}
+                  <span className="break-all">{viewBlogItem.slug || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Created At:</span>{" "}
+                  <span>{viewBlogItem.created_at || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Updated At:</span>{" "}
+                  <span>{viewBlogItem.updated_at || "-"}</span>
+                </div>
               </div>
             </div>
           </div>
