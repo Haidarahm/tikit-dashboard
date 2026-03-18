@@ -8,6 +8,7 @@ import {
   Popconfirm,
   Select,
   Space,
+  Steps,
   Table,
   Tooltip,
   Upload,
@@ -62,7 +63,9 @@ function News() {
   } = useNewsStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createStep, setCreateStep] = useState(0);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editStep, setEditStep] = useState(0);
   const [createForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const [createImage, setCreateImage] = useState([]);
@@ -166,12 +169,14 @@ function News() {
     createForm.resetFields();
     createForm.setFieldsValue({ written_by: defaultWrittenBy });
     setCreateImage([]);
+    setCreateStep(0);
   };
 
   const resetEditModal = () => {
     editForm.resetFields();
     setEditImage([]);
     setEditingId(null);
+    setEditStep(0);
   };
 
   const handleCreate = async () => {
@@ -196,6 +201,8 @@ function News() {
         description_fr: translated.description_fr,
         focus_keyword: values.focus_keyword,
         written_by: values.written_by,
+        meta_title: values.meta_title,
+        meta_description: values.meta_description,
       };
       if (createImage[0]?.originFileObj) {
         payload.image = createImage[0].originFileObj;
@@ -213,14 +220,43 @@ function News() {
     }
   };
 
+  const handleCreateNext = async () => {
+    try {
+      await createForm.validateFields([
+        "title_en",
+        "subtitle_en",
+        "description_en",
+        "written_by",
+      ]);
+      setCreateStep(1);
+    } catch (error) {
+      // Validation errors are already shown by antd Form.
+    }
+  };
+
+  const handleCreatePrev = () => {
+    setCreateStep(0);
+  };
+
+  const handleEditNext = () => {
+    setEditStep(1);
+  };
+
+  const handleEditPrev = () => {
+    setEditStep(0);
+  };
+
   const handleEditOpen = (record) => {
     setEditingId(record.id);
+    setEditStep(0);
     editForm.setFieldsValue({
       title_en: record.title_en || record.title || "",
       subtitle_en: record.subtitle_en || record.subtitle || "",
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
       written_by: record.written_by || defaultWrittenBy,
+      meta_title: record.meta_title || "",
+      meta_description: record.meta_description || "",
     });
     setIsEditOpen(true);
   };
@@ -247,6 +283,8 @@ function News() {
         description_fr: translated.description_fr,
         focus_keyword: values.focus_keyword,
         written_by: values.written_by,
+        meta_title: values.meta_title,
+        meta_description: values.meta_description,
       };
       if (editImage[0]?.originFileObj) {
         payload.image = editImage[0].originFileObj;
@@ -479,71 +517,119 @@ function News() {
           setIsCreateOpen(false);
           resetCreateModal();
         }}
-        onOk={handleCreate}
-        okText="Create"
-        confirmLoading={isLoading || isCreateTranslating}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsCreateOpen(false);
+              resetCreateModal();
+            }}
+          >
+            Cancel
+          </Button>,
+          createStep === 1 ? (
+            <Button key="back" onClick={handleCreatePrev}>
+              Back
+            </Button>
+          ) : null,
+          createStep === 0 ? (
+            <Button key="next" type="primary" onClick={handleCreateNext}>
+              Next
+            </Button>
+          ) : (
+            <Button
+              key="create"
+              type="primary"
+              onClick={handleCreate}
+              loading={isLoading || isCreateTranslating}
+            >
+              Create
+            </Button>
+          ),
+        ]}
       >
         <Form form={createForm} layout="vertical">
+          <Steps
+            current={createStep}
+            items={[
+              { title: "Blog Data" },
+              { title: "Meta Data" },
+            ]}
+            className="mb-6"
+          />
           <div className="space-y-6">
-            <Form.Item
-              name="title_en"
-              label="Title (EN)"
-              rules={[{ required: true, message: "Title is required" }]}
-            >
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item
-              name="subtitle_en"
-              label="Subtitle (EN)"
-              rules={[{ required: true, message: "Subtitle is required" }]}
-            >
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item
-              name="description_en"
-              label="Description (EN)"
-              rules={[{ required: true, message: "Description is required" }]}
-            >
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item
-              name="focus_keyword"
-              label="Focus Keyword"
-              rules={[{ required: true, message: "Focus keyword is required" }]}
-            >
-              <Input placeholder="Enter focus keyword" />
-            </Form.Item>
-            <Form.Item
-              name="written_by"
-              label="Written By"
-              rules={[{ required: true, message: "Writer is required" }]}
-            >
-              <Input
-                placeholder="Enter writer name"
-                onChange={(e) => persistWriter(e.target.value)}
-              />
-            </Form.Item>
+            {createStep === 0 ? (
+              <>
+                <Form.Item
+                  name="title_en"
+                  label="Title (EN)"
+                  rules={[{ required: true, message: "Title is required" }]}
+                >
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item
+                  name="subtitle_en"
+                  label="Subtitle (EN)"
+                  rules={[{ required: true, message: "Subtitle is required" }]}
+                >
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item
+                  name="description_en"
+                  label="Description (EN)"
+                  rules={[{ required: true, message: "Description is required" }]}
+                >
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="written_by"
+                  label="Written By"
+                  rules={[{ required: true, message: "Writer is required" }]}
+                >
+                  <Input
+                    placeholder="Enter writer name"
+                    onChange={(e) => persistWriter(e.target.value)}
+                  />
+                </Form.Item>
+                <Form.Item label="Image" required>
+                  <Upload
+                    listType="picture-card"
+                    fileList={createImage}
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    accept="image/*"
+                    onChange={({ fileList }) => setCreateImage(fileList)}
+                  >
+                    {createImage.length === 0 && (
+                      <div>
+                        <UploadOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </Form.Item>
+              </>
+            ) : (
+              <>
+                <Form.Item
+                  name="focus_keyword"
+                  label="Focus Keyword"
+                  rules={[{ required: true, message: "Focus keyword is required" }]}
+                >
+                  <Input placeholder="Enter focus keyword" />
+                </Form.Item>
+                <Form.Item name="meta_title" label="Meta Title">
+                  <Input placeholder="Enter meta title" />
+                </Form.Item>
+                <Form.Item name="meta_description" label="Meta Description">
+                  <Input.TextArea rows={3} placeholder="Enter meta description" />
+                </Form.Item>
+              </>
+            )}
           </div>
-          <Form.Item label="Image" required>
-            <Upload
-              listType="picture-card"
-              fileList={createImage}
-              beforeUpload={() => false}
-              maxCount={1}
-              accept="image/*"
-              onChange={({ fileList }) => setCreateImage(fileList)}
-            >
-              {createImage.length === 0 && (
-                <div>
-                  <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              )}
-            </Upload>
-          </Form.Item>
         </Form>
       </Modal>
 
@@ -554,51 +640,99 @@ function News() {
           setIsEditOpen(false);
           resetEditModal();
         }}
-        onOk={handleUpdate}
-        okText="Update"
-        confirmLoading={isLoading || isEditTranslating}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsEditOpen(false);
+              resetEditModal();
+            }}
+          >
+            Cancel
+          </Button>,
+          editStep === 1 ? (
+            <Button key="back" onClick={handleEditPrev}>
+              Back
+            </Button>
+          ) : null,
+          editStep === 0 ? (
+            <Button key="next" type="primary" onClick={handleEditNext}>
+              Next
+            </Button>
+          ) : (
+            <Button
+              key="update"
+              type="primary"
+              onClick={handleUpdate}
+              loading={isLoading || isEditTranslating}
+            >
+              Update
+            </Button>
+          ),
+        ]}
       >
         <Form form={editForm} layout="vertical">
+          <Steps
+            current={editStep}
+            items={[
+              { title: "Blog Data" },
+              { title: "Meta Data" },
+            ]}
+            className="mb-6"
+          />
           <div className="space-y-6">
-            <Form.Item name="title_en" label="Title (EN)">
-              <Input placeholder="Enter English title" />
-            </Form.Item>
-            <Form.Item name="subtitle_en" label="Subtitle (EN)">
-              <Input placeholder="Enter English subtitle" />
-            </Form.Item>
-            <Form.Item name="description_en" label="Description (EN)">
-              <Input.TextArea
-                rows={3}
-                placeholder="Enter English description"
-              />
-            </Form.Item>
-            <Form.Item name="focus_keyword" label="Focus Keyword">
-              <Input placeholder="Enter focus keyword" />
-            </Form.Item>
-            <Form.Item name="written_by" label="Written By">
-              <Input
-                placeholder="Enter writer name"
-                onChange={(e) => persistWriter(e.target.value)}
-              />
-            </Form.Item>
+            {editStep === 0 ? (
+              <>
+                <Form.Item name="title_en" label="Title (EN)">
+                  <Input placeholder="Enter English title" />
+                </Form.Item>
+                <Form.Item name="subtitle_en" label="Subtitle (EN)">
+                  <Input placeholder="Enter English subtitle" />
+                </Form.Item>
+                <Form.Item name="description_en" label="Description (EN)">
+                  <Input.TextArea
+                    rows={3}
+                    placeholder="Enter English description"
+                  />
+                </Form.Item>
+                <Form.Item name="written_by" label="Written By">
+                  <Input
+                    placeholder="Enter writer name"
+                    onChange={(e) => persistWriter(e.target.value)}
+                  />
+                </Form.Item>
+                <Form.Item label="Image">
+                  <Upload
+                    listType="picture-card"
+                    fileList={editImage}
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    accept="image/*"
+                    onChange={({ fileList }) => setEditImage(fileList)}
+                  >
+                    {editImage.length === 0 && (
+                      <div>
+                        <UploadOutlined />
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
+                    )}
+                  </Upload>
+                </Form.Item>
+              </>
+            ) : (
+              <>
+                <Form.Item name="focus_keyword" label="Focus Keyword">
+                  <Input placeholder="Enter focus keyword" />
+                </Form.Item>
+                <Form.Item name="meta_title" label="Meta Title">
+                  <Input placeholder="Enter meta title" />
+                </Form.Item>
+                <Form.Item name="meta_description" label="Meta Description">
+                  <Input.TextArea rows={3} placeholder="Enter meta description" />
+                </Form.Item>
+              </>
+            )}
           </div>
-          <Form.Item label="Image">
-            <Upload
-              listType="picture-card"
-              fileList={editImage}
-              beforeUpload={() => false}
-              maxCount={1}
-              accept="image/*"
-              onChange={({ fileList }) => setEditImage(fileList)}
-            >
-              {editImage.length === 0 && (
-                <div>
-                  <UploadOutlined />
-                  <div style={{ marginTop: 8 }}>Upload</div>
-                </div>
-              )}
-            </Upload>
-          </Form.Item>
         </Form>
       </Modal>
 

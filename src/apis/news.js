@@ -22,6 +22,8 @@ const appendNewsFields = (formData, payload = {}) => {
     "description_fr",
     "focus_keyword",
     "written_by",
+    "meta_title",
+    "meta_description",
   ];
   fields.forEach((field) => {
     if (payload[field] != null) {
