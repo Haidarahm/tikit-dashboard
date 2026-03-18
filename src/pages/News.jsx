@@ -71,6 +71,7 @@ function News() {
   const [createImage, setCreateImage] = useState([]);
   const [editImage, setEditImage] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [viewBlogItem, setViewBlogItem] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedNewsId, setSelectedNewsId] = useState(null);
@@ -255,8 +256,9 @@ function News() {
       description_en: record.description_en || record.description || "",
       focus_keyword: record.focus_keyword || "",
       written_by: record.written_by || defaultWrittenBy,
-      meta_title: record.meta_title || "",
-      meta_description: record.meta_description || "",
+      meta_title: record.meta_title || record.title_en || record.title || "",
+      meta_description:
+        record.meta_description || record.description_en || record.description || "",
     });
     setIsEditOpen(true);
   };
@@ -397,9 +399,13 @@ function News() {
       {
         title: "Actions",
         key: "actions",
-        width: 180,
+        width: 220,
         render: (record) => (
           <Space>
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => setViewBlogItem(record)}
+            />
             <Button
               icon={<EditOutlined />}
               onClick={() => handleEditOpen(record)}
@@ -631,6 +637,73 @@ function News() {
             )}
           </div>
         </Form>
+      </Modal>
+
+      <Modal
+        title="View Blog"
+        open={!!viewBlogItem}
+        onCancel={() => setViewBlogItem(null)}
+        footer={
+          <Button type="primary" onClick={() => setViewBlogItem(null)}>
+            Close
+          </Button>
+        }
+        width={720}
+      >
+        {viewBlogItem ? (
+          <div className="space-y-4">
+            <div>
+              <span className="text-gray-500 text-sm">Title</span>
+              <div className="mt-0.5">{viewBlogItem.title || "-"}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Subtitle</span>
+              <div className="mt-0.5">{viewBlogItem.subtitle || "-"}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Description</span>
+              <div className="mt-0.5 whitespace-pre-wrap">
+                {viewBlogItem.description || "-"}
+              </div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Focus Keyword</span>
+              <div className="mt-0.5">{viewBlogItem.focus_keyword || "-"}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Written By</span>
+              <div className="mt-0.5 whitespace-pre-wrap">
+                {viewBlogItem.written_by || "-"}
+              </div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Meta Title</span>
+              <div className="mt-0.5">{viewBlogItem.meta_title || "-"}</div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Meta Description</span>
+              <div className="mt-0.5 whitespace-pre-wrap">
+                {viewBlogItem.meta_description || "-"}
+              </div>
+            </div>
+            <div>
+              <span className="text-gray-500 text-sm">Image</span>
+              <div className="mt-2">
+                {viewBlogItem.image ? (
+                  <Image
+                    src={viewBlogItem.image}
+                    width={160}
+                    height={100}
+                    style={{ objectFit: "cover" }}
+                    preview={{ mask: "Preview" }}
+                  />
+                ) : (
+                  "-"
+                )}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </Modal>
 
       <Modal
