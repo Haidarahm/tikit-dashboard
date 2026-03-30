@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* ─── Navbar & Sidebar color tokens (light mode) ────────────────────────── */
+@theme {
+  --color-sidebar:        #ffffff;
+  --color-sidebar-border: #e2e8f0;
+  --color-navbar:         #ffffff;
+  --color-navbar-border:  #e2e8f0;
+  --color-nav-hover:      #f1f5f9;
+  --color-brand-accent:   #2563eb;
+}
+
+/* Ant Design Sider / Menu background override */
+.tikit-sider,
+.tikit-sider .ant-layout-sider-children,
+.tikit-sider .ant-menu {
+  background-color: var(--color-sidebar) !important;
+}
+
+.tikit-sider .ant-menu-item:hover,
+.tikit-sider .ant-menu-submenu-title:hover {
+  background-color: var(--color-nav-hover) !important;
+}
+
+.tikit-sider .ant-menu-item-selected {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+.tikit-sider .ant-menu-item-selected .ant-menu-item-icon,
+.tikit-sider .ant-menu-item-selected span {
+  color: #2563eb !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 /* Enhanced Text Contrast for Better Readability */
 body {
   color: #1f2937; /* gray-800 - high contrast default text */

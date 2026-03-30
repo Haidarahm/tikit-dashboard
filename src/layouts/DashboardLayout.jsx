@@ -82,18 +82,18 @@ function DashboardLayout() {
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
         trigger={null}
-        theme="dark"
+        theme="light"
         width={260}
-        className="shadow-lg"
+        className="tikit-sider shadow-sm border-r border-sidebar-border"
       >
-        <div className="h-16 flex items-center justify-center border-b border-gray-600">
-          <div className="text-white text-2xl font-bold tracking-wider drop-shadow-sm">
-            <span className="text-blue-300">T</span>
-            <span className="text-gray-50">ikit</span>
+        <div className="h-16 flex items-center justify-center border-b border-sidebar-border">
+          <div className="text-2xl font-bold tracking-wider">
+            <span className="text-brand-accent">T</span>
+            <span className="text-gray-800">ikit</span>
           </div>
         </div>
         <Menu
-          theme="dark"
+          theme="light"
           mode="inline"
           selectedKeys={selectedKeys}
           openKeys={openKeys}
@@ -179,15 +179,15 @@ function DashboardLayout() {
       </Sider>
       <Layout>
         <Header
-          className="bg-gray-800 shadow-md border-b border-gray-700 flex items-center justify-between px-4 md:px-6"
-          style={{ height: 64 }}
+          className="shadow-sm border-b border-navbar-border flex items-center justify-between px-4 md:px-6"
+          style={{ height: 64, backgroundColor: "var(--color-navbar)" }}
         >
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined className="text-lg" /> : <MenuFoldOutlined className="text-lg" />}
             onClick={() => setCollapsed(!collapsed)}
-            style={{ color: "rgba(255,255,255,0.85)", fontSize: 18 }}
-            className="flex items-center justify-center hover:!text-white"
+            style={{ color: "#374151", fontSize: 18 }}
+            className="flex items-center justify-center hover:!text-brand-accent"
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           />
           <div className="flex items-center">
@@ -197,18 +197,18 @@ function DashboardLayout() {
               arrow
               trigger={["click"]}
             >
-              <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-gray-700 transition-all duration-200 cursor-pointer group">
+              <button className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-nav-hover transition-all duration-200 cursor-pointer group">
                 <Avatar
                   size="default"
-                  className="ring-2 ring-blue-400/30"
+                  className="ring-2 ring-blue-200"
                   style={{ backgroundColor: "#2563eb" }}
                   icon={<UserOutlined />}
                 />
                 <div className="hidden sm:flex flex-col items-start ml-1">
-                  <span className="text-xs font-semibold text-gray-300 leading-none">
+                  <span className="text-xs font-semibold text-gray-400 leading-none">
                     Admin
                   </span>
-                  <span className="text-sm font-bold text-white leading-tight">
+                  <span className="text-sm font-bold text-gray-800 leading-tight">
                     Dashboard
                   </span>
                 </div>
