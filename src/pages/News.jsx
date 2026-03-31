@@ -182,7 +182,20 @@ function News() {
 
   const handleCreate = async () => {
     try {
-      const values = await createForm.validateFields();
+      await createForm.validateFields([
+        "title_en",
+        "subtitle_en",
+        "description_en",
+        "written_by",
+        "focus_keyword",
+        "meta_title",
+        "meta_description",
+      ]);
+      const values = createForm.getFieldsValue(true);
+      if (!createImage[0]?.originFileObj) {
+        toast.error("Image is required");
+        return;
+      }
       setIsCreateTranslating(true);
       const translated = await translateBlogFields({
         title_en: values.title_en,
@@ -205,9 +218,8 @@ function News() {
         meta_title: values.meta_title,
         meta_description: values.meta_description,
       };
-      if (createImage[0]?.originFileObj) {
-        payload.image = createImage[0].originFileObj;
-      }
+      payload.image = createImage[0].originFileObj;
+      persistWriter(values.written_by);
       await create(payload);
       setIsCreateOpen(false);
       resetCreateModal();
@@ -229,6 +241,10 @@ function News() {
         "description_en",
         "written_by",
       ]);
+      if (!createImage[0]?.originFileObj) {
+        toast.error("Image is required");
+        return;
+      }
       setCreateStep(1);
     } catch (error) {
       // Validation errors are already shown by antd Form.
