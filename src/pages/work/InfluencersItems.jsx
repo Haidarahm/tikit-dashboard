@@ -79,6 +79,7 @@ const InfluencersItems = () => {
     objective_en,
     brief_en,
     strategy_en,
+    approach_en,
   }) => {
     const out = {
       title_ar: "",
@@ -91,6 +92,8 @@ const InfluencersItems = () => {
       brief_fr: "",
       strategy_ar: "",
       strategy_fr: "",
+      approach_ar: "",
+      approach_fr: "",
     };
     const translatePlain = async (text, field) => {
       if (!text || !String(text).trim()) return;
@@ -105,6 +108,7 @@ const InfluencersItems = () => {
     await translatePlain(objective_en, "objective");
     await translatePlain(brief_en, "brief");
     await translatePlain(strategy_en, "strategy");
+    await translatePlain(approach_en, "approach");
     return out;
   };
 
@@ -125,6 +129,7 @@ const InfluencersItems = () => {
         objective_en: values.objective_en,
         brief_en: values.brief_en,
         strategy_en: values.strategy_en,
+        approach_en: values.approach_en,
       });
       setIsCreateTranslating(false);
       const payload = {
@@ -141,6 +146,9 @@ const InfluencersItems = () => {
         strategy_en: values.strategy_en,
         strategy_ar: translated.strategy_ar,
         strategy_fr: translated.strategy_fr,
+        approach_en: values.approach_en,
+        approach_ar: translated.approach_ar,
+        approach_fr: translated.approach_fr,
         reach: values.reach,
         views: values.views,
         objective_en: values.objective_en,
@@ -195,6 +203,7 @@ const InfluencersItems = () => {
         objective_en: values.objective_en,
         brief_en: values.brief_en,
         strategy_en: values.strategy_en,
+        approach_en: values.approach_en,
       });
       setIsEditTranslating(false);
       const payload = {};
@@ -218,6 +227,11 @@ const InfluencersItems = () => {
         payload.strategy_en = values.strategy_en;
         payload.strategy_ar = translated.strategy_ar;
         payload.strategy_fr = translated.strategy_fr;
+      }
+      if (values.approach_en) {
+        payload.approach_en = values.approach_en;
+        payload.approach_ar = translated.approach_ar;
+        payload.approach_fr = translated.approach_fr;
       }
       if (values.reach) payload.reach = values.reach;
       if (values.views) payload.views = values.views;
@@ -286,6 +300,7 @@ const InfluencersItems = () => {
       engagement_rate: item.engagement_rate || 0,
       brief_en: item.brief_en || "",
       strategy_en: item.strategy_en || "",
+      approach_en: item.approach_en || "",
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
@@ -494,6 +509,9 @@ const InfluencersItems = () => {
                 <Form.Item name="strategy_en" label="Strategy (EN)" className="md:col-span-2">
                   <Input.TextArea rows={2} placeholder="Enter English strategy" />
                 </Form.Item>
+                <Form.Item name="approach_en" label="Approach (EN)" className="md:col-span-2">
+                  <Input.TextArea rows={2} placeholder="Enter English approach" />
+                </Form.Item>
               </div>
             </div>
 
@@ -622,6 +640,9 @@ const InfluencersItems = () => {
 
                 <Form.Item name="strategy_en" label="Strategy (EN)" className="md:col-span-2">
                   <Input.TextArea rows={2} placeholder="Enter English strategy" />
+                </Form.Item>
+                <Form.Item name="approach_en" label="Approach (EN)" className="md:col-span-2">
+                  <Input.TextArea rows={2} placeholder="Enter English approach" />
                 </Form.Item>
               </div>
             </div>
@@ -814,6 +835,16 @@ const InfluencersItems = () => {
                 <h4 className="text-sm font-semibold text-gray-700">Strategy</h4>
                 <p className="text-gray-600 text-sm whitespace-pre-wrap">
                   {viewModal.item.strategy || viewModal.item.strategy_en}
+                </p>
+              </div>
+            )}
+
+            {/* Approach Section */}
+            {(viewModal.item.approach || viewModal.item.approach_en) && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-700">Approach</h4>
+                <p className="text-gray-600 text-sm whitespace-pre-wrap">
+                  {viewModal.item.approach || viewModal.item.approach_en}
                 </p>
               </div>
             )}

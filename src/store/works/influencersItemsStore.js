@@ -62,6 +62,9 @@ export const useInfluencersItemsStore = create((set, get) => ({
         strategy_en: item.strategy_en ?? item.strategy ?? "",
         strategy_ar: item.strategy_ar ?? item.strategy ?? "",
         strategy_fr: item.strategy_fr ?? item.strategy ?? "",
+        approach_en: item.approach_en ?? item.approach ?? "",
+        approach_ar: item.approach_ar ?? item.approach ?? "",
+        approach_fr: item.approach_fr ?? item.approach ?? "",
       }));
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
