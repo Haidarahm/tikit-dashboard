@@ -42,6 +42,7 @@ function DashboardLayout() {
       return ["registered-influencers"];
     if (path.startsWith("/subscribed-users"))
       return ["subscribed-users"];
+    if (path.startsWith("/admins")) return ["admins"];
     return [];
   }, [location.pathname]);
 
@@ -152,6 +153,12 @@ function DashboardLayout() {
                   icon: <MailOutlined />,
                   label: "Subscribed Users",
                   onClick: () => navigate("/subscribed-users"),
+                },
+                {
+                  key: "admins",
+                  icon: <TeamOutlined />,
+                  label: "Admins",
+                  onClick: () => navigate("/admins"),
                 },
               ],
             },

@@ -19,6 +19,7 @@ import TeamManagement from "./pages/team/TeamManagement.jsx";
 import ShowcaseProjects from "./pages/ShowcaseProjects.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 import SubscribedUsers from "./pages/SubscribedUsers.jsx";
+import Admins from "./pages/Admins.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -51,6 +52,7 @@ function App() {
               element={<RegisteredInfluencers />}
             />
             <Route path="/subscribed-users" element={<SubscribedUsers />} />
+            <Route path="/admins" element={<Admins />} />
             <Route path="/banner" element={<Banner />} />
             <Route path="/about-banners" element={<AboutBanners />} />
           </Route>
