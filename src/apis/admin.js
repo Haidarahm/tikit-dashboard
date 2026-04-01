@@ -37,7 +37,7 @@ export async function updateAdmin(id, payload) {
   const formData = new FormData();
   appendAdminFields(formData, payload);
 
-  const { data } = await apiClient.put(`/admins/${id}`, formData, {
+  const { data } = await apiClient.post(`/admins/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
