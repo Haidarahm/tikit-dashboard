@@ -16,3 +16,15 @@ export async function login(credentials) {
   const { data } = await publicClient.post("/auth/login", credentials);
   return data;
 }
+
+export async function logout(token) {
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const { data } = await publicClient.post("/auth/logout", {}, { headers });
+  return data;
+}

@@ -58,8 +58,8 @@ function DashboardLayout() {
     setOpenKeys(newOpenKeys);
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/login", { replace: true });
   };
 

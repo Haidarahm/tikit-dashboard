@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
-import { login as loginAPI } from "../apis/auth.js";
+import { login as loginAPI, logout as logoutAPI } from "../apis/auth.js";
 
 const getInitialToken = () => {
   try {
@@ -46,12 +46,26 @@ export const useAuthStore = create((set, get) => ({
       return { success: false, error: errorMessage };
     }
   },
-  logout: () => {
+  logout: async ({ skipApi = false, silent = false } = {}) => {
+    const token = get().token;
+    if (!skipApi && token) {
+      try {
+        await logoutAPI(token);
+      } catch (error) {
+        if (!silent) {
+          toast.error(
+            error?.response?.data?.message || error?.message || "Logout failed"
+          );
+        }
+      }
+    }
     try {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
     } catch {}
     set({ token: "", user: null, isAuthenticated: false });
-    toast.success("Logged out");
+    if (!silent) {
+      toast.success("Logged out");
+    }
   },
 }));

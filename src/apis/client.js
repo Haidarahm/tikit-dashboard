@@ -23,7 +23,7 @@ apiClient.interceptors.response.use(
     const status = error?.response?.status;
     if (status === 401) {
       const { logout } = useAuthStore.getState();
-      logout();
+      logout({ skipApi: true, silent: true });
     }
     return Promise.reject(error);
   }

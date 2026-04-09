@@ -121,7 +121,8 @@ const InfluencersItems = () => {
 
   const handleAdd = async () => {
     try {
-      const values = await addForm.validateFields();
+      await addForm.validateFields();
+      const values = addForm.getFieldsValue(true);
       setIsCreateTranslating(true);
       const translated = await translateInfluencerFields({
         title_en: values.title_en,
@@ -195,7 +196,8 @@ const InfluencersItems = () => {
 
   const handleEdit = async () => {
     try {
-      const values = await editForm.validateFields();
+      await editForm.validateFields();
+      const values = editForm.getFieldsValue(true);
       setIsEditTranslating(true);
       const translated = await translateInfluencerFields({
         title_en: values.title_en,
@@ -206,42 +208,31 @@ const InfluencersItems = () => {
         approach_en: values.approach_en,
       });
       setIsEditTranslating(false);
-      const payload = {};
-
-      if (values.title_en) {
-        payload.title_en = values.title_en;
-        payload.title_ar = translated.title_ar;
-        payload.title_fr = translated.title_fr;
-      }
-      if (values.subtitle_en) {
-        payload.subtitle_en = values.subtitle_en;
-        payload.subtitle_ar = translated.subtitle_ar;
-        payload.subtitle_fr = translated.subtitle_fr;
-      }
-      if (values.brief_en) {
-        payload.brief_en = values.brief_en;
-        payload.brief_ar = translated.brief_ar;
-        payload.brief_fr = translated.brief_fr;
-      }
-      if (values.strategy_en) {
-        payload.strategy_en = values.strategy_en;
-        payload.strategy_ar = translated.strategy_ar;
-        payload.strategy_fr = translated.strategy_fr;
-      }
-      if (values.approach_en) {
-        payload.approach_en = values.approach_en;
-        payload.approach_ar = translated.approach_ar;
-        payload.approach_fr = translated.approach_fr;
-      }
-      if (values.reach) payload.reach = values.reach;
-      if (values.views) payload.views = values.views;
-      if (values.objective_en) {
-        payload.objective_en = values.objective_en;
-        payload.objective_ar = translated.objective_ar;
-        payload.objective_fr = translated.objective_fr;
-      }
-      if (values.engagement_rate)
+      const payload = {
+        title_en: values.title_en,
+        title_ar: translated.title_ar,
+        title_fr: translated.title_fr,
+        subtitle_en: values.subtitle_en,
+        subtitle_ar: translated.subtitle_ar,
+        subtitle_fr: translated.subtitle_fr,
+        objective_en: values.objective_en,
+        objective_ar: translated.objective_ar,
+        objective_fr: translated.objective_fr,
+        brief_en: values.brief_en,
+        brief_ar: translated.brief_ar,
+        brief_fr: translated.brief_fr,
+        strategy_en: values.strategy_en,
+        strategy_ar: translated.strategy_ar,
+        strategy_fr: translated.strategy_fr,
+        approach_en: values.approach_en,
+        approach_ar: translated.approach_ar,
+        approach_fr: translated.approach_fr,
+      };
+      if (values.reach != null) payload.reach = values.reach;
+      if (values.views != null) payload.views = values.views;
+      if (values.engagement_rate != null) {
         payload.engagement_rate = values.engagement_rate;
+      }
 
       const newImages = editImageFileList
         .map((file) => file.originFileObj)
