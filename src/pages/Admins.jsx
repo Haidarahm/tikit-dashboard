@@ -218,18 +218,18 @@ const Admins = () => {
         confirmLoading={isLoading}
         okText="Create"
       >
-        <Form form={addForm} layout="vertical">
+        <Form form={addForm} layout="vertical" autoComplete="off">
           <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-            <Input placeholder="Enter admin name" />
+            <Input placeholder="Enter admin name" autoComplete="off" />
           </Form.Item>
           <Form.Item name="email" label="Email" rules={[{ required: true, type: "email" }]}>
-            <Input placeholder="Enter admin email" />
+            <Input placeholder="Enter admin email" autoComplete="off" />
           </Form.Item>
           <Form.Item name="phone_number" label="Phone Number" rules={[{ required: true }]}>
-            <Input placeholder="Enter phone number" />
+            <Input placeholder="Enter phone number" autoComplete="off" />
           </Form.Item>
           <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Enter password" autoComplete="new-password" />
           </Form.Item>
           <Form.Item
             name="permissions"
