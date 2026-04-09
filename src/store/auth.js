@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import { login as loginAPI, logout as logoutAPI } from "../apis/auth.js";
+import { getProfile } from "../apis/profile.js";
 
 const getInitialToken = () => {
   try {
@@ -23,6 +24,37 @@ export const useAuthStore = create((set, get) => ({
   token: getInitialToken(),
   user: getInitialUser(),
   isAuthenticated: !!getInitialToken(),
+  isProfileLoading: false,
+  fetchProfile: async () => {
+    const token = get().token;
+    if (!token) {
+      set({ isProfileLoading: false });
+      return null;
+    }
+    set({ isProfileLoading: true });
+    try {
+      const resp = await getProfile();
+      const user = resp?.data?.user;
+      if (user) {
+        try {
+          localStorage.setItem("auth_user", JSON.stringify(user));
+        } catch {
+          /* ignore */
+        }
+        set({ user, isAuthenticated: true });
+      }
+      return resp;
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to load profile"
+      );
+      throw error;
+    } finally {
+      set({ isProfileLoading: false });
+    }
+  },
   login: async (credentials) => {
     try {
       const response = await loginAPI(credentials);
@@ -63,7 +95,12 @@ export const useAuthStore = create((set, get) => ({
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
     } catch {}
-    set({ token: "", user: null, isAuthenticated: false });
+    set({
+      token: "",
+      user: null,
+      isAuthenticated: false,
+      isProfileLoading: false,
+    });
     if (!silent) {
       toast.success("Logged out");
     }

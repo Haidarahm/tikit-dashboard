@@ -1,20 +1,11 @@
-import { Layout, Menu, Dropdown, Avatar, Button } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Button, Spin } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { useAuthStore } from "../store/auth.js";
+import { useSidebarMenu } from "../hooks/useSidebarMenu.jsx";
 import {
   UserOutlined,
   LogoutOutlined,
-  AppstoreOutlined,
-  UnorderedListOutlined,
-  VideoCameraOutlined,
-  FolderOutlined,
-  PlaySquareOutlined,
-  TeamOutlined,
-  ReadOutlined,
-  FundProjectionScreenOutlined,
-  ContactsOutlined,
-  MailOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
@@ -25,6 +16,7 @@ function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const { menuItems, isProfileLoading } = useSidebarMenu();
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -92,90 +84,26 @@ function DashboardLayout() {
             <span className="text-gray-800">ikit</span>
           </div>
         </div>
-        <Menu
-          theme="light"
-          mode="inline"
-          selectedKeys={selectedKeys}
-          openKeys={openKeys}
-          onOpenChange={setOpenKeys}
-          className="border-r-0"
-          items={[
-            {
-              key: "team",
-              icon: <TeamOutlined />,
-              label: "Teams",
-              onClick: () => navigate("/team"),
-            },
-            {
-              key: "news",
-              icon: <ReadOutlined />,
-              label: "Blogs ",
-              onClick: () => navigate("/news"),
-            },
-            {
-              key: "showcase-projects",
-              icon: <FundProjectionScreenOutlined />,
-              label: "Showcase Projects",
-              onClick: () => navigate("/showcase-projects"),
-            },
-            {
-              key: "works",
-              icon: <FolderOutlined />,
-              label: "Works Sections",
-              onClick: () => navigate("/works"),
-            },
-            {
-              key: "sections",
-              icon: <UnorderedListOutlined />,
-              label: "Influencer Sections",
-              onClick: () => navigate("/influencer/sections"),
-            },
-            {
-              key: "users-submenu",
-              icon: <ContactsOutlined />,
-              label: "Users",
-              children: [
-                {
-                  key: "registered-influencers",
-                  icon: <ContactsOutlined />,
-                  label: "Registered Influencers",
-                  onClick: () => navigate("/registered-influencers"),
-                },
-                {
-                  key: "subscribed-users",
-                  icon: <MailOutlined />,
-                  label: "Subscribed Users",
-                  onClick: () => navigate("/subscribed-users"),
-                },
-                {
-                  key: "admins",
-                  icon: <TeamOutlined />,
-                  label: "Admins",
-                  onClick: () => navigate("/admins"),
-                },
-              ],
-            },
-            {
-              key: "banners-submenu",
-              icon: <VideoCameraOutlined />,
-              label: "Banners",
-              children: [
-                {
-                  key: "banner",
-                  icon: <VideoCameraOutlined />,
-                  label: "Banner Videos",
-                  onClick: () => navigate("/banner"),
-                },
-                {
-                  key: "about-banners",
-                  icon: <PlaySquareOutlined />,
-                  label: "About Us Banners",
-                  onClick: () => navigate("/about-banners"),
-                },
-              ],
-            },
-          ]}
-        />
+        {isProfileLoading ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 gap-3">
+            <Spin size="large" />
+            <span className="text-sm text-gray-500">Loading menu…</span>
+          </div>
+        ) : menuItems.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-gray-500">
+            No sections available for your account.
+          </div>
+        ) : (
+          <Menu
+            theme="light"
+            mode="inline"
+            selectedKeys={selectedKeys}
+            openKeys={openKeys}
+            onOpenChange={setOpenKeys}
+            className="border-r-0"
+            items={menuItems}
+          />
+        )}
       </Sider>
       <Layout>
         <Header
