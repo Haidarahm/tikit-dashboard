@@ -383,19 +383,6 @@ function News() {
         ),
       },
       {
-        title: "Focus Keyword",
-        dataIndex: "focus_keyword",
-        key: "focus_keyword",
-        width: 220,
-        render: (value) => (
-          <Tooltip title={value || ""}>
-            <span className="block max-w-[160px] truncate">
-              {value || "-"}
-            </span>
-          </Tooltip>
-        ),
-      },
-      {
         title: "Image",
         dataIndex: "image",
         key: "image",
