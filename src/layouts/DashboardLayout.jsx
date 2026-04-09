@@ -34,7 +34,6 @@ function DashboardLayout() {
     if (path.startsWith("/banner")) return ["banner"];
     if (path.startsWith("/influencer/sections")) return ["sections"];
     if (path.startsWith("/works")) return ["works"];
-    if (path.startsWith("/services")) return ["services"];
     if (path.startsWith("/team")) return ["team"];
     if (path.startsWith("/showcase-projects")) return ["showcase-projects"];
     if (path.startsWith("/news")) return ["news"];
@@ -112,12 +111,6 @@ function DashboardLayout() {
               icon: <ReadOutlined />,
               label: "Blogs ",
               onClick: () => navigate("/news"),
-            },
-            {
-              key: "services",
-              icon: <AppstoreOutlined />,
-              label: "Services",
-              onClick: () => navigate("/services"),
             },
             {
               key: "showcase-projects",
