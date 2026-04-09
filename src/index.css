@@ -39,6 +39,24 @@ body {
   color: #1f2937; /* gray-800 - high contrast default text */
 }
 
+/* Avoid layout shift / extra scrollbars when Ant Design overlays (Popconfirm, Dropdown) open */
+html {
+  scrollbar-gutter: stable;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Ant Layout flex columns: allow shrinking so content doesn’t force horizontal overflow */
+.ant-layout {
+  min-width: 0;
+}
+
+.ant-layout-content {
+  min-width: 0;
+}
+
 /* Table Text Contrast */
 .ant-table {
   color: #111827; /* gray-900 - maximum contrast for table text */

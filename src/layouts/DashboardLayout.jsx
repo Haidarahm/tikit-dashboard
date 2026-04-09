@@ -66,7 +66,7 @@ function DashboardLayout() {
   ];
 
   return (
-    <Layout className="h-screen">
+    <Layout className="h-screen min-h-0 ">
       <Sider
         breakpoint="lg"
         collapsedWidth="0"
@@ -105,7 +105,7 @@ function DashboardLayout() {
           />
         )}
       </Sider>
-      <Layout>
+      <Layout className="min-w-0 min-h-0 flex flex-col">
         <Header
           className="shadow-sm border-b border-navbar-border flex items-center justify-between px-4 md:px-6"
           style={{ height: 64, backgroundColor: "var(--color-navbar)" }}
@@ -144,8 +144,8 @@ function DashboardLayout() {
             </Dropdown>
           </div>
         </Header>
-        <Content className="p-4 md:p-6 bg-gray-50 min-h-[calc(100vh-64px)] overflow-auto">
-          <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm min-h-[60vh]">
+        <Content className="flex-1 min-h-0 min-w-0 p-4 md:p-6 bg-gray-50 overflow-y-auto overflow-x-hidden">
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm min-h-[60vh] min-w-0">
             <Outlet />
           </div>
         </Content>
