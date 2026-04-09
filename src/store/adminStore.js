@@ -70,7 +70,13 @@ export const useAdminStore = create((set, get) => ({
   update: async (id, payload) => {
     set({ isLoading: true, error: null });
     try {
-      const updated = await updateAdmin(id, payload);
+      const nextPayload = {
+        ...payload,
+        permissions: Array.isArray(payload?.permissions)
+          ? payload.permissions
+          : [],
+      };
+      const updated = await updateAdmin(id, nextPayload);
       set({ current: updated?.data || updated });
       await get().fetchList();
       toast.success("Admin updated successfully");

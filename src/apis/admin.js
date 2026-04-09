@@ -21,6 +21,14 @@ const appendAdminFields = (formData, payload = {}) => {
   if (payload?.profile_image) {
     formData.append("profile_image", payload.profile_image);
   }
+
+  if (Array.isArray(payload?.permissions)) {
+    payload.permissions.forEach((permission, index) => {
+      if (permission != null && String(permission).trim() !== "") {
+        formData.append(`permissions[${index}]`, permission);
+      }
+    });
+  }
 };
 
 export async function addAdmin(payload) {

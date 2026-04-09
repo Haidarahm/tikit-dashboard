@@ -11,6 +11,7 @@ import {
   Image,
   Switch,
   Tag,
+  Checkbox,
 } from "antd";
 import {
   ReloadOutlined,
@@ -21,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useAdminStore } from "../store/adminStore.js";
+import { usePermissionsStore } from "../store/permissionsStore.js";
 
 const Admins = () => {
   const {
@@ -45,6 +47,7 @@ const Admins = () => {
   const [addImageFileList, setAddImageFileList] = useState([]);
   const [editImageFileList, setEditImageFileList] = useState([]);
   const [changePasswordOnEdit, setChangePasswordOnEdit] = useState(false);
+  const { items: permissionsItems, fetchPermissions } = usePermissionsStore();
 
   useEffect(() => {
     fetchList();
@@ -60,6 +63,25 @@ const Admins = () => {
     setEditImageFileList([]);
     setChangePasswordOnEdit(false);
     setEditingId(null);
+  };
+
+  const loadPermissions = async () => {
+    if (permissionsItems.length > 0) return;
+    try {
+      await fetchPermissions();
+    } catch {
+      // Error toast is already handled in permissions store.
+    }
+  };
+
+  const extractPermissionSlugs = (record) => {
+    if (!Array.isArray(record?.permissions)) return [];
+    return record.permissions
+      .map((permission) => {
+        if (typeof permission === "string") return permission;
+        return permission?.slug || null;
+      })
+      .filter(Boolean);
   };
 
   const columns = useMemo(
@@ -81,26 +103,6 @@ const Admins = () => {
         render: (value) => <Tag color="blue">{value || "-"}</Tag>,
       },
       {
-        title: "Email Verified",
-        dataIndex: "email_verified_at",
-        key: "email_verified_at",
-        width: 140,
-        render: (value) =>
-          value ? <Tag color="green">Verified</Tag> : <Tag>Not Verified</Tag>,
-      },
-      {
-        title: "Image",
-        dataIndex: "profile_image",
-        key: "profile_image",
-        width: 110,
-        render: (value) =>
-          value ? (
-            <Image src={value} width={52} height={52} style={{ objectFit: "cover" }} />
-          ) : (
-            "-"
-          ),
-      },
-      {
         title: "Actions",
         key: "actions",
         width: 170,
@@ -108,13 +110,15 @@ const Admins = () => {
           <Space>
             <Button
               icon={<EditOutlined />}
-              onClick={() => {
+              onClick={async () => {
+                await loadPermissions();
                 setEditingId(record.id);
                 editForm.setFieldsValue({
                   name: record.name || "",
                   email: record.email || "",
                   phone_number: record.phone_number || "",
                   password: "",
+                  permissions: extractPermissionSlugs(record),
                 });
                 setIsEditOpen(true);
               }}
@@ -154,7 +158,8 @@ const Admins = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => {
+            onClick={async () => {
+              await loadPermissions();
               resetAddModal();
               setIsAddOpen(true);
             }}
@@ -196,6 +201,7 @@ const Admins = () => {
               email: values.email,
               phone_number: values.phone_number,
               password: values.password,
+              permissions: values.permissions,
             };
             if (addImageFileList[0]?.originFileObj) {
               payload.profile_image = addImageFileList[0].originFileObj;
@@ -224,6 +230,22 @@ const Admins = () => {
           </Form.Item>
           <Form.Item name="password" label="Password" rules={[{ required: true, min: 6 }]}>
             <Input.Password placeholder="Enter password" />
+          </Form.Item>
+          <Form.Item
+            name="permissions"
+            label="Permissions"
+            rules={[{ required: true, message: "Select at least one permission" }]}
+          >
+            <Checkbox.Group className="w-full">
+              <div className="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto pr-1">
+                {permissionsItems.map((permission) => (
+                  <Checkbox key={permission.slug} value={permission.slug}>
+                    <span className="font-medium">{permission.name}</span>
+                    <span className="text-gray-500"> ({permission.slug})</span>
+                  </Checkbox>
+                ))}
+              </div>
+            </Checkbox.Group>
           </Form.Item>
           <Form.Item label="Profile Image">
             <Upload
@@ -259,6 +281,9 @@ const Admins = () => {
               name: values.name,
               email: values.email,
               phone_number: values.phone_number,
+              permissions: Array.isArray(values.permissions)
+                ? values.permissions
+                : [],
             };
             if (changePasswordOnEdit && values.password) {
               payload.password = values.password;
@@ -304,6 +329,22 @@ const Admins = () => {
               <Input.Password placeholder="Enter new password" />
             </Form.Item>
           ) : null}
+          <Form.Item
+            name="permissions"
+            label="Permissions"
+            rules={[{ required: true, message: "Select at least one permission" }]}
+          >
+            <Checkbox.Group className="w-full">
+              <div className="grid grid-cols-1 gap-2 max-h-52 overflow-y-auto pr-1">
+                {permissionsItems.map((permission) => (
+                  <Checkbox key={permission.slug} value={permission.slug}>
+                    <span className="font-medium">{permission.name}</span>
+                    <span className="text-gray-500"> ({permission.slug})</span>
+                  </Checkbox>
+                ))}
+              </div>
+            </Checkbox.Group>
+          </Form.Item>
           <Form.Item label="Profile Image">
             <Upload
               listType="picture-card"
