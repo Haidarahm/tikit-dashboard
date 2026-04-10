@@ -30,6 +30,43 @@ const LANG_OPTIONS = [
   { label: "French", value: "fr" },
 ];
 
+/** Ant Design Upload `fileList` entry for an existing remote file URL. */
+function remoteUrlToUploadFile(url, { uidSuffix = "" } = {}) {
+  if (url == null || String(url).trim() === "") return null;
+  const str = String(url);
+  const name = str.split("/").pop() || "file";
+  return {
+    uid: uidSuffix ? `${uidSuffix}-${str}` : str,
+    name,
+    status: "done",
+    url: str,
+  };
+}
+
+function deriveGalleryImageUrls(project) {
+  if (Array.isArray(project?.images) && project.images.length > 0) {
+    return project.images.filter(Boolean);
+  }
+  if (Array.isArray(project?.media)) {
+    return project.media
+      .filter((m) => m?.type === "image" && m?.file)
+      .map((m) => m.file);
+  }
+  return [];
+}
+
+function deriveVideoUrls(project) {
+  if (Array.isArray(project?.videos) && project.videos.length > 0) {
+    return project.videos.filter(Boolean);
+  }
+  if (Array.isArray(project?.media)) {
+    return project.media
+      .filter((m) => m?.type === "video" && m?.file)
+      .map((m) => m.file);
+  }
+  return [];
+}
+
 const ShowcaseProjects = () => {
   const {
     items,
@@ -227,8 +264,35 @@ const ShowcaseProjects = () => {
       strategy_fr: project.strategy_fr ?? "",
       reach: project.reach ?? null,
       views: project.views ?? null,
-      engagement_rate: project.engagement_rate ?? null,
+      engagement_rate: (() => {
+        const er = project.engagement_rate;
+        if (er == null || er === "") return null;
+        const n = Number(er);
+        return Number.isFinite(n) ? n : null;
+      })(),
     });
+
+    const logoFile = remoteUrlToUploadFile(project.logo, { uidSuffix: "logo" });
+    setEditLogoFileList(logoFile ? [logoFile] : []);
+
+    const imageUrls = deriveGalleryImageUrls(project);
+    setEditImagesFileList(
+      imageUrls
+        .map((url, i) =>
+          remoteUrlToUploadFile(url, { uidSuffix: `img-${i}` })
+        )
+        .filter(Boolean)
+    );
+
+    const videoUrls = deriveVideoUrls(project);
+    setEditVideosFileList(
+      videoUrls
+        .map((url, i) =>
+          remoteUrlToUploadFile(url, { uidSuffix: `vid-${i}` })
+        )
+        .filter(Boolean)
+    );
+
     setIsEditOpen(true);
   };
 
