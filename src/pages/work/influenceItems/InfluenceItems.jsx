@@ -17,6 +17,7 @@ import {
   Tooltip,
   Select,
   Switch,
+  Divider,
 } from "antd";
 import {
   EditOutlined,
@@ -30,6 +31,15 @@ import { useInfluencersItemsStore } from "../../../store/works/influencersItemsS
 import { useTranslateStore } from "../../../store/translateStore.js";
 import ExcelImportButton from "../../../components/work/ExcelImportButton.jsx";
 import { LANG_OPTIONS } from "../../../constants/language.js";
+import {
+  extractExistingMediaId,
+  parseEngagementRate,
+  remoteUrlToUploadFile,
+} from "../../showcase/showcaseHelpers.js";
+import {
+  deriveInfluenceImageMediaItems,
+  deriveInfluenceReelMediaItems,
+} from "./influenceItemMediaHelpers.js";
 
 const EMPTY_INFLUENCER_TRANSLATION = {
   title_ar: "",
@@ -75,9 +85,12 @@ const InfluenceItems = () => {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editForm] = Form.useForm();
-  const [editImageFileList, setEditImageFileList] = useState([]);
+  const [editExistingImages, setEditExistingImages] = useState([]);
+  const [editNewImagesFileList, setEditNewImagesFileList] = useState([]);
   const [editLogoFileList, setEditLogoFileList] = useState([]);
-  const [editReelsFileList, setEditReelsFileList] = useState([]);
+  const [editExistingReels, setEditExistingReels] = useState([]);
+  const [editNewReelsFileList, setEditNewReelsFileList] = useState([]);
+  const [editInitialMediaIds, setEditInitialMediaIds] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [viewModal, setViewModal] = useState({
     open: false,
@@ -289,9 +302,9 @@ const InfluenceItems = () => {
         payload.engagement_rate = values.engagement_rate;
       }
 
-      const newImages = editImageFileList
+      const newImages = editNewImagesFileList
         .map((file) => file.originFileObj)
-        .filter((file) => file);
+        .filter(Boolean);
       if (newImages.length > 0) {
         payload.images = newImages;
       }
@@ -300,20 +313,40 @@ const InfluenceItems = () => {
         payload.logo = editLogoFileList[0].originFileObj;
       }
 
-      const newReels = editReelsFileList
+      const newReels = editNewReelsFileList
         .map((file) => file.originFileObj)
-        .filter((file) => file);
+        .filter(Boolean);
       if (newReels.length > 0) {
         payload.reels = newReels;
+      }
+
+      const keptExistingIds = new Set(
+        [...editExistingImages, ...editExistingReels]
+          .map((file) => extractExistingMediaId(file))
+          .filter((id) => Number.isInteger(id))
+      );
+      const removeMediaIds = editInitialMediaIds.filter(
+        (id) => !keptExistingIds.has(id)
+      );
+      if (removeMediaIds.length > 0) {
+        payload.remove_media_ids = removeMediaIds;
+      }
+
+      if (editExistingImages.length === 0 && newImages.length === 0) {
+        toast.error("Keep at least one gallery image or upload new images.");
+        return;
       }
 
       await update(editingId, payload);
       setIsEditOpen(false);
       setAutoTranslateEdit(true);
       editForm.resetFields();
-      setEditImageFileList([]);
+      setEditExistingImages([]);
+      setEditNewImagesFileList([]);
       setEditLogoFileList([]);
-      setEditReelsFileList([]);
+      setEditExistingReels([]);
+      setEditNewReelsFileList([]);
+      setEditInitialMediaIds([]);
       setEditingId(null);
     } catch (err) {
       setIsEditTranslating(false);
@@ -340,31 +373,63 @@ const InfluenceItems = () => {
     setAutoTranslateEdit(true);
     setIsEditOpen(true);
     editForm.setFieldsValue({
-      title_en: item.title_en || "",
-      title_ar: item.title_ar || "",
-      title_fr: item.title_fr || "",
-      subtitle_en: item.subtitle_en || "",
-      subtitle_ar: item.subtitle_ar || "",
-      subtitle_fr: item.subtitle_fr || "",
-      reach: item.reach || 0,
-      views: item.views || 0,
-      objective_en: item.objective_en || "",
-      objective_ar: item.objective_ar || "",
-      objective_fr: item.objective_fr || "",
-      engagement_rate: item.engagement_rate || 0,
-      brief_en: item.brief_en || "",
-      brief_ar: item.brief_ar || "",
-      brief_fr: item.brief_fr || "",
-      strategy_en: item.strategy_en || "",
-      strategy_ar: item.strategy_ar || "",
-      strategy_fr: item.strategy_fr || "",
-      approach_en: item.approach_en || "",
-      approach_ar: item.approach_ar || "",
-      approach_fr: item.approach_fr || "",
+      title_en: item.title_en ?? item.title ?? "",
+      title_ar: item.title_ar ?? "",
+      title_fr: item.title_fr ?? "",
+      subtitle_en: item.subtitle_en ?? item.subtitle ?? "",
+      subtitle_ar: item.subtitle_ar ?? "",
+      subtitle_fr: item.subtitle_fr ?? "",
+      reach: item.reach ?? null,
+      views: item.views ?? null,
+      objective_en: item.objective_en ?? item.objective ?? "",
+      objective_ar: item.objective_ar ?? "",
+      objective_fr: item.objective_fr ?? "",
+      engagement_rate: parseEngagementRate(item),
+      brief_en: item.brief_en ?? item.brief ?? "",
+      brief_ar: item.brief_ar ?? "",
+      brief_fr: item.brief_fr ?? "",
+      strategy_en: item.strategy_en ?? item.strategy ?? "",
+      strategy_ar: item.strategy_ar ?? "",
+      strategy_fr: item.strategy_fr ?? "",
+      approach_en: item.approach_en ?? item.approach ?? "",
+      approach_ar: item.approach_ar ?? "",
+      approach_fr: item.approach_fr ?? "",
     });
-    setEditImageFileList([]);
-    setEditLogoFileList([]);
-    setEditReelsFileList([]);
+
+    const logoEntry = remoteUrlToUploadFile(item.logo, { uidSuffix: "logo" });
+    setEditLogoFileList(logoEntry ? [logoEntry] : []);
+
+    const imageItems = deriveInfluenceImageMediaItems(item);
+    setEditExistingImages(
+      imageItems
+        .map((it, i) =>
+          remoteUrlToUploadFile(it.url, {
+            uidSuffix: `img-${it.id ?? i}`,
+            mediaId: it.id,
+          })
+        )
+        .filter(Boolean)
+    );
+
+    const reelItems = deriveInfluenceReelMediaItems(item);
+    setEditExistingReels(
+      reelItems
+        .map((it, i) =>
+          remoteUrlToUploadFile(it.url, {
+            uidSuffix: `reel-${it.id ?? i}`,
+            mediaId: it.id,
+          })
+        )
+        .filter(Boolean)
+    );
+
+    const initialIds = [...imageItems, ...reelItems]
+      .map((it) => it.id)
+      .filter((id) => Number.isInteger(Number(id)))
+      .map((id) => Number(id));
+    setEditInitialMediaIds(initialIds);
+    setEditNewImagesFileList([]);
+    setEditNewReelsFileList([]);
   };
 
   const openViewModal = (item) => {
@@ -723,9 +788,12 @@ const InfluenceItems = () => {
           setIsEditOpen(false);
           setAutoTranslateEdit(true);
           editForm.resetFields();
-          setEditImageFileList([]);
+          setEditExistingImages([]);
+          setEditNewImagesFileList([]);
           setEditLogoFileList([]);
-          setEditReelsFileList([]);
+          setEditExistingReels([]);
+          setEditNewReelsFileList([]);
+          setEditInitialMediaIds([]);
           setEditingId(null);
         }}
         onOk={handleEdit}
@@ -845,7 +913,7 @@ const InfluenceItems = () => {
             </div>
           </div>
 
-          <Form.Item label="Upload New Logo (optional)">
+          <Form.Item label="Logo / Main Image" tooltip="Replace by uploading a new file">
             <Upload
               fileList={editLogoFileList}
               beforeUpload={() => false}
@@ -858,26 +926,40 @@ const InfluenceItems = () => {
             </Upload>
           </Form.Item>
 
-          <Form.Item label="Upload New Images (optional)">
+          <Form.Item label="Gallery images">
+            <div className="mb-2 text-sm text-gray-600">Existing images</div>
             <Upload
-              fileList={editImageFileList}
+              fileList={editExistingImages}
+              listType="picture-card"
+              onChange={({ fileList }) => setEditExistingImages(fileList)}
+            />
+            <Divider className="my-3">New images</Divider>
+            <Upload
+              fileList={editNewImagesFileList}
               beforeUpload={() => false}
               listType="picture-card"
               accept="image/*"
-              onChange={({ fileList }) => setEditImageFileList(fileList)}
+              onChange={({ fileList }) => setEditNewImagesFileList(fileList)}
             >
-              {editImageFileList.length < 10 && "+ Upload"}
+              {editNewImagesFileList.length < 10 && "+ Upload"}
             </Upload>
           </Form.Item>
 
-          <Form.Item label="Upload New Reels (Videos) (optional)">
+          <Form.Item label="Reels (videos)">
+            <div className="mb-2 text-sm text-gray-600">Existing reels</div>
             <Upload
-              fileList={editReelsFileList}
+              fileList={editExistingReels}
+              listType="text"
+              onChange={({ fileList }) => setEditExistingReels(fileList)}
+            />
+            <Divider className="my-3">New reels</Divider>
+            <Upload
+              fileList={editNewReelsFileList}
               beforeUpload={() => false}
               listType="text"
               accept="video/*"
               multiple
-              onChange={({ fileList }) => setEditReelsFileList(fileList)}
+              onChange={({ fileList }) => setEditNewReelsFileList(fileList)}
             >
               <Button icon={<UploadOutlined />}>Upload Videos</Button>
             </Upload>

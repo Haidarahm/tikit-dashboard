@@ -128,6 +128,14 @@ export async function updateItem(id, payload) {
     });
   }
 
+  if (Array.isArray(payload?.remove_media_ids)) {
+    payload.remove_media_ids.forEach((id, index) => {
+      if (id != null && id !== "") {
+        formData.append(`remove_media_ids[${index}]`, Number(id));
+      }
+    });
+  }
+
   const { data } = await apiClient.post(
     `/work-influences/${id}/update`,
     formData,
