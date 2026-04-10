@@ -8,7 +8,7 @@ import {
 import { toast } from "react-toastify";
 import { useShowcaseProjectsStore } from "../../store/showcaseProjectsStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
-import { LANG_OPTIONS } from "./showcaseConstants.js";
+import { LANG_OPTIONS } from "../../constants/language.js";
 import {
   buildShowcasePayload,
   deriveGalleryImageItems,
