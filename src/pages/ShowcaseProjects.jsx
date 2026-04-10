@@ -12,6 +12,8 @@ import {
   Select,
   Popconfirm,
   Typography,
+  Switch,
+  Divider,
 } from "antd";
 import {
   PlusOutlined,
@@ -31,7 +33,7 @@ const LANG_OPTIONS = [
 ];
 
 /** Ant Design Upload `fileList` entry for an existing remote file URL. */
-function remoteUrlToUploadFile(url, { uidSuffix = "" } = {}) {
+function remoteUrlToUploadFile(url, { uidSuffix = "", mediaId = null } = {}) {
   if (url == null || String(url).trim() === "") return null;
   const str = String(url);
   const name = str.split("/").pop() || "file";
@@ -40,31 +42,41 @@ function remoteUrlToUploadFile(url, { uidSuffix = "" } = {}) {
     name,
     status: "done",
     url: str,
+    mediaId,
   };
 }
 
-function deriveGalleryImageUrls(project) {
-  if (Array.isArray(project?.images) && project.images.length > 0) {
-    return project.images.filter(Boolean);
-  }
-  if (Array.isArray(project?.media)) {
+function deriveGalleryImageItems(project) {
+  if (Array.isArray(project?.media) && project.media.length > 0) {
     return project.media
       .filter((m) => m?.type === "image" && m?.file)
-      .map((m) => m.file);
+      .map((m) => ({ id: m?.id ?? null, url: m.file }));
+  }
+  if (Array.isArray(project?.images) && project.images.length > 0) {
+    return project.images.filter(Boolean).map((url) => ({ id: null, url }));
   }
   return [];
 }
 
-function deriveVideoUrls(project) {
-  if (Array.isArray(project?.videos) && project.videos.length > 0) {
-    return project.videos.filter(Boolean);
-  }
-  if (Array.isArray(project?.media)) {
+function deriveVideoItems(project) {
+  if (Array.isArray(project?.media) && project.media.length > 0) {
     return project.media
       .filter((m) => m?.type === "video" && m?.file)
-      .map((m) => m.file);
+      .map((m) => ({ id: m?.id ?? null, url: m.file }));
+  }
+  if (Array.isArray(project?.videos) && project.videos.length > 0) {
+    return project.videos.filter(Boolean).map((url) => ({ id: null, url }));
   }
   return [];
+}
+
+function extractExistingMediaId(file) {
+  if (file?.originFileObj) return null; // newly uploaded file
+  if (file?.mediaId != null) {
+    const n = Number(file.mediaId);
+    return Number.isInteger(n) ? n : null;
+  }
+  return null;
 }
 
 const ShowcaseProjects = () => {
@@ -94,8 +106,11 @@ const ShowcaseProjects = () => {
   const [imagesFileList, setImagesFileList] = useState([]);
   const [videosFileList, setVideosFileList] = useState([]);
   const [editLogoFileList, setEditLogoFileList] = useState([]);
-  const [editImagesFileList, setEditImagesFileList] = useState([]);
-  const [editVideosFileList, setEditVideosFileList] = useState([]);
+  const [editExistingImages, setEditExistingImages] = useState([]);
+  const [editExistingVideos, setEditExistingVideos] = useState([]);
+  const [editNewImagesFileList, setEditNewImagesFileList] = useState([]);
+  const [editNewVideosFileList, setEditNewVideosFileList] = useState([]);
+  const [editInitialMediaIds, setEditInitialMediaIds] = useState([]);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewingProject, setViewingProject] = useState(null);
   const [expandedBriefs, setExpandedBriefs] = useState(new Set());
@@ -104,6 +119,8 @@ const ShowcaseProjects = () => {
 
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
+  const [autoTranslateCreate, setAutoTranslateCreate] = useState(true);
+  const [autoTranslateEdit, setAutoTranslateEdit] = useState(true);
   
   const translateText = useTranslateStore((state) => state.translateText);
 
@@ -116,13 +133,18 @@ const ShowcaseProjects = () => {
     setLogoFileList([]);
     setImagesFileList([]);
     setVideosFileList([]);
+    setAutoTranslateCreate(true);
   };
 
   const resetEditModal = () => {
     editForm.resetFields();
     setEditLogoFileList([]);
-    setEditImagesFileList([]);
-    setEditVideosFileList([]);
+    setEditExistingImages([]);
+    setEditExistingVideos([]);
+    setEditNewImagesFileList([]);
+    setEditNewVideosFileList([]);
+    setEditInitialMediaIds([]);
+    setAutoTranslateEdit(true);
     setEditingId(null);
   };
 
@@ -204,15 +226,29 @@ const ShowcaseProjects = () => {
       await createForm.validateFields();
       const values = createForm.getFieldsValue(true);
 
-      setIsCreateTranslating(true);
-      const translated = await translateShowcaseFields({
-        title_en: values.title_en,
-        subtitle_en: values.subtitle_en,
-        objective_en: values.objective_en,
-        brief_en: values.brief_en,
-        strategy_en: values.strategy_en,
-      });
-      setIsCreateTranslating(false);
+      let translated = {
+        title_ar: "",
+        title_fr: "",
+        subtitle_ar: "",
+        subtitle_fr: "",
+        objective_ar: "",
+        objective_fr: "",
+        brief_ar: "",
+        brief_fr: "",
+        strategy_ar: "",
+        strategy_fr: "",
+      };
+      if (autoTranslateCreate) {
+        setIsCreateTranslating(true);
+        translated = await translateShowcaseFields({
+          title_en: values.title_en,
+          subtitle_en: values.subtitle_en,
+          objective_en: values.objective_en,
+          brief_en: values.brief_en,
+          strategy_en: values.strategy_en,
+        });
+        setIsCreateTranslating(false);
+      }
 
       const payload = buildPayload(
         values,
@@ -220,16 +256,29 @@ const ShowcaseProjects = () => {
         imagesFileList,
         videosFileList
       );
-      payload.title_ar = translated.title_ar;
-      payload.title_fr = translated.title_fr;
-      payload.subtitle_ar = translated.subtitle_ar;
-      payload.subtitle_fr = translated.subtitle_fr;
-      payload.objective_ar = translated.objective_ar;
-      payload.objective_fr = translated.objective_fr;
-      payload.brief_ar = translated.brief_ar;
-      payload.brief_fr = translated.brief_fr;
-      payload.strategy_ar = translated.strategy_ar;
-      payload.strategy_fr = translated.strategy_fr;
+      if (autoTranslateCreate) {
+        payload.title_ar = translated.title_ar;
+        payload.title_fr = translated.title_fr;
+        payload.subtitle_ar = translated.subtitle_ar;
+        payload.subtitle_fr = translated.subtitle_fr;
+        payload.objective_ar = translated.objective_ar;
+        payload.objective_fr = translated.objective_fr;
+        payload.brief_ar = translated.brief_ar;
+        payload.brief_fr = translated.brief_fr;
+        payload.strategy_ar = translated.strategy_ar;
+        payload.strategy_fr = translated.strategy_fr;
+      } else {
+        payload.title_ar = values.title_ar;
+        payload.title_fr = values.title_fr;
+        payload.subtitle_ar = values.subtitle_ar;
+        payload.subtitle_fr = values.subtitle_fr;
+        payload.objective_ar = values.objective_ar;
+        payload.objective_fr = values.objective_fr;
+        payload.brief_ar = values.brief_ar;
+        payload.brief_fr = values.brief_fr;
+        payload.strategy_ar = values.strategy_ar;
+        payload.strategy_fr = values.strategy_fr;
+      }
 
       await create(payload);
       setIsCreateOpen(false);
@@ -278,23 +327,36 @@ const ShowcaseProjects = () => {
     );
     setEditLogoFileList(mainImageFile ? [mainImageFile] : []);
 
-    const imageUrls = deriveGalleryImageUrls(project);
-    setEditImagesFileList(
-      imageUrls
-        .map((url, i) =>
-          remoteUrlToUploadFile(url, { uidSuffix: `img-${i}` })
+    const imageItems = deriveGalleryImageItems(project);
+    setEditExistingImages(
+      imageItems
+        .map((item, i) =>
+          remoteUrlToUploadFile(item.url, {
+            uidSuffix: `img-${item.id ?? i}`,
+            mediaId: item.id,
+          })
         )
         .filter(Boolean)
     );
 
-    const videoUrls = deriveVideoUrls(project);
-    setEditVideosFileList(
-      videoUrls
-        .map((url, i) =>
-          remoteUrlToUploadFile(url, { uidSuffix: `vid-${i}` })
+    const videoItems = deriveVideoItems(project);
+    setEditExistingVideos(
+      videoItems
+        .map((item, i) =>
+          remoteUrlToUploadFile(item.url, {
+            uidSuffix: `vid-${item.id ?? i}`,
+            mediaId: item.id,
+          })
         )
         .filter(Boolean)
     );
+    const initialIds = [...imageItems, ...videoItems]
+      .map((item) => item.id)
+      .filter((id) => Number.isInteger(Number(id)))
+      .map((id) => Number(id));
+    setEditInitialMediaIds(initialIds);
+    setEditNewImagesFileList([]);
+    setEditNewVideosFileList([]);
 
     setIsEditOpen(true);
   };
@@ -304,32 +366,70 @@ const ShowcaseProjects = () => {
       await editForm.validateFields();
       const values = editForm.getFieldsValue(true);
 
-      setIsEditTranslating(true);
-      const translated = await translateShowcaseFields({
-        title_en: values.title_en,
-        subtitle_en: values.subtitle_en,
-        objective_en: values.objective_en,
-        brief_en: values.brief_en,
-        strategy_en: values.strategy_en,
-      });
-      setIsEditTranslating(false);
+      let translated = {
+        title_ar: "",
+        title_fr: "",
+        subtitle_ar: "",
+        subtitle_fr: "",
+        objective_ar: "",
+        objective_fr: "",
+        brief_ar: "",
+        brief_fr: "",
+        strategy_ar: "",
+        strategy_fr: "",
+      };
+      if (autoTranslateEdit) {
+        setIsEditTranslating(true);
+        translated = await translateShowcaseFields({
+          title_en: values.title_en,
+          subtitle_en: values.subtitle_en,
+          objective_en: values.objective_en,
+          brief_en: values.brief_en,
+          strategy_en: values.strategy_en,
+        });
+        setIsEditTranslating(false);
+      }
 
       const payload = buildPayload(
         values,
         editLogoFileList,
-        editImagesFileList,
-        editVideosFileList
+        editNewImagesFileList,
+        editNewVideosFileList
       );
-      payload.title_ar = translated.title_ar;
-      payload.title_fr = translated.title_fr;
-      payload.subtitle_ar = translated.subtitle_ar;
-      payload.subtitle_fr = translated.subtitle_fr;
-      payload.objective_ar = translated.objective_ar;
-      payload.objective_fr = translated.objective_fr;
-      payload.brief_ar = translated.brief_ar;
-      payload.brief_fr = translated.brief_fr;
-      payload.strategy_ar = translated.strategy_ar;
-      payload.strategy_fr = translated.strategy_fr;
+      if (autoTranslateEdit) {
+        payload.title_ar = translated.title_ar;
+        payload.title_fr = translated.title_fr;
+        payload.subtitle_ar = translated.subtitle_ar;
+        payload.subtitle_fr = translated.subtitle_fr;
+        payload.objective_ar = translated.objective_ar;
+        payload.objective_fr = translated.objective_fr;
+        payload.brief_ar = translated.brief_ar;
+        payload.brief_fr = translated.brief_fr;
+        payload.strategy_ar = translated.strategy_ar;
+        payload.strategy_fr = translated.strategy_fr;
+      } else {
+        payload.title_ar = values.title_ar;
+        payload.title_fr = values.title_fr;
+        payload.subtitle_ar = values.subtitle_ar;
+        payload.subtitle_fr = values.subtitle_fr;
+        payload.objective_ar = values.objective_ar;
+        payload.objective_fr = values.objective_fr;
+        payload.brief_ar = values.brief_ar;
+        payload.brief_fr = values.brief_fr;
+        payload.strategy_ar = values.strategy_ar;
+        payload.strategy_fr = values.strategy_fr;
+      }
+      const keptExistingIds = new Set(
+        [...editExistingImages, ...editExistingVideos]
+          .map((file) => extractExistingMediaId(file))
+          .filter((id) => Number.isInteger(id))
+      );
+      const removeMediaIds = editInitialMediaIds.filter(
+        (id) => !keptExistingIds.has(id)
+      );
+      if (removeMediaIds.length > 0) {
+        payload.remove_media_ids = removeMediaIds;
+      }
 
       await update(editingId, payload);
       setIsEditOpen(false);
@@ -592,6 +692,8 @@ const ShowcaseProjects = () => {
           onImagesChange={setImagesFileList}
           videosFileList={videosFileList}
           onVideosChange={setVideosFileList}
+          autoTranslate={autoTranslateCreate}
+          onToggleAutoTranslate={setAutoTranslateCreate}
         />
       </Modal>
 
@@ -611,11 +713,17 @@ const ShowcaseProjects = () => {
           form={editForm}
           logoFileList={editLogoFileList}
           onLogoChange={setEditLogoFileList}
-          imagesFileList={editImagesFileList}
-          onImagesChange={setEditImagesFileList}
-          videosFileList={editVideosFileList}
-          onVideosChange={setEditVideosFileList}
+          imagesFileList={editNewImagesFileList}
+          onImagesChange={setEditNewImagesFileList}
+          videosFileList={editNewVideosFileList}
+          onVideosChange={setEditNewVideosFileList}
+          existingImagesFileList={editExistingImages}
+          onExistingImagesChange={setEditExistingImages}
+          existingVideosFileList={editExistingVideos}
+          onExistingVideosChange={setEditExistingVideos}
           isEdit
+          autoTranslate={autoTranslateEdit}
+          onToggleAutoTranslate={setAutoTranslateEdit}
         />
       </Modal>
 
@@ -786,10 +894,25 @@ const ProjectForm = ({
   onImagesChange,
   videosFileList,
   onVideosChange,
+  existingImagesFileList = [],
+  onExistingImagesChange,
+  existingVideosFileList = [],
+  onExistingVideosChange,
   isEdit = false,
+  autoTranslate = true,
+  onToggleAutoTranslate,
 }) => {
   return (
     <Form form={form} layout="vertical">
+      <div className="mb-4 flex items-center gap-3">
+        <span className="text-sm text-gray-600">Translation:</span>
+        <Switch
+          checked={autoTranslate}
+          onChange={onToggleAutoTranslate}
+          checkedChildren="Auto"
+          unCheckedChildren="Manual"
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Form.Item
           name="title_en"
@@ -824,6 +947,40 @@ const ProjectForm = ({
         >
           <Input.TextArea rows={3} placeholder="Enter English strategy" />
         </Form.Item>
+        {!autoTranslate && (
+          <>
+            <Form.Item name="title_ar" label="Title (AR)">
+              <Input placeholder="Enter Arabic title" />
+            </Form.Item>
+            <Form.Item name="title_fr" label="Title (FR)">
+              <Input placeholder="Enter French title" />
+            </Form.Item>
+            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
+              <Input placeholder="Enter Arabic subtitle" />
+            </Form.Item>
+            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
+              <Input placeholder="Enter French subtitle" />
+            </Form.Item>
+            <Form.Item name="objective_ar" label="Objective (AR)">
+              <Input placeholder="Enter Arabic objective" />
+            </Form.Item>
+            <Form.Item name="objective_fr" label="Objective (FR)">
+              <Input placeholder="Enter French objective" />
+            </Form.Item>
+            <Form.Item name="brief_ar" label="Brief (AR)">
+              <Input.TextArea rows={3} placeholder="Enter Arabic brief" />
+            </Form.Item>
+            <Form.Item name="brief_fr" label="Brief (FR)">
+              <Input.TextArea rows={3} placeholder="Enter French brief" />
+            </Form.Item>
+            <Form.Item name="strategy_ar" label="Strategy (AR)">
+              <Input.TextArea rows={3} placeholder="Enter Arabic strategy" />
+            </Form.Item>
+            <Form.Item name="strategy_fr" label="Strategy (FR)">
+              <Input.TextArea rows={3} placeholder="Enter French strategy" />
+            </Form.Item>
+          </>
+        )}
         <Form.Item
           name="reach"
           label="Reach"
@@ -870,6 +1027,17 @@ const ProjectForm = ({
         required={!isEdit}
         tooltip="Upload one or more showcase images"
       >
+        {isEdit && (
+          <>
+            <div className="mb-2 text-sm text-gray-600">Existing images</div>
+            <Upload
+              fileList={existingImagesFileList}
+              listType="picture-card"
+              onChange={({ fileList }) => onExistingImagesChange?.(fileList)}
+            />
+            <Divider className="my-3">New images</Divider>
+          </>
+        )}
         <Upload
           fileList={imagesFileList}
           beforeUpload={() => false}
@@ -889,6 +1057,17 @@ const ProjectForm = ({
         label="Videos"
         tooltip="Upload MP4 video files"
       >
+        {isEdit && (
+          <>
+            <div className="mb-2 text-sm text-gray-600">Existing videos</div>
+            <Upload
+              fileList={existingVideosFileList}
+              listType="text"
+              onChange={({ fileList }) => onExistingVideosChange?.(fileList)}
+            />
+            <Divider className="my-3">New videos</Divider>
+          </>
+        )}
         <Upload
           fileList={videosFileList}
           beforeUpload={() => false}

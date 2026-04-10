@@ -47,6 +47,14 @@ const appendProjectPayload = (formData, payload = {}) => {
       }
     });
   }
+
+  if (Array.isArray(payload?.remove_media_ids)) {
+    payload.remove_media_ids.forEach((id, index) => {
+      if (id != null && Number.isInteger(Number(id))) {
+        formData.append(`remove_media_ids[${index}]`, Number(id));
+      }
+    });
+  }
 };
 
 export async function getShowcaseProjects({ page, per_page, lang } = {}) {
