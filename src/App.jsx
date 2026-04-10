@@ -8,7 +8,7 @@ import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
 import InfluencersData from "./pages/influencer/influencersData.jsx";
-import InfluencersItems from "./pages/work/InfluencersItems.jsx";
+import InfluenceItems from "./pages/work/influenceItems/InfluenceItems.jsx";
 import SocialsData from "./pages/work/SocialsData.jsx";
 import DigitalsData from "./pages/work/DigitalsData.jsx";
 import CreativesData from "./pages/work/CreativesData.jsx";
@@ -38,7 +38,7 @@ function App() {
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
             <Route path="/news" element={<News />} />
             <Route path="/works" element={<WorksSection />} />
-            <Route path="/works/influence/:slug" element={<InfluencersItems />} />
+            <Route path="/works/influence/:slug" element={<InfluenceItems />} />
             <Route path="/works/social/:slug" element={<SocialsData />} />
             <Route path="/works/digital/:slug" element={<DigitalsData />} />
             <Route path="/works/creative/:slug" element={<CreativesData />} />

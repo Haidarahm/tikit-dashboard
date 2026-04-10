@@ -25,12 +25,12 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { useInfluencersItemsStore } from "../../store/works/influencersItemsStore.js";
-import { useTranslateStore } from "../../store/translateStore.js";
-import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
-import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
+import { useInfluencersItemsStore } from "../../../store/works/influencersItemsStore.js";
+import { useTranslateStore } from "../../../store/translateStore.js";
+import ExcelImportButton from "../../../components/work/ExcelImportButton.jsx";
+import WorkLangSelect from "../../../components/work/WorkLangSelect.jsx";
 
-const InfluencersItems = () => {
+const InfluenceItems = () => {
   const { slug } = useParams();
   const {
     items,
@@ -820,7 +820,7 @@ const InfluencersItems = () => {
               </div>
             )}
 
-            {/* Strategy Section */}
+            {/* Strategy Section */}  
             {(viewModal.item.strategy || viewModal.item.strategy_en) && (
               <div className="space-y-2">
                 <h4 className="text-sm font-semibold text-gray-700">Strategy</h4>
@@ -910,4 +910,4 @@ const InfluencersItems = () => {
   );
 };
 
-export default InfluencersItems;
+export default InfluenceItems;
