@@ -21,8 +21,8 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { useShowcaseProjectsStore } from "../store/showcaseProjectsStore.js";
-import { useTranslateStore } from "../store/translateStore.js";
+import { useShowcaseProjectsStore } from "../../store/showcaseProjectsStore.js";
+import { useTranslateStore } from "../../store/translateStore.js";
 
 const { Text } = Typography;
 

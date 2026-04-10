@@ -15,7 +15,7 @@ import CreativesData from "./pages/work/CreativesData.jsx";
 import EventsData from "./pages/work/EventsData.jsx";
 import News from "./pages/News.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
-import ShowcaseProjects from "./pages/ShowcaseProjects.jsx";
+import ShowcaseProjects from "./pages/showcase/ShowcaseProjects.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 import SubscribedUsers from "./pages/SubscribedUsers.jsx";
 import Admins from "./pages/Admins.jsx";
