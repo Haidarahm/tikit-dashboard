@@ -30,11 +30,15 @@ export const useShowcaseProjectsStore = create((set, get) => ({
         per_page: perPage,
         lang,
       });
-      const items = Array.isArray(resp?.data)
+      const rawItems = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
         ? resp
         : [];
+      const items = rawItems.map((item) => ({
+        ...item,
+        main_image: item.main_image ?? item.logo ?? null,
+      }));
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;

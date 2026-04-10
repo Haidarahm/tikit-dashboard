@@ -143,7 +143,7 @@ const ShowcaseProjects = () => {
   const buildPayload = (values, logoList, imagesList, videosList) => {
     const payload = { ...values };
     if (logoList[0]?.originFileObj) {
-      payload.logo = logoList[0].originFileObj;
+      payload.main_image = logoList[0].originFileObj;
     }
     const imageFiles = imagesList
       .map((file) => file.originFileObj)
@@ -272,8 +272,11 @@ const ShowcaseProjects = () => {
       })(),
     });
 
-    const logoFile = remoteUrlToUploadFile(project.logo, { uidSuffix: "logo" });
-    setEditLogoFileList(logoFile ? [logoFile] : []);
+    const mainImageFile = remoteUrlToUploadFile(
+      project.main_image ?? project.logo,
+      { uidSuffix: "main-image" }
+    );
+    setEditLogoFileList(mainImageFile ? [mainImageFile] : []);
 
     const imageUrls = deriveGalleryImageUrls(project);
     setEditImagesFileList(
@@ -707,12 +710,12 @@ const ShowcaseProjects = () => {
               <p className="mt-1">{viewingProject.strategy_fr || "-"}</p>
             </div>
 
-            {viewingProject.logo && (
+            {(viewingProject.main_image || viewingProject.logo) && (
               <div>
-                <strong>Logo:</strong>
+                <strong>Main Image:</strong>
                 <div className="mt-2">
                   <Image
-                    src={viewingProject.logo}
+                    src={viewingProject.main_image || viewingProject.logo}
                     width={100}
                     height={100}
                     style={{ objectFit: "cover" }}

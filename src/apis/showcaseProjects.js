@@ -28,8 +28,8 @@ const appendProjectPayload = (formData, payload = {}) => {
     }
   });
 
-  if (payload?.logo) {
-    formData.append("logo", payload.logo);
+  if (payload?.main_image) {
+    formData.append("main_image", payload.main_image);
   }
 
   if (Array.isArray(payload?.images)) {
