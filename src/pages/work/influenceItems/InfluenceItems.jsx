@@ -16,6 +16,7 @@ import {
   Image,
   Tooltip,
   Select,
+  Switch,
 } from "antd";
 import {
   EditOutlined,
@@ -28,7 +29,22 @@ import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../../store/works/influencersItemsStore.js";
 import { useTranslateStore } from "../../../store/translateStore.js";
 import ExcelImportButton from "../../../components/work/ExcelImportButton.jsx";
-import WorkLangSelect from "../../../components/work/WorkLangSelect.jsx";
+import { LANG_OPTIONS } from "../../../constants/language.js";
+
+const EMPTY_INFLUENCER_TRANSLATION = {
+  title_ar: "",
+  title_fr: "",
+  subtitle_ar: "",
+  subtitle_fr: "",
+  objective_ar: "",
+  objective_fr: "",
+  brief_ar: "",
+  brief_fr: "",
+  strategy_ar: "",
+  strategy_fr: "",
+  approach_ar: "",
+  approach_fr: "",
+};
 
 const InfluenceItems = () => {
   const { slug } = useParams();
@@ -69,6 +85,8 @@ const InfluenceItems = () => {
   });
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
+  const [autoTranslateCreate, setAutoTranslateCreate] = useState(true);
+  const [autoTranslateEdit, setAutoTranslateEdit] = useState(true);
 
   const translateText = useTranslateStore((state) => state.translateText);
 
@@ -123,38 +141,29 @@ const InfluenceItems = () => {
     try {
       await addForm.validateFields();
       const values = addForm.getFieldsValue(true);
-      setIsCreateTranslating(true);
-      const translated = await translateInfluencerFields({
-        title_en: values.title_en,
-        subtitle_en: values.subtitle_en,
-        objective_en: values.objective_en,
-        brief_en: values.brief_en,
-        strategy_en: values.strategy_en,
-        approach_en: values.approach_en,
-      });
-      setIsCreateTranslating(false);
+      let translated = { ...EMPTY_INFLUENCER_TRANSLATION };
+      if (autoTranslateCreate) {
+        setIsCreateTranslating(true);
+        translated = await translateInfluencerFields({
+          title_en: values.title_en,
+          subtitle_en: values.subtitle_en,
+          objective_en: values.objective_en,
+          brief_en: values.brief_en,
+          strategy_en: values.strategy_en,
+          approach_en: values.approach_en,
+        });
+        setIsCreateTranslating(false);
+      }
       const payload = {
         work_id: workId,
         title_en: values.title_en,
-        title_ar: translated.title_ar,
-        title_fr: translated.title_fr,
         subtitle_en: values.subtitle_en,
-        subtitle_ar: translated.subtitle_ar,
-        subtitle_fr: translated.subtitle_fr,
         brief_en: values.brief_en,
-        brief_ar: translated.brief_ar,
-        brief_fr: translated.brief_fr,
         strategy_en: values.strategy_en,
-        strategy_ar: translated.strategy_ar,
-        strategy_fr: translated.strategy_fr,
         approach_en: values.approach_en,
-        approach_ar: translated.approach_ar,
-        approach_fr: translated.approach_fr,
         reach: values.reach,
         views: values.views,
         objective_en: values.objective_en,
-        objective_ar: translated.objective_ar,
-        objective_fr: translated.objective_fr,
         engagement_rate: values.engagement_rate,
         images: imageFileList
           .map((file) => file.originFileObj)
@@ -163,6 +172,33 @@ const InfluenceItems = () => {
           .map((file) => file.originFileObj)
           .filter((file) => file),
       };
+      if (autoTranslateCreate) {
+        payload.title_ar = translated.title_ar;
+        payload.title_fr = translated.title_fr;
+        payload.subtitle_ar = translated.subtitle_ar;
+        payload.subtitle_fr = translated.subtitle_fr;
+        payload.objective_ar = translated.objective_ar;
+        payload.objective_fr = translated.objective_fr;
+        payload.brief_ar = translated.brief_ar;
+        payload.brief_fr = translated.brief_fr;
+        payload.strategy_ar = translated.strategy_ar;
+        payload.strategy_fr = translated.strategy_fr;
+        payload.approach_ar = translated.approach_ar;
+        payload.approach_fr = translated.approach_fr;
+      } else {
+        payload.title_ar = values.title_ar;
+        payload.title_fr = values.title_fr;
+        payload.subtitle_ar = values.subtitle_ar;
+        payload.subtitle_fr = values.subtitle_fr;
+        payload.objective_ar = values.objective_ar;
+        payload.objective_fr = values.objective_fr;
+        payload.brief_ar = values.brief_ar;
+        payload.brief_fr = values.brief_fr;
+        payload.strategy_ar = values.strategy_ar;
+        payload.strategy_fr = values.strategy_fr;
+        payload.approach_ar = values.approach_ar;
+        payload.approach_fr = values.approach_fr;
+      }
 
       if (logoFileList[0]?.originFileObj) {
         payload.logo = logoFileList[0].originFileObj;
@@ -180,6 +216,7 @@ const InfluenceItems = () => {
 
       await create(payload);
       setIsAddOpen(false);
+      setAutoTranslateCreate(true);
       addForm.resetFields();
       setImageFileList([]);
       setLogoFileList([]);
@@ -198,36 +235,54 @@ const InfluenceItems = () => {
     try {
       await editForm.validateFields();
       const values = editForm.getFieldsValue(true);
-      setIsEditTranslating(true);
-      const translated = await translateInfluencerFields({
-        title_en: values.title_en,
-        subtitle_en: values.subtitle_en,
-        objective_en: values.objective_en,
-        brief_en: values.brief_en,
-        strategy_en: values.strategy_en,
-        approach_en: values.approach_en,
-      });
-      setIsEditTranslating(false);
+      let translated = { ...EMPTY_INFLUENCER_TRANSLATION };
+      if (autoTranslateEdit) {
+        setIsEditTranslating(true);
+        translated = await translateInfluencerFields({
+          title_en: values.title_en,
+          subtitle_en: values.subtitle_en,
+          objective_en: values.objective_en,
+          brief_en: values.brief_en,
+          strategy_en: values.strategy_en,
+          approach_en: values.approach_en,
+        });
+        setIsEditTranslating(false);
+      }
       const payload = {
         title_en: values.title_en,
-        title_ar: translated.title_ar,
-        title_fr: translated.title_fr,
         subtitle_en: values.subtitle_en,
-        subtitle_ar: translated.subtitle_ar,
-        subtitle_fr: translated.subtitle_fr,
         objective_en: values.objective_en,
-        objective_ar: translated.objective_ar,
-        objective_fr: translated.objective_fr,
         brief_en: values.brief_en,
-        brief_ar: translated.brief_ar,
-        brief_fr: translated.brief_fr,
         strategy_en: values.strategy_en,
-        strategy_ar: translated.strategy_ar,
-        strategy_fr: translated.strategy_fr,
         approach_en: values.approach_en,
-        approach_ar: translated.approach_ar,
-        approach_fr: translated.approach_fr,
       };
+      if (autoTranslateEdit) {
+        payload.title_ar = translated.title_ar;
+        payload.title_fr = translated.title_fr;
+        payload.subtitle_ar = translated.subtitle_ar;
+        payload.subtitle_fr = translated.subtitle_fr;
+        payload.objective_ar = translated.objective_ar;
+        payload.objective_fr = translated.objective_fr;
+        payload.brief_ar = translated.brief_ar;
+        payload.brief_fr = translated.brief_fr;
+        payload.strategy_ar = translated.strategy_ar;
+        payload.strategy_fr = translated.strategy_fr;
+        payload.approach_ar = translated.approach_ar;
+        payload.approach_fr = translated.approach_fr;
+      } else {
+        payload.title_ar = values.title_ar;
+        payload.title_fr = values.title_fr;
+        payload.subtitle_ar = values.subtitle_ar;
+        payload.subtitle_fr = values.subtitle_fr;
+        payload.objective_ar = values.objective_ar;
+        payload.objective_fr = values.objective_fr;
+        payload.brief_ar = values.brief_ar;
+        payload.brief_fr = values.brief_fr;
+        payload.strategy_ar = values.strategy_ar;
+        payload.strategy_fr = values.strategy_fr;
+        payload.approach_ar = values.approach_ar;
+        payload.approach_fr = values.approach_fr;
+      }
       if (values.reach != null) payload.reach = values.reach;
       if (values.views != null) payload.views = values.views;
       if (values.engagement_rate != null) {
@@ -254,6 +309,7 @@ const InfluenceItems = () => {
 
       await update(editingId, payload);
       setIsEditOpen(false);
+      setAutoTranslateEdit(true);
       editForm.resetFields();
       setEditImageFileList([]);
       setEditLogoFileList([]);
@@ -281,17 +337,30 @@ const InfluenceItems = () => {
 
   const openEditModal = (item) => {
     setEditingId(item.id);
+    setAutoTranslateEdit(true);
     setIsEditOpen(true);
     editForm.setFieldsValue({
       title_en: item.title_en || "",
+      title_ar: item.title_ar || "",
+      title_fr: item.title_fr || "",
       subtitle_en: item.subtitle_en || "",
+      subtitle_ar: item.subtitle_ar || "",
+      subtitle_fr: item.subtitle_fr || "",
       reach: item.reach || 0,
       views: item.views || 0,
       objective_en: item.objective_en || "",
+      objective_ar: item.objective_ar || "",
+      objective_fr: item.objective_fr || "",
       engagement_rate: item.engagement_rate || 0,
       brief_en: item.brief_en || "",
+      brief_ar: item.brief_ar || "",
+      brief_fr: item.brief_fr || "",
       strategy_en: item.strategy_en || "",
+      strategy_ar: item.strategy_ar || "",
+      strategy_fr: item.strategy_fr || "",
       approach_en: item.approach_en || "",
+      approach_ar: item.approach_ar || "",
+      approach_fr: item.approach_fr || "",
     });
     setEditImageFileList([]);
     setEditLogoFileList([]);
@@ -312,9 +381,10 @@ const InfluenceItems = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Language:</span>
-            <WorkLangSelect
+            <Select
               value={lang}
               style={{ width: 140 }}
+              options={LANG_OPTIONS}
               onChange={(value) => {
                 setLang(value);
                 setPage(1);
@@ -329,7 +399,10 @@ const InfluenceItems = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setIsAddOpen(true)}
+            onClick={() => {
+              setAutoTranslateCreate(true);
+              setIsAddOpen(true);
+            }}
           >
             Add Item
           </Button>
@@ -456,17 +529,29 @@ const InfluenceItems = () => {
         open={isAddOpen}
         onCancel={() => {
           setIsAddOpen(false);
+          setAutoTranslateCreate(true);
           addForm.resetFields();
           setImageFileList([]);
           setLogoFileList([]);
           setReelsFileList([]);
         }}
         onOk={handleAdd}
-        confirmLoading={isLoading || isCreateTranslating}
+        confirmLoading={
+          isLoading || (autoTranslateCreate && isCreateTranslating)
+        }
         okText="Create"
         width={900}
       >
         <Form form={addForm} layout="vertical">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-sm text-gray-600">Translation:</span>
+            <Switch
+              checked={autoTranslateCreate}
+              onChange={setAutoTranslateCreate}
+              checkedChildren="Auto"
+              unCheckedChildren="Manual"
+            />
+          </div>
           <div className="space-y-4">
             <div className="rounded-md border border-gray-200 p-4">
               <h4 className="text-sm font-semibold text-gray-700 mb-3">
@@ -503,6 +588,46 @@ const InfluenceItems = () => {
                 <Form.Item name="approach_en" label="Approach (EN)" className="md:col-span-2">
                   <Input.TextArea rows={2} placeholder="Enter English approach" />
                 </Form.Item>
+                {!autoTranslateCreate && (
+                  <>
+                    <Form.Item name="title_ar" label="Title (AR)" className="md:col-span-2">
+                      <Input placeholder="Enter Arabic title" />
+                    </Form.Item>
+                    <Form.Item name="title_fr" label="Title (FR)" className="md:col-span-2">
+                      <Input placeholder="Enter French title" />
+                    </Form.Item>
+                    <Form.Item name="subtitle_ar" label="Subtitle (AR)" className="md:col-span-2">
+                      <Input placeholder="Enter Arabic subtitle" />
+                    </Form.Item>
+                    <Form.Item name="subtitle_fr" label="Subtitle (FR)" className="md:col-span-2">
+                      <Input placeholder="Enter French subtitle" />
+                    </Form.Item>
+                    <Form.Item name="objective_ar" label="Objective (AR)">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic objective" />
+                    </Form.Item>
+                    <Form.Item name="objective_fr" label="Objective (FR)">
+                      <Input.TextArea rows={2} placeholder="Enter French objective" />
+                    </Form.Item>
+                    <Form.Item name="brief_ar" label="Brief (AR)">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
+                    </Form.Item>
+                    <Form.Item name="brief_fr" label="Brief (FR)">
+                      <Input.TextArea rows={2} placeholder="Enter French brief" />
+                    </Form.Item>
+                    <Form.Item name="strategy_ar" label="Strategy (AR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
+                    </Form.Item>
+                    <Form.Item name="strategy_fr" label="Strategy (FR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter French strategy" />
+                    </Form.Item>
+                    <Form.Item name="approach_ar" label="Approach (AR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic approach" />
+                    </Form.Item>
+                    <Form.Item name="approach_fr" label="Approach (FR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter French approach" />
+                    </Form.Item>
+                  </>
+                )}
               </div>
             </div>
 
@@ -596,6 +721,7 @@ const InfluenceItems = () => {
         open={isEditOpen}
         onCancel={() => {
           setIsEditOpen(false);
+          setAutoTranslateEdit(true);
           editForm.resetFields();
           setEditImageFileList([]);
           setEditLogoFileList([]);
@@ -603,11 +729,20 @@ const InfluenceItems = () => {
           setEditingId(null);
         }}
         onOk={handleEdit}
-        confirmLoading={isLoading || isEditTranslating}
+        confirmLoading={isLoading || (autoTranslateEdit && isEditTranslating)}
         okText="Update"
         width={900}
       >
         <Form form={editForm} layout="vertical">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-sm text-gray-600">Translation:</span>
+            <Switch
+              checked={autoTranslateEdit}
+              onChange={setAutoTranslateEdit}
+              checkedChildren="Auto"
+              unCheckedChildren="Manual"
+            />
+          </div>
           <div className="space-y-4">
             <div className="rounded-md border border-gray-200 p-4">
               <h4 className="text-sm font-semibold text-gray-700 mb-3">
@@ -635,6 +770,46 @@ const InfluenceItems = () => {
                 <Form.Item name="approach_en" label="Approach (EN)" className="md:col-span-2">
                   <Input.TextArea rows={2} placeholder="Enter English approach" />
                 </Form.Item>
+                {!autoTranslateEdit && (
+                  <>
+                    <Form.Item name="title_ar" label="Title (AR)" className="md:col-span-2">
+                      <Input placeholder="Enter Arabic title" />
+                    </Form.Item>
+                    <Form.Item name="title_fr" label="Title (FR)" className="md:col-span-2">
+                      <Input placeholder="Enter French title" />
+                    </Form.Item>
+                    <Form.Item name="subtitle_ar" label="Subtitle (AR)" className="md:col-span-2">
+                      <Input placeholder="Enter Arabic subtitle" />
+                    </Form.Item>
+                    <Form.Item name="subtitle_fr" label="Subtitle (FR)" className="md:col-span-2">
+                      <Input placeholder="Enter French subtitle" />
+                    </Form.Item>
+                    <Form.Item name="objective_ar" label="Objective (AR)">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic objective" />
+                    </Form.Item>
+                    <Form.Item name="objective_fr" label="Objective (FR)">
+                      <Input.TextArea rows={2} placeholder="Enter French objective" />
+                    </Form.Item>
+                    <Form.Item name="brief_ar" label="Brief (AR)">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic brief" />
+                    </Form.Item>
+                    <Form.Item name="brief_fr" label="Brief (FR)">
+                      <Input.TextArea rows={2} placeholder="Enter French brief" />
+                    </Form.Item>
+                    <Form.Item name="strategy_ar" label="Strategy (AR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic strategy" />
+                    </Form.Item>
+                    <Form.Item name="strategy_fr" label="Strategy (FR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter French strategy" />
+                    </Form.Item>
+                    <Form.Item name="approach_ar" label="Approach (AR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter Arabic approach" />
+                    </Form.Item>
+                    <Form.Item name="approach_fr" label="Approach (FR)" className="md:col-span-2">
+                      <Input.TextArea rows={2} placeholder="Enter French approach" />
+                    </Form.Item>
+                  </>
+                )}
               </div>
             </div>
 
