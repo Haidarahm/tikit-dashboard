@@ -1,20 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Table,
-  Image,
-  Button,
-  Space,
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Upload,
-  Select,
-  Popconfirm,
-  Typography,
-  Switch,
-  Divider,
-} from "antd";
+import { useCallback, useEffect, useState } from "react";
+import { Button, Form, Modal, Select, Space, Table, Upload } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
@@ -23,61 +8,20 @@ import {
 import { toast } from "react-toastify";
 import { useShowcaseProjectsStore } from "../../store/showcaseProjectsStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
-
-const { Text } = Typography;
-
-const LANG_OPTIONS = [
-  { label: "English", value: "en" },
-  { label: "Arabic", value: "ar" },
-  { label: "French", value: "fr" },
-];
-
-/** Ant Design Upload `fileList` entry for an existing remote file URL. */
-function remoteUrlToUploadFile(url, { uidSuffix = "", mediaId = null } = {}) {
-  if (url == null || String(url).trim() === "") return null;
-  const str = String(url);
-  const name = str.split("/").pop() || "file";
-  return {
-    uid: uidSuffix ? `${uidSuffix}-${str}` : str,
-    name,
-    status: "done",
-    url: str,
-    mediaId,
-  };
-}
-
-function deriveGalleryImageItems(project) {
-  if (Array.isArray(project?.media) && project.media.length > 0) {
-    return project.media
-      .filter((m) => m?.type === "image" && m?.file)
-      .map((m) => ({ id: m?.id ?? null, url: m.file }));
-  }
-  if (Array.isArray(project?.images) && project.images.length > 0) {
-    return project.images.filter(Boolean).map((url) => ({ id: null, url }));
-  }
-  return [];
-}
-
-function deriveVideoItems(project) {
-  if (Array.isArray(project?.media) && project.media.length > 0) {
-    return project.media
-      .filter((m) => m?.type === "video" && m?.file)
-      .map((m) => ({ id: m?.id ?? null, url: m.file }));
-  }
-  if (Array.isArray(project?.videos) && project.videos.length > 0) {
-    return project.videos.filter(Boolean).map((url) => ({ id: null, url }));
-  }
-  return [];
-}
-
-function extractExistingMediaId(file) {
-  if (file?.originFileObj) return null; // newly uploaded file
-  if (file?.mediaId != null) {
-    const n = Number(file.mediaId);
-    return Number.isInteger(n) ? n : null;
-  }
-  return null;
-}
+import { LANG_OPTIONS } from "./showcaseConstants.js";
+import {
+  buildShowcasePayload,
+  deriveGalleryImageItems,
+  deriveVideoItems,
+  EMPTY_TRANSLATION_FIELDS,
+  extractExistingMediaId,
+  parseEngagementRate,
+  remoteUrlToUploadFile,
+  translateShowcaseFields,
+} from "./showcaseHelpers.js";
+import { ShowcaseProjectForm } from "./ShowcaseProjectForm.jsx";
+import { ShowcaseProjectViewModal } from "./ShowcaseProjectViewModal.jsx";
+import { useShowcaseTableColumns } from "./useShowcaseTableColumns.jsx";
 
 const ShowcaseProjects = () => {
   const {
@@ -121,7 +65,7 @@ const ShowcaseProjects = () => {
   const [isEditTranslating, setIsEditTranslating] = useState(false);
   const [autoTranslateCreate, setAutoTranslateCreate] = useState(true);
   const [autoTranslateEdit, setAutoTranslateEdit] = useState(true);
-  
+
   const translateText = useTranslateStore((state) => state.translateText);
 
   useEffect(() => {
@@ -157,90 +101,103 @@ const ShowcaseProjects = () => {
     try {
       await importExcel(file);
       setImportFileList([]);
-    } catch (error) {
+    } catch {
       // toast already handled in store
     }
   };
 
-  const buildPayload = (values, logoList, imagesList, videosList) => {
-    const payload = { ...values };
-    if (logoList[0]?.originFileObj) {
-      payload.main_image = logoList[0].originFileObj;
-    }
-    const imageFiles = imagesList
-      .map((file) => file.originFileObj)
-      .filter(Boolean);
-    if (imageFiles.length > 0) {
-      payload.images = imageFiles;
-    }
-    const videoFiles = videosList
-      .map((file) => file.originFileObj)
-      .filter(Boolean);
-    if (videoFiles.length > 0) {
-      payload.thumbnails = videoFiles;
-    }
-    return payload;
-  };
+  const handleEditOpen = useCallback((project) => {
+    setEditingId(project.id);
+    editForm.setFieldsValue({
+      title_en: project.title_en ?? project.title ?? "",
+      title_ar: project.title_ar ?? "",
+      title_fr: project.title_fr ?? "",
+      subtitle_en: project.subtitle_en ?? project.subtitle ?? "",
+      subtitle_ar: project.subtitle_ar ?? "",
+      subtitle_fr: project.subtitle_fr ?? "",
+      objective_en: project.objective_en ?? project.objective ?? "",
+      objective_ar: project.objective_ar ?? "",
+      objective_fr: project.objective_fr ?? "",
+      brief_en: project.brief_en ?? project.brief ?? "",
+      brief_ar: project.brief_ar ?? "",
+      brief_fr: project.brief_fr ?? "",
+      strategy_en: project.strategy_en ?? project.strategy ?? "",
+      strategy_ar: project.strategy_ar ?? "",
+      strategy_fr: project.strategy_fr ?? "",
+      reach: project.reach ?? null,
+      views: project.views ?? null,
+      engagement_rate: parseEngagementRate(project),
+    });
 
-  /** Translate EN fields to AR/FR before sending payload. */
-  const translateShowcaseFields = async ({
-    title_en,
-    subtitle_en,
-    objective_en,
-    brief_en,
-    strategy_en,
-  }) => {
-    const out = {
-      title_ar: "",
-      title_fr: "",
-      subtitle_ar: "",
-      subtitle_fr: "",
-      objective_ar: "",
-      objective_fr: "",
-      brief_ar: "",
-      brief_fr: "",
-      strategy_ar: "",
-      strategy_fr: "",
-    };
+    const mainImageFile = remoteUrlToUploadFile(
+      project.main_image ?? project.logo,
+      { uidSuffix: "main-image" }
+    );
+    setEditLogoFileList(mainImageFile ? [mainImageFile] : []);
 
-    const translatePlain = async (text, field) => {
-      if (!text || !String(text).trim()) return;
-      const result = await translateText(String(text).trim());
-      if (result) {
-        out[`${field}_ar`] = result.ar ?? "";
-        out[`${field}_fr`] = result.fr ?? "";
-      }
-    };
+    const imageItems = deriveGalleryImageItems(project);
+    setEditExistingImages(
+      imageItems
+        .map((item, i) =>
+          remoteUrlToUploadFile(item.url, {
+            uidSuffix: `img-${item.id ?? i}`,
+            mediaId: item.id,
+          })
+        )
+        .filter(Boolean)
+    );
 
-    await translatePlain(title_en, "title");
-    await translatePlain(subtitle_en, "subtitle");
-    await translatePlain(objective_en, "objective");
-    await translatePlain(brief_en, "brief");
-    await translatePlain(strategy_en, "strategy");
+    const videoItems = deriveVideoItems(project);
+    setEditExistingVideos(
+      videoItems
+        .map((item, i) =>
+          remoteUrlToUploadFile(item.url, {
+            uidSuffix: `vid-${item.id ?? i}`,
+            mediaId: item.id,
+          })
+        )
+        .filter(Boolean)
+    );
+    const initialIds = [...imageItems, ...videoItems]
+      .map((item) => item.id)
+      .filter((id) => Number.isInteger(Number(id)))
+      .map((id) => Number(id));
+    setEditInitialMediaIds(initialIds);
+    setEditNewImagesFileList([]);
+    setEditNewVideosFileList([]);
 
-    return out;
-  };
+    setIsEditOpen(true);
+  }, [editForm]);
+
+  const handleViewOpen = useCallback((record) => {
+    setViewingProject(record);
+    setViewModalOpen(true);
+  }, []);
+
+  const handleViewClose = useCallback(() => {
+    setViewModalOpen(false);
+    setViewingProject(null);
+  }, []);
+
+  const columns = useShowcaseTableColumns({
+    remove,
+    expandedBriefs,
+    setExpandedBriefs,
+    expandedStrategies,
+    setExpandedStrategies,
+    onView: handleViewOpen,
+    onEdit: handleEditOpen,
+  });
 
   const handleCreate = async () => {
     try {
       await createForm.validateFields();
       const values = createForm.getFieldsValue(true);
 
-      let translated = {
-        title_ar: "",
-        title_fr: "",
-        subtitle_ar: "",
-        subtitle_fr: "",
-        objective_ar: "",
-        objective_fr: "",
-        brief_ar: "",
-        brief_fr: "",
-        strategy_ar: "",
-        strategy_fr: "",
-      };
+      let translated = { ...EMPTY_TRANSLATION_FIELDS };
       if (autoTranslateCreate) {
         setIsCreateTranslating(true);
-        translated = await translateShowcaseFields({
+        translated = await translateShowcaseFields(translateText, {
           title_en: values.title_en,
           subtitle_en: values.subtitle_en,
           objective_en: values.objective_en,
@@ -250,7 +207,7 @@ const ShowcaseProjects = () => {
         setIsCreateTranslating(false);
       }
 
-      const payload = buildPayload(
+      const payload = buildShowcasePayload(
         values,
         logoFileList,
         imagesFileList,
@@ -293,94 +250,15 @@ const ShowcaseProjects = () => {
     }
   };
 
-  const handleEditOpen = (project) => {
-    setEditingId(project.id);
-    editForm.setFieldsValue({
-      title_en: project.title_en ?? project.title ?? "",
-      title_ar: project.title_ar ?? "",
-      title_fr: project.title_fr ?? "",
-      subtitle_en: project.subtitle_en ?? project.subtitle ?? "",
-      subtitle_ar: project.subtitle_ar ?? "",
-      subtitle_fr: project.subtitle_fr ?? "",
-      objective_en: project.objective_en ?? project.objective ?? "",
-      objective_ar: project.objective_ar ?? "",
-      objective_fr: project.objective_fr ?? "",
-      brief_en: project.brief_en ?? project.brief ?? "",
-      brief_ar: project.brief_ar ?? "",
-      brief_fr: project.brief_fr ?? "",
-      strategy_en: project.strategy_en ?? project.strategy ?? "",
-      strategy_ar: project.strategy_ar ?? "",
-      strategy_fr: project.strategy_fr ?? "",
-      reach: project.reach ?? null,
-      views: project.views ?? null,
-      engagement_rate: (() => {
-        const er = project.engagement_rate;
-        if (er == null || er === "") return null;
-        const n = Number(er);
-        return Number.isFinite(n) ? n : null;
-      })(),
-    });
-
-    const mainImageFile = remoteUrlToUploadFile(
-      project.main_image ?? project.logo,
-      { uidSuffix: "main-image" }
-    );
-    setEditLogoFileList(mainImageFile ? [mainImageFile] : []);
-
-    const imageItems = deriveGalleryImageItems(project);
-    setEditExistingImages(
-      imageItems
-        .map((item, i) =>
-          remoteUrlToUploadFile(item.url, {
-            uidSuffix: `img-${item.id ?? i}`,
-            mediaId: item.id,
-          })
-        )
-        .filter(Boolean)
-    );
-
-    const videoItems = deriveVideoItems(project);
-    setEditExistingVideos(
-      videoItems
-        .map((item, i) =>
-          remoteUrlToUploadFile(item.url, {
-            uidSuffix: `vid-${item.id ?? i}`,
-            mediaId: item.id,
-          })
-        )
-        .filter(Boolean)
-    );
-    const initialIds = [...imageItems, ...videoItems]
-      .map((item) => item.id)
-      .filter((id) => Number.isInteger(Number(id)))
-      .map((id) => Number(id));
-    setEditInitialMediaIds(initialIds);
-    setEditNewImagesFileList([]);
-    setEditNewVideosFileList([]);
-
-    setIsEditOpen(true);
-  };
-
   const handleUpdate = async () => {
     try {
       await editForm.validateFields();
       const values = editForm.getFieldsValue(true);
 
-      let translated = {
-        title_ar: "",
-        title_fr: "",
-        subtitle_ar: "",
-        subtitle_fr: "",
-        objective_ar: "",
-        objective_fr: "",
-        brief_ar: "",
-        brief_fr: "",
-        strategy_ar: "",
-        strategy_fr: "",
-      };
+      let translated = { ...EMPTY_TRANSLATION_FIELDS };
       if (autoTranslateEdit) {
         setIsEditTranslating(true);
-        translated = await translateShowcaseFields({
+        translated = await translateShowcaseFields(translateText, {
           title_en: values.title_en,
           subtitle_en: values.subtitle_en,
           objective_en: values.objective_en,
@@ -390,7 +268,7 @@ const ShowcaseProjects = () => {
         setIsEditTranslating(false);
       }
 
-      const payload = buildPayload(
+      const payload = buildShowcasePayload(
         values,
         editLogoFileList,
         editNewImagesFileList,
@@ -443,164 +321,6 @@ const ShowcaseProjects = () => {
       }
     }
   };
-
-  const columns = useMemo(
-    () => [
-      {
-        title: "Title",
-        dataIndex: "title_en",
-        key: "title_en",
-        render: (value, record) => value || record.title || "-",
-      },
-      {
-        title: "Brief",
-        dataIndex: "brief_en",
-        key: "brief_en",
-        width: 300,
-        render: (value, record) => {
-          const text = value || record.brief || "-";
-          const isExpanded = expandedBriefs.has(record.id);
-          
-          if (text === "-" || !text) {
-            return <Text>{text}</Text>;
-          }
-          
-          return (
-            <div>
-              <div
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: isExpanded ? "unset" : 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  wordBreak: "break-word",
-                  lineHeight: "1.5",
-                  maxHeight: isExpanded ? "none" : "3em",
-                }}
-              >
-                <Text>{text}</Text>
-              </div>
-              <Button
-                type="link"
-                size="small"
-                onClick={() => {
-                  const newSet = new Set(expandedBriefs);
-                  if (isExpanded) {
-                    newSet.delete(record.id);
-                  } else {
-                    newSet.add(record.id);
-                  }
-                  setExpandedBriefs(newSet);
-                }}
-                style={{ padding: 0, marginTop: 4, height: "auto" }}
-              >
-                {isExpanded ? "Read less" : "Read more"}
-              </Button>
-            </div>
-          );
-        },
-      },
-      {
-        title: "Strategy",
-        dataIndex: "strategy_en",
-        key: "strategy_en",
-        width: 300,
-        render: (value, record) => {
-          const text = value || record.strategy || "-";
-          const isExpanded = expandedStrategies.has(record.id);
-          
-          if (text === "-" || !text) {
-            return <Text>{text}</Text>;
-          }
-          
-          return (
-            <div>
-              <div
-                style={{
-                  display: "-webkit-box",
-                  WebkitLineClamp: isExpanded ? "unset" : 2,
-                  WebkitBoxOrient: "vertical",
-                  overflow: "hidden",
-                  wordBreak: "break-word",
-                  lineHeight: "1.5",
-                  maxHeight: isExpanded ? "none" : "3em",
-                }}
-              >
-                <Text>{text}</Text>
-              </div>
-              <Button
-                type="link"
-                size="small"
-                onClick={() => {
-                  const newSet = new Set(expandedStrategies);
-                  if (isExpanded) {
-                    newSet.delete(record.id);
-                  } else {
-                    newSet.add(record.id);
-                  }
-                  setExpandedStrategies(newSet);
-                }}
-                style={{ padding: 0, marginTop: 4, height: "auto" }}
-              >
-                {isExpanded ? "Read less" : "Read more"}
-              </Button>
-            </div>
-          );
-        },
-      },
-      {
-        title: "Reach",
-        dataIndex: "reach",
-        key: "reach",
-        width: 120,
-      },
-      {
-        title: "Views",
-        dataIndex: "views",
-        key: "views",
-        width: 120,
-      },
-      {
-        title: "Engagement Rate",
-        dataIndex: "engagement_rate",
-        key: "engagement_rate",
-        width: 160,
-      },
-      {
-        title: "Actions",
-        key: "actions",
-        width: 220,
-        render: (record) => (
-          <Space>
-            <Button onClick={() => {
-              setViewingProject(record);
-              setViewModalOpen(true);
-            }}>View</Button>
-            <Button onClick={() => handleEditOpen(record)}>Update</Button>
-            <Popconfirm
-              title="Delete this project?"
-              okText="Yes"
-              cancelText="No"
-              onConfirm={async () => {
-                try {
-                  await remove(record.id);
-                } catch (error) {
-                  if (error?.response?.data?.message) {
-                    toast.error(error.response.data.message);
-                  } else if (error?.message) {
-                    toast.error(error.message);
-                  }
-                }
-              }}
-            >
-              <Button danger>Delete</Button>
-            </Popconfirm>
-          </Space>
-        ),
-      },
-    ],
-    [remove, expandedBriefs, expandedStrategies]
-  );
 
   return (
     <div className="space-y-6">
@@ -684,7 +404,7 @@ const ShowcaseProjects = () => {
         confirmLoading={isLoading || isCreateTranslating}
         width={900}
       >
-        <ProjectForm
+        <ShowcaseProjectForm
           form={createForm}
           logoFileList={logoFileList}
           onLogoChange={setLogoFileList}
@@ -709,7 +429,7 @@ const ShowcaseProjects = () => {
         confirmLoading={isLoading || isEditTranslating}
         width={900}
       >
-        <ProjectForm
+        <ShowcaseProjectForm
           form={editForm}
           logoFileList={editLogoFileList}
           onLogoChange={setEditLogoFileList}
@@ -727,359 +447,12 @@ const ShowcaseProjects = () => {
         />
       </Modal>
 
-      <Modal
-        title="Project Details"
+      <ShowcaseProjectViewModal
         open={viewModalOpen}
-        onCancel={() => {
-          setViewModalOpen(false);
-          setViewingProject(null);
-        }}
-        footer={[
-          <Button key="close" onClick={() => {
-            setViewModalOpen(false);
-            setViewingProject(null);
-          }}>
-            Close
-          </Button>
-        ]}
-        width={900}
-      >
-        {viewingProject && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <strong>ID:</strong> {viewingProject.id}
-              </div>
-              <div>
-                <strong>Title:</strong> {viewingProject.title_en || viewingProject.title || "-"}
-              </div>
-              <div>
-                <strong>Title (AR):</strong> {viewingProject.title_ar || "-"}
-              </div>
-              <div>
-                <strong>Title (FR):</strong> {viewingProject.title_fr || "-"}
-              </div>
-              <div>
-                <strong>Subtitle:</strong> {viewingProject.subtitle_en || viewingProject.subtitle || "-"}
-              </div>
-              <div>
-                <strong>Subtitle (AR):</strong> {viewingProject.subtitle_ar || "-"}
-              </div>
-              <div>
-                <strong>Subtitle (FR):</strong> {viewingProject.subtitle_fr || "-"}
-              </div>
-              <div>
-                <strong>Reach:</strong> {viewingProject.reach || "-"}
-              </div>
-              <div>
-                <strong>Views:</strong> {viewingProject.views || "-"}
-              </div>
-              <div>
-                <strong>Engagement Rate:</strong> {viewingProject.engagement_rate || "-"}%
-              </div>
-            </div>
-            
-            <div>
-              <strong>Objective (EN):</strong>
-              <p className="mt-1">{viewingProject.objective_en || viewingProject.objective || "-"}</p>
-            </div>
-            <div>
-              <strong>Objective (AR):</strong>
-              <p className="mt-1">{viewingProject.objective_ar || "-"}</p>
-            </div>
-            <div>
-              <strong>Objective (FR):</strong>
-              <p className="mt-1">{viewingProject.objective_fr || "-"}</p>
-            </div>
-            
-            <div>
-              <strong>Brief (EN):</strong>
-              <p className="mt-1">{viewingProject.brief_en || viewingProject.brief || "-"}</p>
-            </div>
-            <div>
-              <strong>Brief (AR):</strong>
-              <p className="mt-1">{viewingProject.brief_ar || "-"}</p>
-            </div>
-            <div>
-              <strong>Brief (FR):</strong>
-              <p className="mt-1">{viewingProject.brief_fr || "-"}</p>
-            </div>
-            
-            <div>
-              <strong>Strategy (EN):</strong>
-              <p className="mt-1">{viewingProject.strategy_en || viewingProject.strategy || "-"}</p>
-            </div>
-            <div>
-              <strong>Strategy (AR):</strong>
-              <p className="mt-1">{viewingProject.strategy_ar || "-"}</p>
-            </div>
-            <div>
-              <strong>Strategy (FR):</strong>
-              <p className="mt-1">{viewingProject.strategy_fr || "-"}</p>
-            </div>
-
-            {(viewingProject.main_image || viewingProject.logo) && (
-              <div>
-                <strong>Main Image:</strong>
-                <div className="mt-2">
-                  <Image
-                    src={viewingProject.main_image || viewingProject.logo}
-                    width={100}
-                    height={100}
-                    style={{ objectFit: "cover" }}
-                    preview={{ mask: "Preview" }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(viewingProject.images) && viewingProject.images.length > 0 && (
-              <div>
-                <strong>Images:</strong>
-                <div className="mt-2">
-                  <Space size={[8, 8]} wrap>
-                    {viewingProject.images.map((img, index) => (
-                      <Image
-                        key={img || index}
-                        src={img}
-                        width={100}
-                        height={100}
-                        style={{ objectFit: "cover" }}
-                        preview={{ mask: "Preview" }}
-                      />
-                    ))}
-                  </Space>
-                </div>
-              </div>
-            )}
-
-            {Array.isArray(viewingProject.videos) && viewingProject.videos.length > 0 && (
-              <div>
-                <strong>Videos:</strong>
-                <div className="mt-2">
-                  <Space size={[8, 8]} wrap direction="vertical">
-                    {viewingProject.videos.map((video, index) => (
-                      <video
-                        key={video || index}
-                        src={video}
-                        controls
-                        style={{ maxWidth: "100%", maxHeight: "300px" }}
-                      />
-                    ))}
-                  </Space>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <div>
-                <strong>Created At:</strong> {new Date(viewingProject.created_at).toLocaleString()}
-              </div>
-              <div>
-                <strong>Updated At:</strong> {new Date(viewingProject.updated_at).toLocaleString()}
-              </div>
-            </div>
-          </div>
-        )}
-      </Modal>
+        project={viewingProject}
+        onClose={handleViewClose}
+      />
     </div>
-  );
-};
-
-const ProjectForm = ({
-  form,
-  logoFileList,
-  onLogoChange,
-  imagesFileList,
-  onImagesChange,
-  videosFileList,
-  onVideosChange,
-  existingImagesFileList = [],
-  onExistingImagesChange,
-  existingVideosFileList = [],
-  onExistingVideosChange,
-  isEdit = false,
-  autoTranslate = true,
-  onToggleAutoTranslate,
-}) => {
-  return (
-    <Form form={form} layout="vertical">
-      <div className="mb-4 flex items-center gap-3">
-        <span className="text-sm text-gray-600">Translation:</span>
-        <Switch
-          checked={autoTranslate}
-          onChange={onToggleAutoTranslate}
-          checkedChildren="Auto"
-          unCheckedChildren="Manual"
-        />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Form.Item
-          name="title_en"
-          label="Title (EN)"
-          rules={isEdit ? [] : [{ required: true, message: "Title is required" }]}
-        >
-          <Input placeholder="Enter English title" />
-        </Form.Item>
-        <Form.Item
-          name="subtitle_en"
-          label="Subtitle (EN)"
-          rules={isEdit ? [] : [{ required: true, message: "Subtitle is required" }]}
-        >
-          <Input placeholder="Enter English subtitle" />
-        </Form.Item>
-        <Form.Item
-          name="objective_en"
-          label="Objective (EN)"
-          rules={isEdit ? [] : [{ required: true, message: "Objective is required" }]}
-        >
-          <Input placeholder="Enter English objective" />
-        </Form.Item>
-        <Form.Item
-          name="brief_en"
-          label="Brief (EN)"
-        >
-          <Input.TextArea rows={3} placeholder="Enter English brief" />
-        </Form.Item>
-        <Form.Item
-          name="strategy_en"
-          label="Strategy (EN)"
-        >
-          <Input.TextArea rows={3} placeholder="Enter English strategy" />
-        </Form.Item>
-        {!autoTranslate && (
-          <>
-            <Form.Item name="title_ar" label="Title (AR)">
-              <Input placeholder="Enter Arabic title" />
-            </Form.Item>
-            <Form.Item name="title_fr" label="Title (FR)">
-              <Input placeholder="Enter French title" />
-            </Form.Item>
-            <Form.Item name="subtitle_ar" label="Subtitle (AR)">
-              <Input placeholder="Enter Arabic subtitle" />
-            </Form.Item>
-            <Form.Item name="subtitle_fr" label="Subtitle (FR)">
-              <Input placeholder="Enter French subtitle" />
-            </Form.Item>
-            <Form.Item name="objective_ar" label="Objective (AR)">
-              <Input placeholder="Enter Arabic objective" />
-            </Form.Item>
-            <Form.Item name="objective_fr" label="Objective (FR)">
-              <Input placeholder="Enter French objective" />
-            </Form.Item>
-            <Form.Item name="brief_ar" label="Brief (AR)">
-              <Input.TextArea rows={3} placeholder="Enter Arabic brief" />
-            </Form.Item>
-            <Form.Item name="brief_fr" label="Brief (FR)">
-              <Input.TextArea rows={3} placeholder="Enter French brief" />
-            </Form.Item>
-            <Form.Item name="strategy_ar" label="Strategy (AR)">
-              <Input.TextArea rows={3} placeholder="Enter Arabic strategy" />
-            </Form.Item>
-            <Form.Item name="strategy_fr" label="Strategy (FR)">
-              <Input.TextArea rows={3} placeholder="Enter French strategy" />
-            </Form.Item>
-          </>
-        )}
-        <Form.Item
-          name="reach"
-          label="Reach"
-          rules={isEdit ? [] : [{ required: true, message: "Reach is required" }]}
-        >
-          <InputNumber style={{ width: "100%" }} min={0} />
-        </Form.Item>
-        <Form.Item
-          name="views"
-          label="Views"
-          rules={isEdit ? [] : [{ required: true, message: "Views are required" }]}
-        >
-          <InputNumber style={{ width: "100%" }} min={0} />
-        </Form.Item>
-        <Form.Item
-          name="engagement_rate"
-          label="Engagement Rate (%)"
-          rules={isEdit ? [] : [{ required: true, message: "Engagement rate is required" }]}
-        >
-          <InputNumber style={{ width: "100%" }} min={0} max={100} />
-        </Form.Item>
-      </div>
-
-      <Form.Item label="Main Image" required={!isEdit} tooltip="Upload project Main Image">
-        <Upload
-          fileList={logoFileList}
-          beforeUpload={() => false}
-          listType="picture-card"
-          maxCount={1}
-          accept="image/*"
-          onChange={({ fileList }) => onLogoChange(fileList)}
-        >
-          {logoFileList.length === 0 && (
-            <div>
-              <UploadOutlined />
-              <div style={{ marginTop: 8 }}>Upload Logo</div>
-            </div>
-          )}
-        </Upload>
-      </Form.Item>
-
-      <Form.Item
-        label="Gallery Images"
-        required={!isEdit}
-        tooltip="Upload one or more showcase images"
-      >
-        {isEdit && (
-          <>
-            <div className="mb-2 text-sm text-gray-600">Existing images</div>
-            <Upload
-              fileList={existingImagesFileList}
-              listType="picture-card"
-              onChange={({ fileList }) => onExistingImagesChange?.(fileList)}
-            />
-            <Divider className="my-3">New images</Divider>
-          </>
-        )}
-        <Upload
-          fileList={imagesFileList}
-          beforeUpload={() => false}
-          listType="picture-card"
-          accept="image/*"
-          multiple
-          onChange={({ fileList }) => onImagesChange(fileList)}
-        >
-          <div>
-            <UploadOutlined />
-            <div style={{ marginTop: 8 }}>Upload Images</div>
-          </div>
-        </Upload>
-      </Form.Item>
-
-      <Form.Item
-        label="Videos"
-        tooltip="Upload MP4 video files"
-      >
-        {isEdit && (
-          <>
-            <div className="mb-2 text-sm text-gray-600">Existing videos</div>
-            <Upload
-              fileList={existingVideosFileList}
-              listType="text"
-              onChange={({ fileList }) => onExistingVideosChange?.(fileList)}
-            />
-            <Divider className="my-3">New videos</Divider>
-          </>
-        )}
-        <Upload
-          fileList={videosFileList}
-          beforeUpload={() => false}
-          listType="text"
-          accept="video/mp4"
-          multiple
-          onChange={({ fileList }) => onVideosChange(fileList)}
-        >
-          <Button icon={<UploadOutlined />}>Upload Videos (MP4)</Button>
-        </Upload>
-      </Form.Item>
-    </Form>
   );
 };
 
