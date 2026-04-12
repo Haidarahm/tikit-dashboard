@@ -21,9 +21,14 @@ import {
 } from "./showcaseHelpers.js";
 import { ShowcaseProjectForm } from "./ShowcaseProjectForm.jsx";
 import { ShowcaseProjectViewModal } from "./ShowcaseProjectViewModal.jsx";
+import { useAuthStore } from "../../store/auth.js";
 import { useShowcaseTableColumns } from "./useShowcaseTableColumns.jsx";
 
+const SUPER_ADMIN_ROLE = "super_admin";
+
 const ShowcaseProjects = () => {
+  const user = useAuthStore((s) => s.user);
+  const isSuperAdmin = user?.role === SUPER_ADMIN_ROLE;
   const {
     items,
     total,
@@ -187,6 +192,7 @@ const ShowcaseProjects = () => {
     setExpandedStrategies,
     onView: handleViewOpen,
     onEdit: handleEditOpen,
+    isSuperAdmin,
   });
 
   const handleCreate = async () => {
@@ -362,16 +368,18 @@ const ShowcaseProjects = () => {
           >
             Import
           </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              resetCreateModal();
-              setIsCreateOpen(true);
-            }}
-          >
-            Add Project
-          </Button>
+          {isSuperAdmin && (
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                resetCreateModal();
+                setIsCreateOpen(true);
+              }}
+            >
+              Add Project
+            </Button>
+          )}
         </Space>
       </div>
 

@@ -13,6 +13,7 @@ const { Text } = Typography;
  *   setExpandedStrategies: React.Dispatch<React.SetStateAction<Set<unknown>>>;
  *   onView: (record: unknown) => void;
  *   onEdit: (record: unknown) => void;
+ *   isSuperAdmin?: boolean;
  * }} params
  */
 export function useShowcaseTableColumns({
@@ -23,6 +24,7 @@ export function useShowcaseTableColumns({
   setExpandedStrategies,
   onView,
   onEdit,
+  isSuperAdmin = false,
 }) {
   return useMemo(
     () => [
@@ -152,24 +154,26 @@ export function useShowcaseTableColumns({
           <Space>
             <Button onClick={() => onView(record)}>View</Button>
             <Button onClick={() => onEdit(record)}>Update</Button>
-            <Popconfirm
-              title="Delete this project?"
-              okText="Yes"
-              cancelText="No"
-              onConfirm={async () => {
-                try {
-                  await remove(record.id);
-                } catch (error) {
-                  if (error?.response?.data?.message) {
-                    toast.error(error.response.data.message);
-                  } else if (error?.message) {
-                    toast.error(error.message);
+            {isSuperAdmin && (
+              <Popconfirm
+                title="Delete this project?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={async () => {
+                  try {
+                    await remove(record.id);
+                  } catch (error) {
+                    if (error?.response?.data?.message) {
+                      toast.error(error.response.data.message);
+                    } else if (error?.message) {
+                      toast.error(error.message);
+                    }
                   }
-                }
-              }}
-            >
-              <Button danger>Delete</Button>
-            </Popconfirm>
+                }}
+              >
+                <Button danger>Delete</Button>
+              </Popconfirm>
+            )}
           </Space>
         ),
       },
@@ -182,6 +186,7 @@ export function useShowcaseTableColumns({
       setExpandedStrategies,
       onView,
       onEdit,
+      isSuperAdmin,
     ]
   );
 }
