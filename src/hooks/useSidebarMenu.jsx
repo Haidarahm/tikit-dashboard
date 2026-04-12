@@ -12,40 +12,14 @@ import {
   PlaySquareOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/auth.js";
+import {
+  SUPER_ADMIN_ROLE,
+  buildSlugSet,
+  canAccessMenuItemKey,
+} from "../auth/routeAccess.js";
 
-const SUPER_ADMIN_ROLE = "super_admin";
-
-/**
- * Map sidebar routes to permission slugs (user needs at least one slug per item).
- * Adjust slugs here if your backend uses different names.
- */
-const PERMISSION_SLUGS = {
-  team: ["manage_content"],
-  news: ["manage_blogs"],
-  "showcase-projects": ["manage_content"],
-  works: ["manage_content"],
-  sections: ["manage_content"],
-  "registered-influencers": ["manage_subscribers"],
-  "subscribed-users": ["manage_subscribers"],
-  admins: ["manage_admins", "view_admins"],
-  banner: ["manage_content"],
-  "about-banners": ["manage_content"],
-};
-
-function buildSlugSet(user) {
-  if (!user?.permissions || !Array.isArray(user.permissions)) return new Set();
-  return new Set(
-    user.permissions
-      .map((p) => (typeof p === "string" ? p : p?.slug))
-      .filter(Boolean)
-  );
-}
-
-function canAccessItem(key, role, slugSet) {
-  if (role === SUPER_ADMIN_ROLE) return true;
-  const required = PERMISSION_SLUGS[key];
-  if (!required || required.length === 0) return false;
-  return required.some((slug) => slugSet.has(slug));
+function canAccessItem(key, user) {
+  return canAccessMenuItemKey(user, key);
 }
 
 function buildMenuItems(navigate) {
@@ -127,15 +101,15 @@ function buildMenuItems(navigate) {
   ];
 }
 
-function filterMenuItem(item, role, slugSet) {
+function filterMenuItem(item, user) {
   if (item.children?.length) {
     const children = item.children
-      .map((child) => filterMenuItem(child, role, slugSet))
+      .map((child) => filterMenuItem(child, user))
       .filter(Boolean);
     if (children.length === 0) return null;
     return { ...item, children };
   }
-  return canAccessItem(item.key, role, slugSet) ? item : null;
+  return canAccessItem(item.key, user) ? item : null;
 }
 
 /**
@@ -155,10 +129,9 @@ export function useSidebarMenu() {
 
   const menuItems = useMemo(() => {
     const role = user?.role || "";
-    const slugSet = buildSlugSet(user);
     const all = buildMenuItems(navigate);
     if (role === SUPER_ADMIN_ROLE) return all;
-    return all.map((item) => filterMenuItem(item, role, slugSet)).filter(Boolean);
+    return all.map((item) => filterMenuItem(item, user)).filter(Boolean);
   }, [user, navigate]);
 
   return {

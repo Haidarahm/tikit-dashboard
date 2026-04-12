@@ -1,8 +1,9 @@
 import { Layout, Menu, Dropdown, Avatar, Button, Spin } from "antd";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { useAuthStore, AUTH_PROFILE_SUMMARY_KEY } from "../store/auth.js";
 import { useSidebarMenu } from "../hooks/useSidebarMenu.jsx";
+import { DashboardPermissionOutlet } from "../components/DashboardPermissionOutlet.jsx";
 import {
   UserOutlined,
   LogoutOutlined,
@@ -174,7 +175,7 @@ function DashboardLayout() {
         </Header>
         <Content className="flex-1 min-h-0 min-w-0 p-4 md:p-6 bg-gray-50 overflow-y-auto overflow-x-hidden">
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm min-h-[60vh] min-w-0">
-            <Outlet />
+            <DashboardPermissionOutlet />
           </div>
         </Content>
       </Layout>

@@ -7,6 +7,7 @@ import AboutBanners from "./pages/AboutBanners.jsx";
 import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
+import DashboardHomeRedirect from "./components/DashboardHomeRedirect.jsx";
 import InfluencersData from "./pages/influencer/influencersData.jsx";
 import InfluenceItems from "./pages/work/influenceItems/InfluenceItems.jsx";
 import SocialsData from "./pages/work/SocialsData.jsx";
@@ -19,6 +20,7 @@ import ShowcaseProjects from "./pages/showcase/ShowcaseProjects.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 import SubscribedUsers from "./pages/SubscribedUsers.jsx";
 import Admins from "./pages/Admins.jsx";
+import NoAccess from "./pages/NoAccess.jsx";
 function App() {
   return (
     <BrowserRouter>
@@ -33,7 +35,7 @@ function App() {
         />
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route index element={<Navigate to="/team" replace />} />
+            <Route index element={<DashboardHomeRedirect />} />
             <Route path="/team" element={<TeamManagement />} />
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
             <Route path="/news" element={<News />} />
@@ -53,6 +55,7 @@ function App() {
             <Route path="/admins" element={<Admins />} />
             <Route path="/banner" element={<Banner />} />
             <Route path="/about-banners" element={<AboutBanners />} />
+            <Route path="/no-access" element={<NoAccess />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

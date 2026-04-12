@@ -2,6 +2,10 @@ import { Card, Form, Input, Button, Typography } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/auth.js";
 import { useState } from "react";
+import {
+  canAccessPath,
+  getFirstAccessibleDashboardPath,
+} from "../auth/routeAccess.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -18,8 +22,13 @@ function Login() {
     try {
       const result = await login({ email, password });
       if (result.success) {
-        const redirectTo = location.state?.from?.pathname || "/works";
-        navigate(redirectTo, { replace: true });
+        const user = useAuthStore.getState().user;
+        const fromPath = location.state?.from?.pathname;
+        const target =
+          fromPath && canAccessPath(user, fromPath)
+            ? fromPath
+            : getFirstAccessibleDashboardPath(user);
+        navigate(target, { replace: true });
       }
     } catch (error) {
       // Error is already handled in the store
