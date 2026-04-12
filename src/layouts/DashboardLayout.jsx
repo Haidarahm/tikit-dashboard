@@ -1,7 +1,7 @@
 import { Layout, Menu, Dropdown, Avatar, Button, Spin } from "antd";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
-import { useAuthStore } from "../store/auth.js";
+import { useAuthStore, AUTH_PROFILE_SUMMARY_KEY } from "../store/auth.js";
 import { useSidebarMenu } from "../hooks/useSidebarMenu.jsx";
 import {
   UserOutlined,
@@ -12,10 +12,22 @@ import {
 
 const { Header, Sider, Content } = Layout;
 
+function formatRoleLabel(role) {
+  if (role == null || String(role).trim() === "") return "";
+  return String(role)
+    .split("_")
+    .filter(Boolean)
+    .map(
+      (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join(" ");
+}
+
 function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
   const { menuItems, isProfileLoading } = useSidebarMenu();
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
@@ -64,6 +76,22 @@ function DashboardLayout() {
       onClick: handleLogout,
     },
   ];
+
+  const { headerName, headerRole } = useMemo(() => {
+    let summary = null;
+    try {
+      const raw = localStorage.getItem(AUTH_PROFILE_SUMMARY_KEY);
+      summary = raw ? JSON.parse(raw) : null;
+    } catch {
+      summary = null;
+    }
+    const name = user?.name ?? summary?.name ?? "";
+    const roleRaw = user?.role ?? summary?.role ?? "";
+    return {
+      headerName: name.trim() || "User",
+      headerRole: formatRoleLabel(roleRaw) || "Member",
+    };
+  }, [user]);
 
   return (
     <Layout className="h-screen min-h-0 ">
@@ -134,10 +162,10 @@ function DashboardLayout() {
                 />
                 <div className="hidden sm:flex flex-col items-start ml-1">
                   <span className="text-xs font-semibold text-gray-400 leading-none">
-                    Admin
+                    {headerRole}
                   </span>
                   <span className="text-sm font-bold text-gray-800 leading-tight">
-                    Dashboard
+                    {headerName}
                   </span>
                 </div>
               </button>

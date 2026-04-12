@@ -3,6 +3,24 @@ import { toast } from "react-toastify";
 import { login as loginAPI, logout as logoutAPI } from "../apis/auth.js";
 import { getProfile } from "../apis/profile.js";
 
+/** Header display only; cleared on logout. Full `auth_user` stays for menu permissions. */
+export const AUTH_PROFILE_SUMMARY_KEY = "auth_profile_summary";
+
+function persistProfileSummary(user) {
+  if (!user || (user.name == null && user.role == null)) return;
+  try {
+    localStorage.setItem(
+      AUTH_PROFILE_SUMMARY_KEY,
+      JSON.stringify({
+        name: user.name ?? "",
+        role: user.role ?? "",
+      })
+    );
+  } catch {
+    /* ignore */
+  }
+}
+
 const getInitialToken = () => {
   try {
     return localStorage.getItem("auth_token") || "";
@@ -41,10 +59,20 @@ export const useAuthStore = create((set, get) => ({
         } catch {
           /* ignore */
         }
+        persistProfileSummary(user);
         set({ user, isAuthenticated: true });
       }
       return resp;
     } catch (error) {
+      const status = error?.response?.status;
+      if (status === 401) {
+        await get().logout({ skipApi: true, silent: true });
+        toast.error(
+          error?.response?.data?.message ||
+            "Session expired or unauthorized. Please log in again."
+        );
+        return null;
+      }
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
@@ -63,6 +91,7 @@ export const useAuthStore = create((set, get) => ({
         try {
           localStorage.setItem("auth_token", token);
           localStorage.setItem("auth_user", JSON.stringify(user));
+          persistProfileSummary(user);
         } catch {}
         set({ token, user, isAuthenticated: true });
         toast.success(response.message || "Logged in successfully");
@@ -94,6 +123,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
+      localStorage.removeItem(AUTH_PROFILE_SUMMARY_KEY);
     } catch {}
     set({
       token: "",

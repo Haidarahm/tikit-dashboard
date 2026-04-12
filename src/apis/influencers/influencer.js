@@ -108,7 +108,7 @@ export async function importExcel(sectionId, file) {
   formData.append("file", file);
 
   const { data } = await apiClient.post(
-    `/influencers/${sectionId}/import`,
+    `/influencers/sections/${sectionId}/import`,
     formData,
     {
       headers: { "Content-Type": "multipart/form-data" },
