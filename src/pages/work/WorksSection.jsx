@@ -230,19 +230,48 @@ const WorksSection = () => {
   const openEditModal = (work) => {
     setEditingId(work.id);
     setIsEditOpen(true);
+    const localizedTitle = work.title ?? "";
+    const localizedSubtitle = work.subtitle ?? "";
+    const localizedDescription = work.description ?? "";
     editForm.setFieldsValue({
-      title_en: work.title_en || "",
-      title_ar: work.title_ar || "",
-      title_fr: work.title_fr || "",
-      subtitle_en: work.subtitle_en || "",
-      subtitle_ar: work.subtitle_ar || "",
-      subtitle_fr: work.subtitle_fr || "",
-      description_en: work.description_en || "",
-      description_ar: work.description_ar || "",
-      description_fr: work.description_fr || "",
+      title_en:
+        work.title_en || (lang === "en" ? localizedTitle : "") || "",
+      title_ar:
+        work.title_ar || (lang === "ar" ? localizedTitle : "") || "",
+      title_fr:
+        work.title_fr || (lang === "fr" ? localizedTitle : "") || "",
+      subtitle_en:
+        work.subtitle_en || (lang === "en" ? localizedSubtitle : "") || "",
+      subtitle_ar:
+        work.subtitle_ar || (lang === "ar" ? localizedSubtitle : "") || "",
+      subtitle_fr:
+        work.subtitle_fr || (lang === "fr" ? localizedSubtitle : "") || "",
+      description_en:
+        work.description_en ||
+        (lang === "en" ? localizedDescription : "") ||
+        "",
+      description_ar:
+        work.description_ar ||
+        (lang === "ar" ? localizedDescription : "") ||
+        "",
+      description_fr:
+        work.description_fr ||
+        (lang === "fr" ? localizedDescription : "") ||
+        "",
       type: work.type || "",
     });
-    setEditImageFileList([]);
+    setEditImageFileList(
+      work.media
+        ? [
+            {
+              uid: "-1",
+              name: "current",
+              status: "done",
+              url: work.media,
+            },
+          ]
+        : []
+    );
   };
 
   const handleViewData = (workSlug, workType) => {
