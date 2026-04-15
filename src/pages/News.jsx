@@ -70,6 +70,8 @@ function News() {
   const [editForm] = Form.useForm();
   const [createImage, setCreateImage] = useState([]);
   const [editImage, setEditImage] = useState([]);
+  const [createHtmlFile, setCreateHtmlFile] = useState([]);
+  const [editHtmlFile, setEditHtmlFile] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [viewBlogItem, setViewBlogItem] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -170,12 +172,14 @@ function News() {
     createForm.resetFields();
     createForm.setFieldsValue({ written_by: defaultWrittenBy });
     setCreateImage([]);
+    setCreateHtmlFile([]);
     setCreateStep(0);
   };
 
   const resetEditModal = () => {
     editForm.resetFields();
     setEditImage([]);
+    setEditHtmlFile([]);
     setEditingId(null);
     setEditStep(0);
   };
@@ -219,6 +223,9 @@ function News() {
         meta_description: values.meta_description,
       };
       payload.image = createImage[0].originFileObj;
+      if (createHtmlFile[0]?.originFileObj) {
+        payload.html_file = createHtmlFile[0].originFileObj;
+      }
       persistWriter(values.written_by);
       await create(payload);
       setIsCreateOpen(false);
@@ -275,6 +282,7 @@ function News() {
       meta_title: record.meta_title || "",
       meta_description: record.meta_description || "",
     });
+    setEditHtmlFile([]);
     setIsEditOpen(true);
   };
 
@@ -307,6 +315,9 @@ function News() {
       persistWriter(values.written_by);
       if (editImage[0]?.originFileObj) {
         payload.image = editImage[0].originFileObj;
+      }
+      if (editHtmlFile[0]?.originFileObj) {
+        payload.html_file = editHtmlFile[0].originFileObj;
       }
       await update(editingId, payload);
       setIsEditOpen(false);
@@ -621,6 +632,17 @@ function News() {
                     )}
                   </Upload>
                 </Form.Item>
+                <Form.Item label="HTML File">
+                  <Upload
+                    fileList={createHtmlFile}
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    accept=".html,.htm,text/html"
+                    onChange={({ fileList }) => setCreateHtmlFile(fileList)}
+                  >
+                    <Button icon={<UploadOutlined />}>Upload HTML</Button>
+                  </Upload>
+                </Form.Item>
               </>
             ) : (
               <>
@@ -829,6 +851,17 @@ function News() {
                         <div style={{ marginTop: 8 }}>Upload</div>
                       </div>
                     )}
+                  </Upload>
+                </Form.Item>
+                <Form.Item label="HTML File">
+                  <Upload
+                    fileList={editHtmlFile}
+                    beforeUpload={() => false}
+                    maxCount={1}
+                    accept=".html,.htm,text/html"
+                    onChange={({ fileList }) => setEditHtmlFile(fileList)}
+                  >
+                    <Button icon={<UploadOutlined />}>Upload HTML</Button>
                   </Upload>
                 </Form.Item>
               </>

@@ -33,6 +33,9 @@ const appendNewsFields = (formData, payload = {}) => {
   if (payload?.image) {
     formData.append("image", payload.image);
   }
+  if (payload?.html_file) {
+    formData.append("html_file", payload.html_file);
+  }
 };
 
 export async function addNewsCard(payload) {
