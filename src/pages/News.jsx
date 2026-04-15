@@ -425,15 +425,17 @@ function News() {
               icon={<EditOutlined />}
               onClick={() => handleEditOpen(record)}
             />
-            <Button
-              icon={<DatabaseOutlined />}
-              onClick={() => {
-                setSelectedNewsId(record.id);
-                setSelectedNewsSlug(record.slug);
-                setIsDetailsModalOpen(true);
-                fetchNewsDetails(record.slug, { lang });
-              }}
-            />
+             {!record?.html_file ? (
+              <Button
+                icon={<DatabaseOutlined />}
+                onClick={() => {
+                  setSelectedNewsId(record.id);
+                  setSelectedNewsSlug(record.slug);
+                  setIsDetailsModalOpen(true);
+                  fetchNewsDetails(record.slug, { lang });
+                }}
+              />
+            ) : null}
             <Popconfirm
               title="Delete this blog card?"
               okText="Yes"
