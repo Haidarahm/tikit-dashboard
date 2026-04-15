@@ -14,7 +14,7 @@ import SocialsData from "./pages/work/SocialsData.jsx";
 import DigitalsData from "./pages/work/DigitalsData.jsx";
 import CreativesData from "./pages/work/CreativesData.jsx";
 import EventsData from "./pages/work/EventsData.jsx";
-import News from "./pages/News.jsx";
+import Blogs from "./pages/blogs/Blogs.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
 import ShowcaseProjects from "./pages/showcase/ShowcaseProjects.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
@@ -38,7 +38,7 @@ function App() {
             <Route index element={<DashboardHomeRedirect />} />
             <Route path="/team" element={<TeamManagement />} />
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
-            <Route path="/news" element={<News />} />
+            <Route path="/blogs" element={<Blogs />} />
             <Route path="/works" element={<WorksSection />} />
             <Route path="/works/influence/:slug" element={<InfluenceItems />} />
             <Route path="/works/social/:slug" element={<SocialsData />} />

@@ -41,7 +41,7 @@ function DashboardLayout() {
     if (path.startsWith("/works")) return ["works"];
     if (path.startsWith("/team")) return ["team"];
     if (path.startsWith("/showcase-projects")) return ["showcase-projects"];
-    if (path.startsWith("/news")) return ["news"];
+    if (path.startsWith("/blogs")) return ["blogs"];
     if (path.startsWith("/registered-influencers"))
       return ["registered-influencers"];
     if (path.startsWith("/subscribed-users"))

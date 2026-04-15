@@ -9,7 +9,7 @@ export const SUPER_ADMIN_ROLE = "super_admin";
  */
 export const PERMISSION_SLUGS = {
   team: ["manage_content"],
-  news: ["manage_blogs"],
+  blogs: ["manage_blogs"],
   "showcase-projects": ["manage_content"],
   works: ["manage_content"],
   sections: ["manage_content"],
@@ -23,7 +23,7 @@ export const PERMISSION_SLUGS = {
 /** First match wins for default landing after login / forbidden URL. */
 export const DEFAULT_DASHBOARD_PATHS = [
   { key: "team", path: "/team" },
-  { key: "news", path: "/news" },
+  { key: "blogs", path: "/blogs" },
   { key: "showcase-projects", path: "/showcase-projects" },
   { key: "works", path: "/works" },
   { key: "sections", path: "/influencer/sections" },
@@ -70,7 +70,7 @@ export function getMenuKeyForPathname(pathname) {
   if (path.startsWith("/works")) return "works";
   if (path.startsWith("/team")) return "team";
   if (path.startsWith("/showcase-projects")) return "showcase-projects";
-  if (path.startsWith("/news")) return "news";
+  if (path.startsWith("/blogs")) return "blogs";
   if (path.startsWith("/registered-influencers")) {
     return "registered-influencers";
   }

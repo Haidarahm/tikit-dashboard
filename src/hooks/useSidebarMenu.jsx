@@ -31,10 +31,10 @@ function buildMenuItems(navigate) {
       onClick: () => navigate("/team"),
     },
     {
-      key: "news",
+      key: "blogs",
       icon: <ReadOutlined />,
       label: "Blogs ",
-      onClick: () => navigate("/news"),
+      onClick: () => navigate("/blogs"),
     },
     {
       key: "showcase-projects",

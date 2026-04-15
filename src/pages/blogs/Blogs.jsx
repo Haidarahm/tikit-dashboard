@@ -23,13 +23,13 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { useNewsStore } from "../store/newsStore.js";
-import { useTranslateStore } from "../store/translateStore.js";
+import { useNewsStore } from "../../store/newsStore.js";
+import { useTranslateStore } from "../../store/translateStore.js";
 import RichTextEditor, {
   normalizeDescriptionHtml,
   stripHtml,
   translateHtmlPreservingStructure,
-} from "../components/RichTextEditor.jsx";
+} from "../../components/RichTextEditor.jsx";
 
 const LANG_OPTIONS = [
   { label: "English", value: "en" },
@@ -38,7 +38,7 @@ const LANG_OPTIONS = [
 ];
 const NEWS_WRITER_STORAGE_KEY = "news_written_by";
 
-function News() {
+function Blogs() {
   const {
     items,
     total,
@@ -1328,4 +1328,4 @@ function News() {
   );
 }
 
-export default News;
+export default Blogs;
