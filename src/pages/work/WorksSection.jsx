@@ -563,6 +563,7 @@ const WorksSection = () => {
                 { label: "Creative", value: "creative" },
                 { label: "Digital", value: "digital" },
                 { label: "Event", value: "event" },
+                { label: "Featured", value: "featured" },
               ]}
             />
           </Form.Item>
@@ -660,6 +661,7 @@ const WorksSection = () => {
                 { label: "Creative", value: "creative" },
                 { label: "Digital", value: "digital" },
                 { label: "Event", value: "event" },
+                { label: "Featured", value: "featured" },
               ]}
             />
           </Form.Item>
