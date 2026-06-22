@@ -10,6 +10,7 @@ import {
   MailOutlined,
   VideoCameraOutlined,
   PlaySquareOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/auth.js";
 import {
@@ -24,6 +25,12 @@ function canAccessItem(key, user) {
 
 function buildMenuItems(navigate) {
   return [
+    {
+      key: "statistics",
+      icon: <BarChartOutlined />,
+      label: "Statistecs",
+      onClick: () => navigate("/statistics"),
+    },
     {
       key: "team",
       icon: <TeamOutlined />,

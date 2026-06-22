@@ -8,6 +8,7 @@ export const SUPER_ADMIN_ROLE = "super_admin";
  * Map sidebar menu keys to permission slugs (user needs at least one slug per item).
  */
 export const PERMISSION_SLUGS = {
+  statistics: ["manage_content"],
   team: ["manage_content"],
   blogs: ["manage_blogs"],
   "showcase-projects": ["manage_content"],
@@ -22,6 +23,7 @@ export const PERMISSION_SLUGS = {
 
 /** First match wins for default landing after login / forbidden URL. */
 export const DEFAULT_DASHBOARD_PATHS = [
+  { key: "statistics", path: "/statistics" },
   { key: "team", path: "/team" },
   { key: "blogs", path: "/blogs" },
   { key: "showcase-projects", path: "/showcase-projects" },
@@ -71,6 +73,7 @@ export function getMenuKeyForPathname(pathname) {
   if (path.startsWith("/team")) return "team";
   if (path.startsWith("/showcase-projects")) return "showcase-projects";
   if (path.startsWith("/blogs")) return "blogs";
+  if (path.startsWith("/statistics")) return "statistics";
   if (path.startsWith("/registered-influencers")) {
     return "registered-influencers";
   }
