@@ -18,6 +18,7 @@ import Blogs from "./pages/blogs/Blogs.jsx";
 import Statistics from "./pages/Statistics.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
 import ShowcaseProjects from "./pages/showcase/ShowcaseProjects.jsx";
+import FeaturedCampaigns from "./pages/featured/FeaturedCampaigns.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 import SubscribedUsers from "./pages/SubscribedUsers.jsx";
 import Admins from "./pages/Admins.jsx";
@@ -39,6 +40,7 @@ function App() {
             <Route index element={<DashboardHomeRedirect />} />
             <Route path="/team" element={<TeamManagement />} />
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
+            <Route path="/featured-campaigns" element={<FeaturedCampaigns />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/works" element={<WorksSection />} />

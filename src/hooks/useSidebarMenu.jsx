@@ -11,6 +11,7 @@ import {
   VideoCameraOutlined,
   PlaySquareOutlined,
   BarChartOutlined,
+  StarOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/auth.js";
 import {
@@ -48,6 +49,12 @@ function buildMenuItems(navigate) {
       icon: <FundProjectionScreenOutlined />,
       label: "Showcase Projects",
       onClick: () => navigate("/showcase-projects"),
+    },
+    {
+      key: "featured-campaigns",
+      icon: <StarOutlined />,
+      label: "Featured Campaigns",
+      onClick: () => navigate("/featured-campaigns"),
     },
     {
       key: "works",
