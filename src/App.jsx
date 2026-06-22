@@ -8,7 +8,7 @@ import WorksSection from "./pages/work/WorksSection.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import PublicRoute from "./components/PublicRoute.jsx";
 import DashboardHomeRedirect from "./components/DashboardHomeRedirect.jsx";
-import InfluencersData from "./pages/influencer/influencersData.jsx";
+import InfluencersData from "./pages/influencer/InfluencersData.jsx";
 import InfluenceItems from "./pages/work/influenceItems/InfluenceItems.jsx";
 import SocialsData from "./pages/work/SocialsData.jsx";
 import DigitalsData from "./pages/work/DigitalsData.jsx";
