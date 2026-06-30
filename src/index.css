@@ -134,6 +134,11 @@ h1, h2, h3, h4, h5, h6 {
   color: #111827;
 }
 
+/* Mobile: prevent modals from exceeding the viewport width */
+.ant-modal {
+  max-width: calc(100vw - 32px) !important;
+}
+
 /* Hide scrollbar but keep functionality */
 .scrollbar-hide {
   -ms-overflow-style: none; /* IE and Edge */

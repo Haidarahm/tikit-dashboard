@@ -519,6 +519,7 @@ function Blogs() {
       <Table
         rowKey={(record) => record.id}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={items}
         loading={isLoading}
         pagination={{
@@ -955,6 +956,7 @@ function Blogs() {
 
           <Table
             rowKey={(record) => record.id}
+            scroll={{ x: 'max-content' }}
             columns={[
               {
                 title: "ID",

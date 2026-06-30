@@ -183,6 +183,7 @@ function Statistics() {
                 <Table
                   rowKey={(r) => r.key}
                   columns={columns}
+                  scroll={{ x: 'max-content' }}
                   dataSource={breakdownRows}
                   pagination={false}
                 />

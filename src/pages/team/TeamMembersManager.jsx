@@ -299,6 +299,7 @@ function TeamMembersManager({ typeId }) {
         rowKey={(record) => record.id}
         dataSource={items}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         loading={isLoading}
         pagination={false}
       />

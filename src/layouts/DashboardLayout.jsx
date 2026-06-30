@@ -1,4 +1,4 @@
-import { Layout, Menu, Dropdown, Avatar, Button, Spin } from "antd";
+import { Layout, Menu, Dropdown, Avatar, Button, Spin, Drawer, Grid } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState, useEffect } from "react";
 import { useAuthStore, AUTH_PROFILE_SUMMARY_KEY } from "../store/auth.js";
@@ -32,6 +32,8 @@ function DashboardLayout() {
   const { menuItems, isProfileLoading } = useSidebarMenu();
   const [openKeys, setOpenKeys] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const screens = Grid.useBreakpoint();
 
   const selectedKeys = useMemo(() => {
     const path = location.pathname;
@@ -51,7 +53,7 @@ function DashboardLayout() {
     return [];
   }, [location.pathname]);
 
-  // Auto-open submenus based on current path
+  // Auto-open submenus based on current path; close mobile drawer on navigation
   useEffect(() => {
     const path = location.pathname;
     const newOpenKeys = [];
@@ -62,6 +64,7 @@ function DashboardLayout() {
       newOpenKeys.push("banners-submenu");
     }
     setOpenKeys(newOpenKeys);
+    setMobileOpen(false);
   }, [location.pathname]);
 
   const handleLogout = async () => {
@@ -95,46 +98,69 @@ function DashboardLayout() {
     };
   }, [user]);
 
+  const isMobile = screens.lg === false;
+
+  const sidebarContent = (
+    <>
+      <div className="h-16 flex items-center justify-center border-b border-sidebar-border">
+        <div className="text-2xl font-bold tracking-wider">
+          <span className="text-brand-accent">T</span>
+          <span className="text-gray-800">ikit</span>
+        </div>
+      </div>
+      {isProfileLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4 gap-3">
+          <Spin size="large" />
+          <span className="text-sm text-gray-500">Loading menu…</span>
+        </div>
+      ) : menuItems.length === 0 ? (
+        <div className="px-4 py-8 text-center text-sm text-gray-500">
+          No sections available for your account.
+        </div>
+      ) : (
+        <Menu
+          theme="light"
+          mode="inline"
+          selectedKeys={selectedKeys}
+          openKeys={openKeys}
+          onOpenChange={setOpenKeys}
+          className="border-r-0"
+          items={menuItems}
+        />
+      )}
+    </>
+  );
+
   return (
     <Layout className="h-screen min-h-0 ">
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        collapsible
-        collapsed={collapsed}
-        onCollapse={(value) => setCollapsed(value)}
-        trigger={null}
-        theme="light"
-        width={260}
-        className="tikit-sider shadow-sm border-r border-sidebar-border"
-      >
-        <div className="h-16 flex items-center justify-center border-b border-sidebar-border">
-          <div className="text-2xl font-bold tracking-wider">
-            <span className="text-brand-accent">T</span>
-            <span className="text-gray-800">ikit</span>
-          </div>
-        </div>
-        {isProfileLoading ? (
-          <div className="flex flex-col items-center justify-center py-16 px-4 gap-3">
-            <Spin size="large" />
-            <span className="text-sm text-gray-500">Loading menu…</span>
-          </div>
-        ) : menuItems.length === 0 ? (
-          <div className="px-4 py-8 text-center text-sm text-gray-500">
-            No sections available for your account.
-          </div>
-        ) : (
-          <Menu
-            theme="light"
-            mode="inline"
-            selectedKeys={selectedKeys}
-            openKeys={openKeys}
-            onOpenChange={setOpenKeys}
-            className="border-r-0"
-            items={menuItems}
-          />
-        )}
-      </Sider>
+      {isMobile ? (
+        <Drawer
+          placement="left"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          width={260}
+          styles={{ body: { padding: 0 } }}
+          title={null}
+          closable={false}
+          className="tikit-sider"
+        >
+          {sidebarContent}
+        </Drawer>
+      ) : (
+        <Sider
+          breakpoint="lg"
+          collapsedWidth="0"
+          collapsible
+          collapsed={collapsed}
+          onCollapse={(value) => setCollapsed(value)}
+          trigger={null}
+          theme="light"
+          width={260}
+          className="tikit-sider shadow-sm border-r border-sidebar-border"
+        >
+          {sidebarContent}
+        </Sider>
+      )}
       <Layout className="min-w-0 min-h-0 flex flex-col">
         <Header
           className="shadow-sm border-b border-navbar-border flex items-center justify-between px-4 md:px-6"
@@ -142,11 +168,14 @@ function DashboardLayout() {
         >
           <Button
             type="text"
-            icon={collapsed ? <MenuUnfoldOutlined className="text-lg" /> : <MenuFoldOutlined className="text-lg" />}
-            onClick={() => setCollapsed(!collapsed)}
+            icon={isMobile
+              ? (mobileOpen ? <MenuFoldOutlined className="text-lg" /> : <MenuUnfoldOutlined className="text-lg" />)
+              : (collapsed ? <MenuUnfoldOutlined className="text-lg" /> : <MenuFoldOutlined className="text-lg" />)
+            }
+            onClick={() => isMobile ? setMobileOpen(v => !v) : setCollapsed(!collapsed)}
             style={{ color: "#374151", fontSize: 18 }}
             className="flex items-center justify-center hover:!text-brand-accent"
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label="Toggle sidebar"
           />
           <div className="flex items-center">
             <Dropdown

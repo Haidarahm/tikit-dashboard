@@ -386,6 +386,7 @@ const ShowcaseProjects = () => {
       <Table
         rowKey={(record) => record.id}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={items}
         loading={isLoading}
         pagination={{
