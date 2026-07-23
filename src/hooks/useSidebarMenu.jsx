@@ -12,6 +12,7 @@ import {
   PlaySquareOutlined,
   BarChartOutlined,
   StarOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../store/auth.js";
 import {
@@ -61,6 +62,12 @@ function buildMenuItems(navigate) {
       icon: <FolderOutlined />,
       label: "Works Sections",
       onClick: () => navigate("/works"),
+    },
+    {
+      key: "jobs",
+      icon: <SolutionOutlined />,
+      label: "Jobs",
+      onClick: () => navigate("/jobs"),
     },
     {
       key: "sections",

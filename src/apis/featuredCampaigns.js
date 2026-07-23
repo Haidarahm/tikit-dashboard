@@ -88,3 +88,8 @@ export async function deleteFeaturedCampaign(id) {
   const { data } = await apiClient.delete(`/featured/delete/${id}`);
   return data;
 }
+
+export async function reorderFeaturedCampaigns(orders) {
+  const { data } = await apiClient.post("/featured/reorder", { orders });
+  return data;
+}

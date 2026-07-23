@@ -38,3 +38,8 @@ export async function deleteVideo(id) {
   const { data } = await apiClient.delete(`/banners/${id}/delete`);
   return data;
 }
+
+export async function reorderVideos(orders) {
+  const { data } = await apiClient.post("/banners/reorder", { orders });
+  return data;
+}

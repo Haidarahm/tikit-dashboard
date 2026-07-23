@@ -7,6 +7,7 @@ import {
   updateInfluencersSection,
   deleteInfluencersSection,
   importExcel,
+  reorderInfluencersSections,
 } from "../../apis/influencers/influencersSections.js";
 
 export const useInfluencersSectionsStore = create((set, get) => ({
@@ -127,6 +128,24 @@ export const useInfluencersSectionsStore = create((set, get) => ({
       throw error;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  reorder: async (reorderedItems) => {
+    const { items: prevItems, page, perPage } = get();
+    set({ items: reorderedItems });
+    const base = (page - 1) * perPage;
+    const orders = reorderedItems.map((item, index) => ({
+      id: item.id,
+      sort_order: base + index + 1,
+    }));
+    try {
+      await reorderInfluencersSections(orders);
+      toast.success("Order updated successfully");
+    } catch (error) {
+      set({ items: prevItems, error });
+      toast.error(error?.response?.data?.message || "Failed to update order");
+      throw error;
     }
   },
 }));

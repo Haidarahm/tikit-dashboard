@@ -107,3 +107,8 @@ export async function deleteProject(id) {
   const { data } = await apiClient.delete(`/showcase-projects/delete/${id}`);
   return data;
 }
+
+export async function reorderShowcaseProjects(orders) {
+  const { data } = await apiClient.post("/showcase-projects/reorder", { orders });
+  return data;
+}

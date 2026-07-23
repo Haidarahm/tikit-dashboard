@@ -6,8 +6,6 @@ import {
   Upload,
   Popconfirm,
   Card,
-  Row,
-  Col,
   Pagination,
   Spin,
 } from "antd";
@@ -18,6 +16,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import SortableCards, { CardDragHandle } from "../components/common/SortableCards.jsx";
 import { useBannerStore } from "../store/bannerStore.js";
 
 const Banner = () => {
@@ -33,6 +32,7 @@ const Banner = () => {
     create,
     update,
     remove,
+    reorder,
   } = useBannerStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -162,59 +162,63 @@ const Banner = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]}>
-            {items.map((banner) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={banner.id}>
-                <Card
-                  hoverable
-                  cover={
-                    <div className="h-48 overflow-hidden bg-gray-100">
-                      {banner.video ? (
-                        <video
-                          src={banner.video}
-                          className="w-full h-full object-cover"
-                          controls
-                          muted
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          No Video
-                        </div>
-                      )}
+          <SortableCards
+            items={items}
+            rowKey="id"
+            onReorder={reorder}
+            renderItem={(banner) => (
+              <Card
+                hoverable
+                cover={
+                  <div className="h-48 overflow-hidden bg-gray-100">
+                    {banner.video ? (
+                      <video
+                        src={banner.video}
+                        className="w-full h-full object-cover"
+                        controls
+                        muted
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        No Video
+                      </div>
+                    )}
+                  </div>
+                }
+                actions={[
+                  <EditOutlined
+                    key="edit"
+                    onClick={() => openEditModal(banner)}
+                  />,
+                  <Popconfirm
+                    key="delete"
+                    title="Delete this video?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => handleDelete(banner.id)}
+                  >
+                    <DeleteOutlined danger />
+                  </Popconfirm>,
+                ]}
+              >
+                <Card.Meta
+                  title={
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-base">
+                        Video #{banner.id}
+                      </span>
+                      <CardDragHandle />
                     </div>
                   }
-                  actions={[
-                    <EditOutlined
-                      key="edit"
-                      onClick={() => openEditModal(banner)}
-                    />,
-                    <Popconfirm
-                      key="delete"
-                      title="Delete this video?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => handleDelete(banner.id)}
-                    >
-                      <DeleteOutlined danger />
-                    </Popconfirm>,
-                  ]}
-                >
-                  <Card.Meta
-                    title={
-                      <div className="font-semibold text-base">
-                        Video #{banner.id}
-                      </div>
-                    }
-                    description={
-                      <div className="text-gray-600 text-sm">
-                        {new Date(banner.created_at).toLocaleDateString()}
-                      </div>
-                    }
-                  />
-                </Card>
-              </Col>
-            ))}
-          </Row>
+                  description={
+                    <div className="text-gray-600 text-sm">
+                      {new Date(banner.created_at).toLocaleDateString()}
+                    </div>
+                  }
+                />
+              </Card>
+            )}
+          />
 
           {total > perPage && (
             <div className="flex justify-center mt-8">

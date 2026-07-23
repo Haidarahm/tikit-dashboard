@@ -5,6 +5,7 @@ import {
   addTeamMember,
   updateTeamMember,
   deleteTeamMember,
+  reorderTeamMembers,
 } from "../../apis/team/teamMembers.js";
 
 export const useTeamMembersStore = create((set, get) => ({
@@ -115,6 +116,23 @@ export const useTeamMembersStore = create((set, get) => ({
       throw error;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  reorder: async (reorderedItems) => {
+    const prevItems = get().items;
+    set({ items: reorderedItems });
+    const orders = reorderedItems.map((item, index) => ({
+      id: item.id,
+      sort_order: index + 1,
+    }));
+    try {
+      await reorderTeamMembers(orders);
+      toast.success("Order updated successfully");
+    } catch (error) {
+      set({ items: prevItems, error });
+      toast.error(error?.response?.data?.message || "Failed to update order");
+      throw error;
     }
   },
 }));

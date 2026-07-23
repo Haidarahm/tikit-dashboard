@@ -19,6 +19,7 @@ import Statistics from "./pages/Statistics.jsx";
 import TeamManagement from "./pages/team/TeamManagement.jsx";
 import ShowcaseProjects from "./pages/showcase/ShowcaseProjects.jsx";
 import FeaturedCampaigns from "./pages/featured/FeaturedCampaigns.jsx";
+import Jobs from "./pages/jobs/Jobs.jsx";
 import RegisteredInfluencers from "./pages/RegisteredInfluencers.jsx";
 import SubscribedUsers from "./pages/SubscribedUsers.jsx";
 import Admins from "./pages/Admins.jsx";
@@ -41,6 +42,7 @@ function App() {
             <Route path="/team" element={<TeamManagement />} />
             <Route path="/showcase-projects" element={<ShowcaseProjects />} />
             <Route path="/featured-campaigns" element={<FeaturedCampaigns />} />
+            <Route path="/jobs" element={<Jobs />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/statistics" element={<Statistics />} />
             <Route path="/works" element={<WorksSection />} />

@@ -9,8 +9,6 @@ import {
   Upload,
   Popconfirm,
   Card,
-  Row,
-  Col,
   Pagination,
   Spin,
 } from "antd";
@@ -23,6 +21,7 @@ import {
 } from "@ant-design/icons";
 import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
+import SortableCards, { CardDragHandle } from "../../components/common/SortableCards.jsx";
 import { useInfluencersSectionsStore } from "../../store/influencers/influencersSectionsStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
 
@@ -42,6 +41,7 @@ export const Sections = () => {
     create,
     update,
     remove,
+    reorder,
     import: importExcel,
   } = useInfluencersSectionsStore();
 
@@ -289,51 +289,52 @@ export const Sections = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]}>
-            {items.map((section) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={section.id}>
-                <Card
-                  hoverable
-                 
-                  actions={[
-                    <Button
-                      key="data"
-                      type="text"
-                      icon={<FaDatabase />}
-                      onClick={() => handleViewData(section.id)}
-                      className="flex items-center justify-center"
-                    />,
-                    <EditOutlined
-                      key="edit"
-                      onClick={() => openEditModal(section)}
-                    />,
-                    <Popconfirm
-                      key="delete"
-                      title="Delete this section?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => handleDelete(section.id)}
-                    >
-                      <DeleteOutlined danger />
-                    </Popconfirm>,
-                  ]}
-                >
-                  <Card.Meta
-                    title={
-                      <div className="font-semibold text-base line-clamp-2">
-                        {section.title || "No Title"}
-                      </div>
-                    }
-                    description={
-                      <div className="text-gray-600 line-clamp-2">
-                        {section.subtitle || "No Subtitle"}
-                      </div>
-                    }
-                  />
-                </Card>
-              </Col>
-            ))}
-          </Row>
+          <SortableCards
+            items={items}
+            rowKey="id"
+            onReorder={reorder}
+            renderItem={(section) => (
+              <Card
+                hoverable
+                title={
+                  <div className="flex items-center justify-between">
+                    <span className="truncate">{section.title || "No Title"}</span>
+                    <CardDragHandle />
+                  </div>
+                }
+                actions={[
+                  <Button
+                    key="data"
+                    type="text"
+                    icon={<FaDatabase />}
+                    onClick={() => handleViewData(section.id)}
+                    className="flex items-center justify-center"
+                  />,
+                  <EditOutlined
+                    key="edit"
+                    onClick={() => openEditModal(section)}
+                  />,
+                  <Popconfirm
+                    key="delete"
+                    title="Delete this section?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => handleDelete(section.id)}
+                  >
+                    <DeleteOutlined danger />
+                  </Popconfirm>,
+                ]}
+              >
+                <Card.Meta
+                  description={
+                    <div className="text-gray-600 line-clamp-2">
+                      {section.subtitle || "No Subtitle"}
+                    </div>
+                  }
+                />
+              </Card>
+            )}
+          />
 
           {total > perPage && (
             <div className="flex justify-center mt-8">

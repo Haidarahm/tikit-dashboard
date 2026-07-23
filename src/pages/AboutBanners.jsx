@@ -8,8 +8,6 @@ import {
   Pagination,
   Spin,
   Tooltip,
-  Row,
-  Col,
   Card,
 } from "antd";
 import {
@@ -19,6 +17,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import SortableCards, { CardDragHandle } from "../components/common/SortableCards.jsx";
 import { useAboutBannerStore } from "../store/aboutBannerStore.js";
 
 const AboutBanners = () => {
@@ -34,6 +33,7 @@ const AboutBanners = () => {
     create,
     update,
     remove,
+    reorder,
   } = useAboutBannerStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -152,49 +152,53 @@ const AboutBanners = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]}>
-            {items.map((banner) => (
-              <Col xs={24} sm={12} md={8} lg={6} key={banner.id}>
-                <Card
-                  hoverable
-                  bodyStyle={{ padding: 0 }}
-                  cover={
-                    banner.media ? (
-                      <video
-                        src={banner.media}
-                        className="w-full h-48 object-cover rounded-t-md"
-                        controls
-                      />
-                    ) : (
-                      <div className="h-48 flex items-center justify-center text-gray-400 bg-gray-100">
-                        No Video
-                      </div>
-                    )
-                  }
-                  actions={[
-                    <Tooltip key="edit" title="Edit">
-                      <Button
-                        type="text"
-                        icon={<EditOutlined />}
-                        onClick={() => openEditModal(banner)}
-                      />
-                    </Tooltip>,
-                    <Popconfirm
-                      key="delete"
-                      title="Delete this video?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => handleDelete(banner.id)}
-                    >
-                      <Tooltip title="Delete">
-                        <Button type="text" danger icon={<DeleteOutlined />} />
-                      </Tooltip>
-                    </Popconfirm>,
-                  ]}
-                />
-              </Col>
-            ))}
-          </Row>
+          <SortableCards
+            items={items}
+            rowKey="id"
+            onReorder={reorder}
+            renderItem={(banner) => (
+              <Card
+                hoverable
+                bodyStyle={{ padding: 0 }}
+                cover={
+                  banner.media ? (
+                    <video
+                      src={banner.media}
+                      className="w-full h-48 object-cover rounded-t-md"
+                      controls
+                    />
+                  ) : (
+                    <div className="h-48 flex items-center justify-center text-gray-400 bg-gray-100">
+                      No Video
+                    </div>
+                  )
+                }
+                actions={[
+                  <Tooltip key="drag" title="Drag to reorder">
+                    <CardDragHandle />
+                  </Tooltip>,
+                  <Tooltip key="edit" title="Edit">
+                    <Button
+                      type="text"
+                      icon={<EditOutlined />}
+                      onClick={() => openEditModal(banner)}
+                    />
+                  </Tooltip>,
+                  <Popconfirm
+                    key="delete"
+                    title="Delete this video?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => handleDelete(banner.id)}
+                  >
+                    <Tooltip title="Delete">
+                      <Button type="text" danger icon={<DeleteOutlined />} />
+                    </Tooltip>
+                  </Popconfirm>,
+                ]}
+              />
+            )}
+          />
 
           {total > perPage && (
             <div className="flex justify-center mt-8">

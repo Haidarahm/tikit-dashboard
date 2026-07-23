@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Form, Modal, Select, Space, Table, Upload } from "antd";
+import { Button, Form, Modal, Select, Space, Upload } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import SortableTable, { DragHandle } from "../../components/common/SortableTable.jsx";
 import { useShowcaseProjectsStore } from "../../store/showcaseProjectsStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
 import { LANG_OPTIONS } from "../../constants/language.js";
@@ -43,6 +44,7 @@ const ShowcaseProjects = () => {
     create,
     update,
     remove,
+    reorder,
     importExcel,
   } = useShowcaseProjectsStore();
 
@@ -184,7 +186,7 @@ const ShowcaseProjects = () => {
     setViewingProject(null);
   }, []);
 
-  const columns = useShowcaseTableColumns({
+  const baseColumns = useShowcaseTableColumns({
     remove,
     expandedBriefs,
     setExpandedBriefs,
@@ -194,6 +196,17 @@ const ShowcaseProjects = () => {
     onEdit: handleEditOpen,
     isSuperAdmin,
   });
+
+  const columns = [
+    {
+      title: "",
+      key: "sort",
+      width: 48,
+      align: "center",
+      render: () => <DragHandle />,
+    },
+    ...baseColumns,
+  ];
 
   const handleCreate = async () => {
     try {
@@ -383,9 +396,10 @@ const ShowcaseProjects = () => {
         </Space>
       </div>
 
-      <Table
+      <SortableTable
         rowKey={(record) => record.id}
         columns={columns}
+        onReorder={reorder}
         scroll={{ x: 'max-content' }}
         dataSource={items}
         loading={isLoading}

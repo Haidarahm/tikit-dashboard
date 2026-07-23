@@ -1,19 +1,17 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import {
-  getVideos,
-  addVideo,
-  updateVideo,
-  deleteVideo,
-  reorderVideos,
-} from "../apis/banners/banner";
+  getJobs,
+  addJob,
+  updateJob,
+  deleteJob,
+} from "../apis/jobs.js";
 
-export const useBannerStore = create((set, get) => ({
+export const useJobsStore = create((set, get) => ({
   items: [],
   total: 0,
   page: 1,
-  perPage: 5,
-  current: null,
+  perPage: 10,
   isLoading: false,
   error: null,
 
@@ -24,10 +22,7 @@ export const useBannerStore = create((set, get) => ({
     const { page, perPage } = get();
     set({ isLoading: true, error: null });
     try {
-      const resp = await getVideos({
-        page,
-        per_page: perPage,
-      });
+      const resp = await getJobs({ page, per_page: perPage });
       const items = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
@@ -36,9 +31,15 @@ export const useBannerStore = create((set, get) => ({
       const total = resp?.pagination?.total ?? resp?.total ?? items.length;
       const nextPage = resp?.pagination?.current_page ?? page;
       const nextPerPage = resp?.pagination?.per_page ?? perPage;
-      set({ items, total, page: nextPage, perPage: nextPerPage });
+      set({
+        items,
+        total,
+        page: nextPage,
+        perPage: nextPerPage,
+      });
     } catch (error) {
       set({ error });
+      toast.error(error?.response?.data?.message || "Failed to fetch jobs");
     } finally {
       set({ isLoading: false });
     }
@@ -47,14 +48,13 @@ export const useBannerStore = create((set, get) => ({
   create: async (payload) => {
     set({ isLoading: true, error: null });
     try {
-      const created = await addVideo(payload);
-      set({ current: created?.data || created });
+      const created = await addJob(payload);
       await get().fetchList();
-      toast.success("Video added successfully");
+      toast.success("Job added successfully");
       return created;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to add video");
+      toast.error(error?.response?.data?.message || "Failed to add job");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -64,14 +64,13 @@ export const useBannerStore = create((set, get) => ({
   update: async (id, payload) => {
     set({ isLoading: true, error: null });
     try {
-      const updated = await updateVideo(id, payload);
-      set({ current: updated?.data || updated });
+      const updated = await updateJob(id, payload);
       await get().fetchList();
-      toast.success("Video updated successfully");
+      toast.success("Job updated successfully");
       return updated;
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to update video");
+      toast.error(error?.response?.data?.message || "Failed to update job");
       throw error;
     } finally {
       set({ isLoading: false });
@@ -81,38 +80,20 @@ export const useBannerStore = create((set, get) => ({
   remove: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await deleteVideo(id);
+      await deleteJob(id);
       await get().fetchList();
       const { items, page } = get();
       if (items.length === 0 && page > 1) {
         set({ page: page - 1 });
         await get().fetchList();
       }
-      toast.success("Video deleted successfully");
+      toast.success("Job deleted successfully");
     } catch (error) {
       set({ error });
-      toast.error(error?.response?.data?.message || "Failed to delete video");
+      toast.error(error?.response?.data?.message || "Failed to delete job");
       throw error;
     } finally {
       set({ isLoading: false });
-    }
-  },
-
-  reorder: async (reorderedItems) => {
-    const { items: prevItems, page, perPage } = get();
-    set({ items: reorderedItems });
-    const base = (page - 1) * perPage;
-    const orders = reorderedItems.map((item, index) => ({
-      id: item.id,
-      sort_order: base + index + 1,
-    }));
-    try {
-      await reorderVideos(orders);
-      toast.success("Order updated successfully");
-    } catch (error) {
-      set({ items: prevItems, error });
-      toast.error(error?.response?.data?.message || "Failed to update order");
-      throw error;
     }
   },
 }));

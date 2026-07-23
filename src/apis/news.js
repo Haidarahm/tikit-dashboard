@@ -61,6 +61,11 @@ export async function deleteNewsCard(id) {
   return data;
 }
 
+export async function reorderNews(orders) {
+  const { data } = await apiClient.post("/blogs/reorder", { orders });
+  return data;
+}
+
 export async function importNewsExcel(file) {
   const formData = new FormData();
   formData.append("file", file);

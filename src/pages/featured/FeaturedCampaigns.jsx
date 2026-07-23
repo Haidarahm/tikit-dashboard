@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Form, Modal, Select, Space, Table } from "antd";
+import { Button, Form, Modal, Select, Space } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import SortableTable, { DragHandle } from "../../components/common/SortableTable.jsx";
 import { useFeaturedCampaignsStore } from "../../store/featuredCampaignsStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
 import { LANG_OPTIONS } from "../../constants/language.js";
@@ -39,6 +40,7 @@ const FeaturedCampaigns = () => {
     create,
     update,
     remove,
+    reorder,
   } = useFeaturedCampaignsStore();
 
   const [createForm] = Form.useForm();
@@ -164,7 +166,7 @@ const FeaturedCampaigns = () => {
     setViewingCampaign(null);
   }, []);
 
-  const columns = useFeaturedTableColumns({
+  const baseColumns = useFeaturedTableColumns({
     remove,
     expandedBriefs,
     setExpandedBriefs,
@@ -174,6 +176,17 @@ const FeaturedCampaigns = () => {
     onEdit: handleEditOpen,
     isSuperAdmin,
   });
+
+  const columns = [
+    {
+      title: "",
+      key: "sort",
+      width: 48,
+      align: "center",
+      render: () => <DragHandle />,
+    },
+    ...baseColumns,
+  ];
 
   const handleCreate = async () => {
     try {
@@ -345,9 +358,10 @@ const FeaturedCampaigns = () => {
         </Space>
       </div>
 
-      <Table
+      <SortableTable
         rowKey={(record) => record.id}
         columns={columns}
+        onReorder={reorder}
         scroll={{ x: 'max-content' }}
         dataSource={items}
         loading={isLoading}

@@ -13,6 +13,7 @@ import {
   Tooltip,
   Upload,
 } from "antd";
+import SortableTable, { DragHandle } from "../../components/common/SortableTable.jsx";
 import {
   ReloadOutlined,
   UploadOutlined,
@@ -53,6 +54,7 @@ function Blogs() {
     create,
     update,
     remove,
+    reorder,
     importFromExcel,
     detailsItems,
     fetchNewsDetails,
@@ -351,6 +353,13 @@ function Blogs() {
   const columns = useMemo(
     () => [
       {
+        title: "",
+        key: "sort",
+        width: 48,
+        align: "center",
+        render: () => <DragHandle />,
+      },
+      {
         title: "ID",
         dataIndex: "id",
         key: "id",
@@ -516,9 +525,10 @@ function Blogs() {
         </Space>
       </div>
 
-      <Table
+      <SortableTable
         rowKey={(record) => record.id}
         columns={columns}
+        onReorder={reorder}
         scroll={{ x: 'max-content' }}
         dataSource={items}
         loading={isLoading}

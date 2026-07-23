@@ -48,3 +48,8 @@ export async function deleteTeamMember(id) {
   const { data } = await apiClient.delete(`/teams/${id}/delete`);
   return data;
 }
+
+export async function reorderTeamMembers(orders) {
+  const { data } = await apiClient.post("/teams/reorder", { orders });
+  return data;
+}

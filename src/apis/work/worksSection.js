@@ -78,3 +78,8 @@ export async function importExcel(file) {
   });
   return data;
 }
+
+export async function reorderWorks(orders) {
+  const { data } = await apiClient.post("/works/reorder", { orders });
+  return data;
+}

@@ -47,3 +47,8 @@ export async function deleteVideo(id) {
   const { data } = await apiClient.delete(`/about-us-banners/${id}/delete`);
   return data;
 }
+
+export async function reorderBannerVideo(orders) {
+  const { data } = await apiClient.post("/about-us-banners/reorder", { orders });
+  return data;
+}

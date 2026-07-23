@@ -5,6 +5,7 @@ import {
   addBannerVideo,
   updateVideo,
   deleteVideo,
+  reorderBannerVideo,
 } from "../apis/banners/aboutBannser.js";
 
 const normalizeResponse = (response, fallbackPage, fallbackPerPage) => {
@@ -115,6 +116,24 @@ export const useAboutBannerStore = create((set, get) => ({
       throw error;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  reorder: async (reorderedItems) => {
+    const { items: prevItems, page, perPage } = get();
+    set({ items: reorderedItems });
+    const base = (page - 1) * perPage;
+    const orders = reorderedItems.map((item, index) => ({
+      id: item.id,
+      sort_order: base + index + 1,
+    }));
+    try {
+      await reorderBannerVideo(orders);
+      toast.success("Order updated successfully");
+    } catch (error) {
+      set({ items: prevItems, error });
+      toast.error(error?.response?.data?.message || "Failed to update order");
+      throw error;
     }
   },
 }));

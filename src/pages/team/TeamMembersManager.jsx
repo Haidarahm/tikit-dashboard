@@ -8,10 +8,10 @@ import {
   Popconfirm,
   Select,
   Space,
-  Table,
   Tooltip,
   Upload,
 } from "antd";
+import SortableTable, { DragHandle } from "../../components/common/SortableTable.jsx";
 import { FiPlus, FiEdit2, FiTrash2, FiExternalLink } from "react-icons/fi";
 import {
   FaFacebookF,
@@ -66,7 +66,7 @@ const SOCIAL_ICON_MAP = {
 };
 
 function TeamMembersManager({ typeId }) {
-  const { items, isLoading, fetchList, create, update, remove, setTypeId } =
+  const { items, isLoading, fetchList, create, update, remove, reorder, setTypeId } =
     useTeamMembersStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -161,6 +161,13 @@ function TeamMembersManager({ typeId }) {
 
   const columns = useMemo(
     () => [
+      {
+        title: "",
+        key: "sort",
+        width: 48,
+        align: "center",
+        render: () => <DragHandle />,
+      },
       {
         title: "Name",
         dataIndex: "name",
@@ -295,10 +302,11 @@ function TeamMembersManager({ typeId }) {
         </Tooltip>
       </div>
 
-      <Table
+      <SortableTable
         rowKey={(record) => record.id}
         dataSource={items}
         columns={columns}
+        onReorder={reorder}
         scroll={{ x: 'max-content' }}
         loading={isLoading}
         pagination={false}

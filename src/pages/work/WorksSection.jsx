@@ -11,7 +11,6 @@ import {
   Pagination,
   Spin,
   Image,
-  Table,
   Tooltip,
   Typography,
   Switch,
@@ -23,6 +22,7 @@ import {
 } from "@ant-design/icons";
 import { FaDatabase } from "react-icons/fa";
 import { toast } from "react-toastify";
+import SortableTable, { DragHandle } from "../../components/common/SortableTable.jsx";
 import { useWorksSectionStore } from "../../store/works/worksSectionStore.js";
 import { useTranslateStore } from "../../store/translateStore.js";
 import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
@@ -48,6 +48,7 @@ const WorksSection = () => {
     create,
     update,
     remove,
+    reorder,
     import: importExcel,
   } = useWorksSectionStore();
 
@@ -282,6 +283,13 @@ const WorksSection = () => {
 
   const columns = [
     {
+      title: "",
+      key: "sort",
+      width: 48,
+      align: "center",
+      render: () => <DragHandle />,
+    },
+    {
       title: "Media",
       dataIndex: "media",
       key: "media",
@@ -422,10 +430,11 @@ const WorksSection = () => {
         </div>
       ) : (
         <>
-          <Table
+          <SortableTable
             columns={columns}
             dataSource={items}
             rowKey="id"
+            onReorder={reorder}
             pagination={false}
             className="bg-white shadow-sm rounded-lg"
             size="middle"

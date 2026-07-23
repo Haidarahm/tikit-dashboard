@@ -14,6 +14,7 @@ export const PERMISSION_SLUGS = {
   "showcase-projects": ["manage_content"],
   "featured-campaigns": ["manage_content"],
   works: ["manage_content"],
+  jobs: ["manage_content"],
   sections: ["manage_content"],
   "registered-influencers": ["manage_subscribers"],
   "subscribed-users": ["manage_subscribers"],
@@ -30,6 +31,7 @@ export const DEFAULT_DASHBOARD_PATHS = [
   { key: "showcase-projects", path: "/showcase-projects" },
   { key: "featured-campaigns", path: "/featured-campaigns" },
   { key: "works", path: "/works" },
+  { key: "jobs", path: "/jobs" },
   { key: "sections", path: "/influencer/sections" },
   { key: "registered-influencers", path: "/registered-influencers" },
   { key: "subscribed-users", path: "/subscribed-users" },
@@ -71,6 +73,7 @@ export function getMenuKeyForPathname(pathname) {
   if (path.startsWith("/banner")) return "banner";
   if (path.startsWith("/influencer/sections")) return "sections";
   if (path.startsWith("/influencer/data")) return "sections";
+  if (path.startsWith("/jobs")) return "jobs";
   if (path.startsWith("/works")) return "works";
   if (path.startsWith("/team")) return "team";
   if (path.startsWith("/showcase-projects")) return "showcase-projects";
