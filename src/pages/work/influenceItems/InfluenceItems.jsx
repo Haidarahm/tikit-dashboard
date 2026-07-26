@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Button,
@@ -18,6 +18,7 @@ import {
   Select,
   Switch,
   Divider,
+  Dropdown,
 } from "antd";
 import {
   EditOutlined,
@@ -25,6 +26,7 @@ import {
   PlusOutlined,
   EyeOutlined,
   UploadOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../../store/works/influencersItemsStore.js";
@@ -40,6 +42,9 @@ import {
   deriveInfluenceImageMediaItems,
   deriveInfluenceReelMediaItems,
 } from "./influenceItemMediaHelpers.js";
+import ActiveStatusSwitch from "../../../components/content/ActiveStatusSwitch.jsx";
+import CopyMoveSectionModal from "../../../components/content/CopyMoveSectionModal.jsx";
+import { WORK_INFLUENCE_SECTION } from "../../../constants/contentSections.js";
 
 const EMPTY_INFLUENCER_TRANSLATION = {
   title_ar: "",
@@ -75,6 +80,10 @@ const InfluenceItems = () => {
     remove,
     importExcel: importInfluencersExcel,
     workId,
+    toggleActive,
+    duplicateItem,
+    copyItem,
+    moveItem,
   } = useInfluencersItemsStore();
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -100,6 +109,12 @@ const InfluenceItems = () => {
   const [isEditTranslating, setIsEditTranslating] = useState(false);
   const [autoTranslateCreate, setAutoTranslateCreate] = useState(true);
   const [autoTranslateEdit, setAutoTranslateEdit] = useState(true);
+  const [transferModal, setTransferModal] = useState({
+    open: false,
+    mode: "copy",
+    item: null,
+  });
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   const translateText = useTranslateStore((state) => state.translateText);
 
@@ -148,7 +163,13 @@ const InfluenceItems = () => {
       setSlug(slug);
       fetchList(slug);
     }
-  }, [slug, page, perPage, lang]);
+  }, [slug, lang]);
+
+  // The admin listing is not paginated server-side, so the grid slices it.
+  const pagedItems = useMemo(
+    () => items.slice((page - 1) * perPage, page * perPage),
+    [items, page, perPage]
+  );
 
   const handleAdd = async () => {
     try {
@@ -432,6 +453,25 @@ const InfluenceItems = () => {
     setEditNewReelsFileList([]);
   };
 
+  const handleDuplicate = async (item) => {
+    if (isDuplicating) return;
+    setIsDuplicating(true);
+    try {
+      await duplicateItem(item.id);
+    } catch {
+      // toast already handled in store
+    } finally {
+      setIsDuplicating(false);
+    }
+  };
+
+  const handleTransferSubmit = async ({ targetSection, workId: targetWorkId }) => {
+    const { mode, item } = transferModal;
+    const action = mode === "move" ? moveItem : copyItem;
+    await action(item.id, { targetSection, workId: targetWorkId });
+    setTransferModal({ open: false, mode: "copy", item: null });
+  };
+
   const openViewModal = (item) => {
     setViewModal({
       open: true,
@@ -485,7 +525,7 @@ const InfluenceItems = () => {
       ) : (
         <>
           <Row gutter={[24, 24]}>
-            {items.map((item) => {
+            {pagedItems.map((item) => {
               return (
                 <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
                   <Card
@@ -535,6 +575,27 @@ const InfluenceItems = () => {
                           className="text-blue-500 hover:text-blue-700"
                         />
                       </Tooltip>,
+                      <Dropdown
+                        key="more"
+                        menu={{
+                          items: [
+                            { key: "duplicate", label: "Duplicate" },
+                            { key: "copy", label: "Copy to section…" },
+                            { key: "move", label: "Move to section…" },
+                          ],
+                          onClick: ({ key }) => {
+                            if (key === "duplicate") {
+                              handleDuplicate(item);
+                            } else {
+                              setTransferModal({ open: true, mode: key, item });
+                            }
+                          },
+                        }}
+                      >
+                        <Tooltip title="More actions">
+                          <MoreOutlined className="text-gray-600 hover:text-gray-900" />
+                        </Tooltip>
+                      </Dropdown>,
                       <Popconfirm
                         key="delete"
                         title="Delete this item?"
@@ -555,6 +616,15 @@ const InfluenceItems = () => {
                       <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words text-center">
                         {item.title || "No Title"}
                       </h3>
+                      <div className="flex justify-center">
+                        <ActiveStatusSwitch
+                          size="small"
+                          isActive={item.is_active}
+                          onToggle={(nextValue) =>
+                            toggleActive(item.id, nextValue)
+                          }
+                        />
+                      </div>
                     </div>
                   </Card>
                 </Col>
@@ -1163,6 +1233,17 @@ const InfluenceItems = () => {
           </div>
         )}
       </Modal>
+
+      <CopyMoveSectionModal
+        open={transferModal.open}
+        mode={transferModal.mode}
+        sourceSection={WORK_INFLUENCE_SECTION}
+        item={transferModal.item}
+        onCancel={() =>
+          setTransferModal({ open: false, mode: "copy", item: null })
+        }
+        onSubmit={handleTransferSubmit}
+      />
     </div>
   );
 };

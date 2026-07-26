@@ -1,13 +1,16 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import {
-  getShowcaseProjects,
+  getShowcaseProjectsAdmin,
   addProject,
   updateProject,
   deleteProject,
   importShowcaseProjects,
   reorderShowcaseProjects,
 } from "../apis/showcaseProjects.js";
+import { createSectionItemActions } from "./content/sectionItemActions.js";
+import { localizeSectionItem } from "./content/localizeSectionItem.js";
+import { SHOWCASE_PROJECT_SECTION } from "../constants/contentSections.js";
 
 export const useShowcaseProjectsStore = create((set, get) => ({
   items: [],
@@ -22,32 +25,24 @@ export const useShowcaseProjectsStore = create((set, get) => ({
   setPerPage: (perPage) => set({ perPage }),
   setLang: (lang) => set({ lang, page: 1 }),
 
+  // GET /showcase-projects/admin/all returns every project (including inactive
+  // ones) as a plain array, so paging and language are resolved on the client.
   fetchList: async () => {
     const { page, perPage, lang } = get();
     set({ isLoading: true, error: null });
     try {
-      const resp = await getShowcaseProjects({
-        page,
-        per_page: perPage,
-        lang,
-      });
+      const resp = await getShowcaseProjectsAdmin();
       const rawItems = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
         ? resp
         : [];
-      const items = rawItems.map((item) => ({
-        ...item,
-        main_image: item.main_image ?? item.logo ?? null,
-      }));
-      const total = resp?.pagination?.total ?? resp?.total ?? items.length;
-      const nextPage = resp?.pagination?.current_page ?? page;
-      const nextPerPage = resp?.pagination?.per_page ?? perPage;
+      const items = rawItems.map((item) => localizeSectionItem(item, lang));
+      const lastPage = Math.max(1, Math.ceil(items.length / perPage));
       set({
         items,
-        total,
-        page: nextPage,
-        perPage: nextPerPage,
+        total: items.length,
+        page: Math.min(page, lastPage),
       });
     } catch (error) {
       set({ error });
@@ -100,11 +95,6 @@ export const useShowcaseProjectsStore = create((set, get) => ({
     try {
       await deleteProject(id);
       await get().fetchList();
-      const { items, page } = get();
-      if (items.length === 0 && page > 1) {
-        set({ page: page - 1 });
-        await get().fetchList();
-      }
       toast.success("Showcase project deleted successfully");
     } catch (error) {
       set({ error });
@@ -151,4 +141,11 @@ export const useShowcaseProjectsStore = create((set, get) => ({
       throw error;
     }
   },
+
+  ...createSectionItemActions({
+    section: SHOWCASE_PROJECT_SECTION,
+    entityLabel: "Showcase project",
+    set,
+    get,
+  }),
 }));

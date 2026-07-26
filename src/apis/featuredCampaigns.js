@@ -57,12 +57,18 @@ const appendCampaignPayload = (formData, payload = {}) => {
   }
 };
 
-export async function getFeaturedCampaigns({ page, per_page, lang } = {}) {
-  const params = {};
-  if (page != null) params.page = page;
-  if (per_page != null) params.per_page = per_page;
-  if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/featured", { params });
+/**
+ * Dashboard listing: includes campaigns hidden from the public website.
+ * GET /featured is deliberately not used here, because it filters out inactive
+ * campaigns and an admin would lose the way to re-enable them.
+ */
+export async function getFeaturedCampaignsAdmin() {
+  const { data } = await apiClient.get("/featured/admin/all");
+  return data;
+}
+
+export async function getFeaturedCampaignAdmin(id) {
+  const { data } = await apiClient.get(`/featured/admin/show/${id}`);
   return data;
 }
 

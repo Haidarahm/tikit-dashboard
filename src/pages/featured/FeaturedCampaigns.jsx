@@ -20,6 +20,8 @@ import { FeaturedCampaignForm } from "./FeaturedCampaignForm.jsx";
 import { FeaturedCampaignViewModal } from "./FeaturedCampaignViewModal.jsx";
 import { useAuthStore } from "../../store/auth.js";
 import { useFeaturedTableColumns } from "./useFeaturedTableColumns.jsx";
+import CopyMoveSectionModal from "../../components/content/CopyMoveSectionModal.jsx";
+import { FEATURED_CAMPAIGN_SECTION } from "../../constants/contentSections.js";
 
 const SUPER_ADMIN_ROLE = "super_admin";
 
@@ -41,6 +43,10 @@ const FeaturedCampaigns = () => {
     update,
     remove,
     reorder,
+    toggleActive,
+    duplicateItem,
+    copyItem,
+    moveItem,
   } = useFeaturedCampaignsStore();
 
   const [createForm] = Form.useForm();
@@ -61,6 +67,12 @@ const FeaturedCampaigns = () => {
   const [viewingCampaign, setViewingCampaign] = useState(null);
   const [expandedBriefs, setExpandedBriefs] = useState(new Set());
   const [expandedStrategies, setExpandedStrategies] = useState(new Set());
+  const [transferModal, setTransferModal] = useState({
+    open: false,
+    mode: "copy",
+    item: null,
+  });
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
@@ -71,7 +83,7 @@ const FeaturedCampaigns = () => {
 
   useEffect(() => {
     fetchList();
-  }, [page, perPage, lang]);
+  }, [lang]);
 
   const resetCreateModal = () => {
     createForm.resetFields();
@@ -166,14 +178,54 @@ const FeaturedCampaigns = () => {
     setViewingCampaign(null);
   }, []);
 
+  const handleDuplicate = useCallback(
+    async (record) => {
+      if (isDuplicating) return;
+      setIsDuplicating(true);
+      try {
+        await duplicateItem(record.id);
+      } catch {
+        // toast already handled in store
+      } finally {
+        setIsDuplicating(false);
+      }
+    },
+    [duplicateItem, isDuplicating]
+  );
+
+  const openTransferModal = useCallback((mode, record) => {
+    setTransferModal({ open: true, mode, item: record });
+  }, []);
+
+  const handleCopyOpen = useCallback(
+    (record) => openTransferModal("copy", record),
+    [openTransferModal]
+  );
+
+  const handleMoveOpen = useCallback(
+    (record) => openTransferModal("move", record),
+    [openTransferModal]
+  );
+
+  const handleTransferSubmit = async ({ targetSection, workId }) => {
+    const { mode, item } = transferModal;
+    const action = mode === "move" ? moveItem : copyItem;
+    await action(item.id, { targetSection, workId });
+    setTransferModal({ open: false, mode: "copy", item: null });
+  };
+
   const baseColumns = useFeaturedTableColumns({
     remove,
+    toggleActive,
     expandedBriefs,
     setExpandedBriefs,
     expandedStrategies,
     setExpandedStrategies,
     onView: handleViewOpen,
     onEdit: handleEditOpen,
+    onDuplicate: handleDuplicate,
+    onCopy: handleCopyOpen,
+    onMove: handleMoveOpen,
     isSuperAdmin,
   });
 
@@ -436,6 +488,17 @@ const FeaturedCampaigns = () => {
         open={viewModalOpen}
         campaign={viewingCampaign}
         onClose={handleViewClose}
+      />
+
+      <CopyMoveSectionModal
+        open={transferModal.open}
+        mode={transferModal.mode}
+        sourceSection={FEATURED_CAMPAIGN_SECTION}
+        item={transferModal.item}
+        onCancel={() =>
+          setTransferModal({ open: false, mode: "copy", item: null })
+        }
+        onSubmit={handleTransferSubmit}
       />
     </div>
   );

@@ -1,12 +1,50 @@
 import { create } from "zustand";
 import { toast } from "react-toastify";
 import {
-  getItems,
+  getItemsAdmin,
   addItem,
   updateItem,
   deleteItem,
   importExcelfile,
 } from "../../apis/work/influencersItems.js";
+import { getWorksSections } from "../../apis/work/worksSection.js";
+import { createSectionItemActions } from "../content/sectionItemActions.js";
+import { localizeSectionItem } from "../content/localizeSectionItem.js";
+import { WORK_INFLUENCE_SECTION } from "../../constants/contentSections.js";
+
+/**
+ * GET /work-influences/admin/all is not scoped to a work, so the page resolves
+ * the work behind the URL slug and filters the list with it.
+ */
+async function resolveWorkIdBySlug(slug) {
+  const resp = await getWorksSections({ per_page: 500 });
+  const works = Array.isArray(resp?.data) ? resp.data : [];
+  return works.find((work) => work?.slug === slug)?.id ?? null;
+}
+
+/** Maps the admin payload onto the media shape the influence page expects. */
+function normalizeInfluenceItem(item, lang) {
+  const localized = localizeSectionItem(item, lang);
+  return {
+    ...localized,
+    title_ar: item.title_ar ?? "",
+    title_fr: item.title_fr ?? "",
+    subtitle_ar: item.subtitle_ar ?? "",
+    subtitle_fr: item.subtitle_fr ?? "",
+    objective_ar: item.objective_ar ?? "",
+    objective_fr: item.objective_fr ?? "",
+    brief_ar: item.brief_ar ?? "",
+    brief_fr: item.brief_fr ?? "",
+    strategy_ar: item.strategy_ar ?? "",
+    strategy_fr: item.strategy_fr ?? "",
+    approach_ar: item.approach_ar ?? "",
+    approach_fr: item.approach_fr ?? "",
+    logo: item.main_image ?? item.logo ?? null,
+    media_items: Array.isArray(item.media) ? item.media : [],
+    media: Array.isArray(item.images) ? item.images : [],
+    reels: Array.isArray(item.videos) ? item.videos : [],
+  };
+}
 
 export const useInfluencersItemsStore = create((set, get) => ({
   items: [],
@@ -34,48 +72,30 @@ export const useInfluencersItemsStore = create((set, get) => ({
     }
     set({ isLoading: true, error: null });
     try {
-      const resp = await getItems({
-        slug: targetSlug,
-        page,
-        per_page: perPage,
-        lang,
-      });
-      const items = Array.isArray(resp?.data)
+      const [workId, resp] = await Promise.all([
+        resolveWorkIdBySlug(targetSlug),
+        getItemsAdmin(),
+      ]);
+      const rawItems = Array.isArray(resp?.data)
         ? resp.data
         : Array.isArray(resp)
         ? resp
         : [];
-      const normalizedItems = items.map((item) => ({
-        ...item,
-        title_en: item.title_en ?? item.title ?? "",
-        title_ar: item.title_ar ?? "",
-        title_fr: item.title_fr ?? "",
-        subtitle_en: item.subtitle_en ?? item.subtitle ?? "",
-        subtitle_ar: item.subtitle_ar ?? "",
-        subtitle_fr: item.subtitle_fr ?? "",
-        objective_en: item.objective_en ?? item.objective ?? "",
-        objective_ar: item.objective_ar ?? "",
-        objective_fr: item.objective_fr ?? "",
-        brief_en: item.brief_en ?? item.brief ?? "",
-        brief_ar: item.brief_ar ?? "",
-        brief_fr: item.brief_fr ?? "",
-        strategy_en: item.strategy_en ?? item.strategy ?? "",
-        strategy_ar: item.strategy_ar ?? "",
-        strategy_fr: item.strategy_fr ?? "",
-        approach_en: item.approach_en ?? item.approach ?? "",
-        approach_ar: item.approach_ar ?? "",
-        approach_fr: item.approach_fr ?? "",
-      }));
-      const total = resp?.pagination?.total ?? resp?.total ?? items.length;
-      const nextPage = resp?.pagination?.current_page ?? page;
-      const nextPerPage = resp?.pagination?.per_page ?? perPage;
-      const workId =
-        resp?.work?.id ?? resp?.work_id ?? resp?.data?.work_id ?? items[0]?.work_id ?? null;
+      const scopedItems =
+        workId == null
+          ? []
+          : rawItems.filter((item) => Number(item?.work_id) === Number(workId));
+      const normalizedItems = scopedItems.map((item) =>
+        normalizeInfluenceItem(item, lang)
+      );
+      if (workId == null) {
+        toast.error("Could not resolve the work for this page");
+      }
+      const lastPage = Math.max(1, Math.ceil(normalizedItems.length / perPage));
       set({
         items: normalizedItems,
-        total,
-        page: nextPage,
-        perPage: nextPerPage,
+        total: normalizedItems.length,
+        page: Math.min(page, lastPage),
         workId,
       });
     } catch (error) {
@@ -166,4 +186,11 @@ export const useInfluencersItemsStore = create((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  ...createSectionItemActions({
+    section: WORK_INFLUENCE_SECTION,
+    entityLabel: "Influencer item",
+    set,
+    get,
+  }),
 }));

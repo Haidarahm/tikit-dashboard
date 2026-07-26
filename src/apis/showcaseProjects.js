@@ -57,12 +57,18 @@ const appendProjectPayload = (formData, payload = {}) => {
   }
 };
 
-export async function getShowcaseProjects({ page, per_page, lang } = {}) {
-  const params = {};
-  if (page != null) params.page = page;
-  if (per_page != null) params.per_page = per_page;
-  if (lang) params.lang = lang;
-  const { data } = await apiClient.get("/showcase-projects/get", { params });
+/**
+ * Dashboard listing: includes projects hidden from the public website.
+ * GET /showcase-projects/get is deliberately not used here, because it filters
+ * out inactive projects and an admin would lose the way to re-enable them.
+ */
+export async function getShowcaseProjectsAdmin() {
+  const { data } = await apiClient.get("/showcase-projects/admin/all");
+  return data;
+}
+
+export async function getShowcaseProjectAdmin(id) {
+  const { data } = await apiClient.get(`/showcase-projects/admin/show/${id}`);
   return data;
 }
 

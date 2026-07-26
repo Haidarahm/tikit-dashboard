@@ -24,6 +24,8 @@ import { ShowcaseProjectForm } from "./ShowcaseProjectForm.jsx";
 import { ShowcaseProjectViewModal } from "./ShowcaseProjectViewModal.jsx";
 import { useAuthStore } from "../../store/auth.js";
 import { useShowcaseTableColumns } from "./useShowcaseTableColumns.jsx";
+import CopyMoveSectionModal from "../../components/content/CopyMoveSectionModal.jsx";
+import { SHOWCASE_PROJECT_SECTION } from "../../constants/contentSections.js";
 
 const SUPER_ADMIN_ROLE = "super_admin";
 
@@ -46,6 +48,10 @@ const ShowcaseProjects = () => {
     remove,
     reorder,
     importExcel,
+    toggleActive,
+    duplicateItem,
+    copyItem,
+    moveItem,
   } = useShowcaseProjectsStore();
 
   const [createForm] = Form.useForm();
@@ -67,6 +73,12 @@ const ShowcaseProjects = () => {
   const [expandedBriefs, setExpandedBriefs] = useState(new Set());
   const [expandedStrategies, setExpandedStrategies] = useState(new Set());
   const [importFileList, setImportFileList] = useState([]);
+  const [transferModal, setTransferModal] = useState({
+    open: false,
+    mode: "copy",
+    item: null,
+  });
+  const [isDuplicating, setIsDuplicating] = useState(false);
 
   const [isCreateTranslating, setIsCreateTranslating] = useState(false);
   const [isEditTranslating, setIsEditTranslating] = useState(false);
@@ -77,7 +89,7 @@ const ShowcaseProjects = () => {
 
   useEffect(() => {
     fetchList();
-  }, [page, perPage, lang]);
+  }, [lang]);
 
   const resetCreateModal = () => {
     createForm.resetFields();
@@ -186,14 +198,54 @@ const ShowcaseProjects = () => {
     setViewingProject(null);
   }, []);
 
+  const handleDuplicate = useCallback(
+    async (record) => {
+      if (isDuplicating) return;
+      setIsDuplicating(true);
+      try {
+        await duplicateItem(record.id);
+      } catch {
+        // toast already handled in store
+      } finally {
+        setIsDuplicating(false);
+      }
+    },
+    [duplicateItem, isDuplicating]
+  );
+
+  const openTransferModal = useCallback((mode, record) => {
+    setTransferModal({ open: true, mode, item: record });
+  }, []);
+
+  const handleCopyOpen = useCallback(
+    (record) => openTransferModal("copy", record),
+    [openTransferModal]
+  );
+
+  const handleMoveOpen = useCallback(
+    (record) => openTransferModal("move", record),
+    [openTransferModal]
+  );
+
+  const handleTransferSubmit = async ({ targetSection, workId }) => {
+    const { mode, item } = transferModal;
+    const action = mode === "move" ? moveItem : copyItem;
+    await action(item.id, { targetSection, workId });
+    setTransferModal({ open: false, mode: "copy", item: null });
+  };
+
   const baseColumns = useShowcaseTableColumns({
     remove,
+    toggleActive,
     expandedBriefs,
     setExpandedBriefs,
     expandedStrategies,
     setExpandedStrategies,
     onView: handleViewOpen,
     onEdit: handleEditOpen,
+    onDuplicate: handleDuplicate,
+    onCopy: handleCopyOpen,
+    onMove: handleMoveOpen,
     isSuperAdmin,
   });
 
@@ -474,6 +526,17 @@ const ShowcaseProjects = () => {
         open={viewModalOpen}
         project={viewingProject}
         onClose={handleViewClose}
+      />
+
+      <CopyMoveSectionModal
+        open={transferModal.open}
+        mode={transferModal.mode}
+        sourceSection={SHOWCASE_PROJECT_SECTION}
+        item={transferModal.item}
+        onCancel={() =>
+          setTransferModal({ open: false, mode: "copy", item: null })
+        }
+        onSubmit={handleTransferSubmit}
       />
     </div>
   );

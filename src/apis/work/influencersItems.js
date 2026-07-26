@@ -1,14 +1,18 @@
 import { apiClient } from "../client.js";
 
-export async function getItems({ slug, page, per_page, lang } = {}) {
-  if (!slug) {
-    throw new Error("Slug is required");
-  }
-  const params = {};
-  if (page != null) params.page = page;
-  if (per_page != null) params.per_page = per_page;
-  if (lang != null) params.lang = lang;
-  const { data } = await apiClient.get(`/work-influences/${slug}`, { params });
+/**
+ * Dashboard listing: every work influence across all works, including the ones
+ * hidden from the public website. Callers scope it to a work themselves.
+ * GET /work-influences/{work_slug} is deliberately not used here, because it
+ * filters out inactive items and an admin would lose the way to re-enable them.
+ */
+export async function getItemsAdmin() {
+  const { data } = await apiClient.get("/work-influences/admin/all");
+  return data;
+}
+
+export async function getItemAdmin(id) {
+  const { data } = await apiClient.get(`/work-influences/admin/show/${id}`);
   return data;
 }
 
