@@ -82,6 +82,8 @@ const CopyMoveSectionModal = ({
       form.resetFields();
       setTargetSection(null);
       setIsSubmitting(false);
+      setWorks([]);
+      setIsLoadingWorks(false);
     }
   }, [open, form]);
 
@@ -89,15 +91,26 @@ const CopyMoveSectionModal = ({
   const workIsRequired = needsWork && sourceSection !== WORK_INFLUENCE_SECTION;
 
   useEffect(() => {
-    if (!open || !needsWork || works.length > 0 || isLoadingWorks) return;
+    if (!open || !needsWork) return;
+
     let cancelled = false;
     setIsLoadingWorks(true);
+
     (async () => {
       try {
-        const resp = await getWorksSections({ per_page: 500 });
-        const list = Array.isArray(resp?.data) ? resp.data : [];
+        const resp = await getWorksSections({ per_page: 500, page: 1 });
+        const raw = resp?.data;
+        const list = Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.data)
+            ? raw.data
+            : [];
         if (!cancelled) {
-          setWorks(list.filter((work) => work?.type === "influence"));
+          setWorks(
+            list.filter(
+              (work) => String(work?.type || "").toLowerCase() === "influence"
+            )
+          );
         }
       } catch {
         if (!cancelled) setWorks([]);
@@ -105,10 +118,11 @@ const CopyMoveSectionModal = ({
         if (!cancelled) setIsLoadingWorks(false);
       }
     })();
+
     return () => {
       cancelled = true;
     };
-  }, [open, needsWork, works.length, isLoadingWorks]);
+  }, [open, needsWork]);
 
   const sectionOptions = useMemo(
     () =>
@@ -200,18 +214,31 @@ const CopyMoveSectionModal = ({
                   : []
               }
               extra={
-                workIsRequired
-                  ? undefined
-                  : "Leave empty to keep the item's current work."
+                isLoadingWorks
+                  ? "Loading influence work sections…"
+                  : workOptions.length === 0
+                    ? "No work sections of type Influence were found. Create one under Works first."
+                    : workIsRequired
+                      ? undefined
+                      : "Leave empty to keep the item's current work."
               }
             >
               <Select
-                placeholder="Select a work"
+                placeholder={
+                  isLoadingWorks
+                    ? "Loading…"
+                    : "Select an influence work section"
+                }
                 options={workOptions}
                 loading={isLoadingWorks}
                 showSearch
                 optionFilterProp="label"
                 allowClear
+                notFoundContent={
+                  isLoadingWorks
+                    ? "Loading…"
+                    : "No influence work sections found"
+                }
               />
             </Form.Item>
           )}
