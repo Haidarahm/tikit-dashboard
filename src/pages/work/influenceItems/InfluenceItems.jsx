@@ -9,8 +9,6 @@ import {
   Upload,
   Popconfirm,
   Card,
-  Row,
-  Col,
   Pagination,
   Spin,
   Image,
@@ -32,6 +30,9 @@ import { toast } from "react-toastify";
 import { useInfluencersItemsStore } from "../../../store/works/influencersItemsStore.js";
 import { useTranslateStore } from "../../../store/translateStore.js";
 import ExcelImportButton from "../../../components/work/ExcelImportButton.jsx";
+import SortableCards, {
+  CardDragHandle,
+} from "../../../components/common/SortableCards.jsx";
 import { LANG_OPTIONS } from "../../../constants/language.js";
 import {
   extractExistingMediaId,
@@ -79,6 +80,7 @@ const InfluenceItems = () => {
     update,
     remove,
     importExcel: importInfluencersExcel,
+    reorder,
     workId,
     toggleActive,
     duplicateItem,
@@ -524,113 +526,116 @@ const InfluenceItems = () => {
         </div>
       ) : (
         <>
-          <Row gutter={[24, 24]}>
-            {pagedItems.map((item) => {
-              return (
-                <Col xs={24} sm={12} md={8} lg={6} key={item.id}>
-                  <Card
-                    hoverable
-                    className="h-full flex flex-col overflow-hidden"
-                    bodyStyle={{
-                      padding: 0,
-                      display: "flex",
-                      flexDirection: "column",
-                      flex: 1,
-                      minHeight: 0,
-                    }}
-                    cover={
-                      <div className="relative">
-                        {/* Logo Section */}
-                        <div className="h-40 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                          {item.logo ? (
-                            <Image
-                              src={item.logo}
-                              alt={item.title}
-                              className="w-full h-full object-contain p-4"
-                              preview={false}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                              <div className="text-center">
-                                <div className="text-4xl mb-2">🖼️</div>
-                                <div className="text-sm">No Logo</div>
-                              </div>
-                            </div>
-                          )}
+          <SortableCards
+            items={pagedItems}
+            rowKey="id"
+            onReorder={reorder}
+            colProps={{ xs: 24, sm: 12, md: 8, lg: 6 }}
+            renderItem={(item) => (
+              <Card
+                hoverable
+                className="h-full flex flex-col overflow-hidden"
+                bodyStyle={{
+                  padding: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  minHeight: 0,
+                }}
+                cover={
+                  <div className="relative">
+                    {/* Logo Section */}
+                    <div className="h-40 overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                      {item.logo ? (
+                        <Image
+                          src={item.logo}
+                          alt={item.title}
+                          className="w-full h-full object-contain p-4"
+                          preview={false}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <div className="text-center">
+                            <div className="text-4xl mb-2">🖼️</div>
+                            <div className="text-sm">No Logo</div>
+                          </div>
                         </div>
-                      </div>
-                    }
-                    actions={[
-                      <Tooltip title="View Details" key="view">
-                        <Button
-                          type="text"
-                          icon={<EyeOutlined />}
-                          onClick={() => openViewModal(item)}
-                          className="flex items-center justify-center"
-                        />
-                      </Tooltip>,
-                      <Tooltip title="Edit" key="edit">
-                        <EditOutlined
-                          onClick={() => openEditModal(item)}
-                          className="text-blue-500 hover:text-blue-700"
-                        />
-                      </Tooltip>,
-                      <Dropdown
-                        key="more"
-                        menu={{
-                          items: [
-                            { key: "duplicate", label: "Duplicate" },
-                            { key: "copy", label: "Copy to section…" },
-                            { key: "move", label: "Move to section…" },
-                          ],
-                          onClick: ({ key }) => {
-                            if (key === "duplicate") {
-                              handleDuplicate(item);
-                            } else {
-                              setTransferModal({ open: true, mode: key, item });
-                            }
-                          },
-                        }}
-                      >
-                        <Tooltip title="More actions">
-                          <MoreOutlined className="text-gray-600 hover:text-gray-900" />
-                        </Tooltip>
-                      </Dropdown>,
-                      <Popconfirm
-                        key="delete"
-                        title="Delete this item?"
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={() => handleDelete(item.id)}
-                      >
-                        <Tooltip title="Delete">
-                          <DeleteOutlined
-                            danger
-                            className="text-red-500 hover:text-red-700"
-                          />
-                        </Tooltip>
-                      </Popconfirm>,
-                    ]}
-                  >
-                    <div className="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
-                      <h3 className="font-bold text-base text-gray-900 line-clamp-2 mb-2 min-w-0 break-words text-center">
-                        {item.title || "No Title"}
-                      </h3>
-                      <div className="flex justify-center">
-                        <ActiveStatusSwitch
-                          size="small"
-                          isActive={item.is_active}
-                          onToggle={(nextValue) =>
-                            toggleActive(item.id, nextValue)
-                          }
-                        />
-                      </div>
+                      )}
                     </div>
-                  </Card>
-                </Col>
-              );
-            })}
-          </Row>
+                  </div>
+                }
+                actions={[
+                  <Tooltip title="View Details" key="view">
+                    <Button
+                      type="text"
+                      icon={<EyeOutlined />}
+                      onClick={() => openViewModal(item)}
+                      className="flex items-center justify-center"
+                    />
+                  </Tooltip>,
+                  <Tooltip title="Edit" key="edit">
+                    <EditOutlined
+                      onClick={() => openEditModal(item)}
+                      className="text-blue-500 hover:text-blue-700"
+                    />
+                  </Tooltip>,
+                  <Dropdown
+                    key="more"
+                    menu={{
+                      items: [
+                        { key: "duplicate", label: "Duplicate" },
+                        { key: "copy", label: "Copy to section…" },
+                        { key: "move", label: "Move to section…" },
+                      ],
+                      onClick: ({ key }) => {
+                        if (key === "duplicate") {
+                          handleDuplicate(item);
+                        } else {
+                          setTransferModal({ open: true, mode: key, item });
+                        }
+                      },
+                    }}
+                  >
+                    <Tooltip title="More actions">
+                      <MoreOutlined className="text-gray-600 hover:text-gray-900" />
+                    </Tooltip>
+                  </Dropdown>,
+                  <Popconfirm
+                    key="delete"
+                    title="Delete this item?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={() => handleDelete(item.id)}
+                  >
+                    <Tooltip title="Delete">
+                      <DeleteOutlined
+                        danger
+                        className="text-red-500 hover:text-red-700"
+                      />
+                    </Tooltip>
+                  </Popconfirm>,
+                ]}
+              >
+                <div className="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-bold text-base text-gray-900 line-clamp-2 min-w-0 break-words text-center flex-1">
+                      {item.title || "No Title"}
+                    </h3>
+                    <CardDragHandle />
+                  </div>
+                  <div className="flex justify-center">
+                    <ActiveStatusSwitch
+                      size="small"
+                      isActive={item.is_active}
+                      onToggle={(nextValue) =>
+                        toggleActive(item.id, nextValue)
+                      }
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
+          />
 
           {total > 0 && (
             <div className="flex justify-center mt-8">

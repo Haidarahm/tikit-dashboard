@@ -6,6 +6,7 @@ import {
   updateItem,
   deleteItem,
   importExcelfile,
+  reorderInfluencerItems,
 } from "../../apis/work/influencersItems.js";
 import { getWorksSections } from "../../apis/work/worksSection.js";
 import { createSectionItemActions } from "../content/sectionItemActions.js";
@@ -184,6 +185,31 @@ export const useInfluencersItemsStore = create((set, get) => ({
       throw error;
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  reorder: async (reorderedPageItems) => {
+    const { items: prevItems, page, perPage } = get();
+    const start = (page - 1) * perPage;
+    const nextItems = [
+      ...prevItems.slice(0, start),
+      ...reorderedPageItems,
+      ...prevItems.slice(start + reorderedPageItems.length),
+    ];
+    set({ items: nextItems });
+    const orders = nextItems.map((item, index) => ({
+      id: item.id,
+      sort_order: index + 1,
+    }));
+    try {
+      await reorderInfluencerItems(orders);
+      toast.success("Order updated successfully");
+    } catch (error) {
+      set({ items: prevItems, error });
+      toast.error(
+        error?.response?.data?.message || "Failed to update order"
+      );
+      throw error;
     }
   },
 

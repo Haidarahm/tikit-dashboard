@@ -29,6 +29,9 @@ import { toast } from "react-toastify";
 import { useDigitalItemsStore } from "../../store/works/digitalItemsStore.js";
 import ExcelImportButton from "../../components/work/ExcelImportButton.jsx";
 import WorkLangSelect from "../../components/work/WorkLangSelect.jsx";
+import SortableCards, {
+  CardDragHandle,
+} from "../../components/common/SortableCards.jsx";
 
 const DigitalsData = () => {
   const { slug } = useParams();
@@ -47,6 +50,7 @@ const DigitalsData = () => {
     create,
     update,
     remove,
+    reorder,
     importExcel: importDigitalExcel,
   } = useDigitalItemsStore();
 
@@ -296,91 +300,86 @@ const DigitalsData = () => {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-6">
-            {items.map((item) => {
+          <SortableCards
+            items={items}
+            rowKey="id"
+            onReorder={reorder}
+            colProps={{ xs: 24, sm: 12, md: 8, lg: 6 }}
+            renderItem={(item) => {
               const digital = item || {};
               return (
-                <div
-                  key={digital.id}
-                  className="w-full sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)]"
-                >
-                  <Card
-                    hoverable
-                    className="h-full flex flex-col overflow-hidden"
-                    bodyStyle={{
-                      padding: 0,
-                      display: "flex",
-                      flexDirection: "column",
-                      flex: 1,
-                      minHeight: 0,
-                    }}
-                    cover={
-                      <div className="relative">
-                        {/* Main Image (Logo) */}
-                        {digital.logo ? (
-                          <div className="h-56 overflow-hidden bg-gray-100">
-                            <Image
-                              src={digital.logo}
-                              alt={digital.title}
-                              className="w-full h-full object-cover"
-                              preview={false}
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-56 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                            <div className="text-center text-gray-400">
-                              <div className="text-4xl mb-2">🖼️</div>
-                              <div className="text-sm">No Logo</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    }
-                    actions={[
-                      <Tooltip title="View All Data" key="view">
-                        <Button
-                          type="text"
-                          icon={<EyeOutlined />}
-                          onClick={() => openPreviewModal(item)}
-                        />
-                      </Tooltip>,
-                      <Tooltip title="Edit" key="edit">
-                        <Button
-                          type="text"
-                          icon={<EditOutlined />}
-                          onClick={() => openEditModal(item)}
-                        />
-                      </Tooltip>,
-                      <Popconfirm
-                        key="delete"
-                        title="Delete this item?"
-                        okText="Yes"
-                        cancelText="No"
-                        onConfirm={() => handleDelete(digital.id)}
-                      >
-                        <Tooltip title="Delete">
-                          <Button
-                            type="text"
-                            icon={<DeleteOutlined />}
-                            danger
+                <Card
+                  hoverable
+                  className="h-full flex flex-col overflow-hidden"
+                  bodyStyle={{
+                    padding: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                    minHeight: 0,
+                  }}
+                  cover={
+                    <div className="relative">
+                      {/* Main Image (Logo) */}
+                      {digital.logo ? (
+                        <div className="h-56 overflow-hidden bg-gray-100">
+                          <Image
+                            src={digital.logo}
+                            alt={digital.title}
+                            className="w-full h-full object-cover"
+                            preview={false}
                           />
-                        </Tooltip>
-                      </Popconfirm>,
-                    ]}
-                  >
-                    <div className="p-4 flex flex-col gap-3">
-                      {/* Title */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-base text-gray-900 line-clamp-2 break-words mb-1">
-                          {digital.title || "No Title"}
-                        </h3>
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="h-56 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                          <div className="text-center text-gray-400">
+                            <div className="text-4xl mb-2">🖼️</div>
+                            <div className="text-sm">No Logo</div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </Card>
-                </div>
+                  }
+                  actions={[
+                    <Tooltip title="View All Data" key="view">
+                      <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={() => openPreviewModal(item)}
+                      />
+                    </Tooltip>,
+                    <Tooltip title="Edit" key="edit">
+                      <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={() => openEditModal(item)}
+                      />
+                    </Tooltip>,
+                    <Popconfirm
+                      key="delete"
+                      title="Delete this item?"
+                      okText="Yes"
+                      cancelText="No"
+                      onConfirm={() => handleDelete(digital.id)}
+                    >
+                      <Tooltip title="Delete">
+                        <Button type="text" icon={<DeleteOutlined />} danger />
+                      </Tooltip>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <div className="p-4 flex flex-col gap-3">
+                    <div className="flex items-start justify-between gap-2 min-w-0">
+                      <h3 className="font-bold text-base text-gray-900 line-clamp-2 break-words mb-0 flex-1">
+                        {digital.title || "No Title"}
+                      </h3>
+                      <CardDragHandle />
+                    </div>
+                  </div>
+                </Card>
               );
-            })}
-          </div>
+            }}
+          />
 
           {total > 0 && (
             <div className="flex justify-center mt-8">

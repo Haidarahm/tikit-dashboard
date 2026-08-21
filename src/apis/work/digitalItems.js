@@ -115,3 +115,8 @@ export async function deleteDigitalItem(id) {
   const { data } = await apiClient.delete(`/work-digitals/${id}/delete`);
   return data;
 }
+
+export async function reorderDigitalItems(orders) {
+  const { data } = await apiClient.post("/work-digitals/reorder", { orders });
+  return data;
+}

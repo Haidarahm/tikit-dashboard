@@ -166,3 +166,8 @@ export async function deleteItem(id) {
   const { data } = await apiClient.delete(`/work-influences/${id}/delete`);
   return data;
 }
+
+export async function reorderInfluencerItems(orders) {
+  const { data } = await apiClient.post("/work-influences/reorder", { orders });
+  return data;
+}
