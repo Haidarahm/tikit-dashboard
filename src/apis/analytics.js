@@ -39,7 +39,14 @@ export async function getAnalyticsSections(params = {}) {
 
 export async function getAnalyticsTimeseries(params = {}) {
   const { data } = await apiClient.get("/analytics/timeseries", {
-    params: withRange({ ...params, granularity: params.granularity || "day" }),
+    params: withRange({ ...params, granularity: params.granularity }),
+  });
+  return data;
+}
+
+export async function getAnalyticsDevices(params = {}) {
+  const { data } = await apiClient.get("/analytics/devices", {
+    params: withRange(params),
   });
   return data;
 }

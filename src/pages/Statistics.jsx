@@ -15,7 +15,18 @@ import {
 } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { FaBriefcase, FaBlog, FaUserFriends, FaUsers, FaEye, FaUser, FaClock } from "react-icons/fa";
+import {
+  FaBriefcase,
+  FaBlog,
+  FaUserFriends,
+  FaUsers,
+  FaEye,
+  FaUser,
+  FaClock,
+  FaMobileAlt,
+  FaTabletAlt,
+  FaDesktop,
+} from "react-icons/fa";
 import dayjs from "dayjs";
 import { Line } from "@ant-design/charts";
 import { getStatistics } from "../apis/statistics.js";
@@ -25,10 +36,13 @@ import {
   getAnalyticsPages,
   getAnalyticsSections,
   getAnalyticsTimeseries,
+  getAnalyticsDevices,
 } from "../apis/analytics.js";
 
 const { RangePicker } = DatePicker;
 const { Title, Text } = Typography;
+
+const TABLE_SCROLL_Y = 260;
 
 function defaultRange() {
   return [dayjs().subtract(29, "day"), dayjs()];
@@ -42,6 +56,26 @@ function formatRange(range) {
   };
 }
 
+function resolveGranularity(range) {
+  const [from, to] = range || [];
+  if (!from || !to) return "day";
+  const hours = to.diff(from, "hour", true);
+  return hours <= 48 ? "hour" : "day";
+}
+
+function deviceIcon(device) {
+  if (device === "mobile") return <FaMobileAlt className="text-blue-600" />;
+  if (device === "tablet") return <FaTabletAlt className="text-purple-600" />;
+  return <FaDesktop className="text-green-600" />;
+}
+
+function deviceLabel(device) {
+  if (device === "mobile") return "Mobile";
+  if (device === "tablet") return "Tablet";
+  if (device === "desktop") return "Desktop";
+  return device;
+}
+
 function Statistics() {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState(null);
@@ -53,6 +87,7 @@ function Statistics() {
   const [pages, setPages] = useState(null);
   const [sections, setSections] = useState(null);
   const [timeseries, setTimeseries] = useState(null);
+  const [devices, setDevices] = useState(null);
 
   const fetchStats = async () => {
     setIsLoading(true);
@@ -69,21 +104,30 @@ function Statistics() {
   const fetchAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
     const params = formatRange(range);
+    const granularity = resolveGranularity(range);
     try {
-      const [summaryResp, sourcesResp, pagesResp, sectionsResp, seriesResp] =
-        await Promise.all([
-          getAnalyticsSummary(params),
-          getAnalyticsSources(params),
-          getAnalyticsPages(params),
-          getAnalyticsSections(params),
-          getAnalyticsTimeseries(params),
-        ]);
+      const [
+        summaryResp,
+        sourcesResp,
+        pagesResp,
+        sectionsResp,
+        seriesResp,
+        devicesResp,
+      ] = await Promise.all([
+        getAnalyticsSummary(params),
+        getAnalyticsSources(params),
+        getAnalyticsPages(params),
+        getAnalyticsSections(params),
+        getAnalyticsTimeseries({ ...params, granularity }),
+        getAnalyticsDevices(params),
+      ]);
 
       setSummary(summaryResp?.data ?? summaryResp ?? null);
       setSources(sourcesResp?.data ?? sourcesResp ?? null);
       setPages(pagesResp?.data ?? pagesResp ?? null);
       setSections(sectionsResp?.data ?? sectionsResp ?? null);
       setTimeseries(seriesResp?.data ?? seriesResp ?? null);
+      setDevices(devicesResp?.data ?? devicesResp ?? null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to fetch website analytics");
     } finally {
@@ -179,66 +223,79 @@ function Statistics() {
     [totalBreakdown]
   );
 
+  const countCol = {
+    title: "Count",
+    dataIndex: "count",
+    key: "count",
+    align: "right",
+    width: 90,
+    render: (v) => <span className="font-semibold">{v}</span>,
+  };
+
   const pageColumns = [
-    { title: "Path", dataIndex: "path", key: "path" },
-    {
-      title: "Pageviews",
-      dataIndex: "count",
-      key: "count",
-      align: "right",
-      render: (v) => <span className="font-semibold">{v}</span>,
-    },
+    { title: "Path", dataIndex: "path", key: "path", ellipsis: true },
+    { ...countCol, title: "Pageviews" },
   ];
 
   const referrerColumns = [
-    { title: "Referrer", dataIndex: "referrer", key: "referrer" },
-    {
-      title: "Hits",
-      dataIndex: "count",
-      key: "count",
-      align: "right",
-      render: (v) => <span className="font-semibold">{v}</span>,
-    },
+    { title: "Referrer", dataIndex: "referrer", key: "referrer", ellipsis: true },
+    { ...countCol, title: "Hits" },
   ];
 
   const utmColumns = [
-    { title: "UTM source", dataIndex: "utm_source", key: "utm_source" },
-    {
-      title: "Hits",
-      dataIndex: "count",
-      key: "count",
-      align: "right",
-      render: (v) => <span className="font-semibold">{v}</span>,
-    },
+    { title: "UTM source", dataIndex: "utm_source", key: "utm_source", ellipsis: true },
+    { ...countCol, title: "Hits" },
   ];
 
   const sectionColumns = [
-    { title: "Section", dataIndex: "section_key", key: "section_key" },
-    {
-      title: "Views",
-      dataIndex: "count",
-      key: "count",
-      align: "right",
-      render: (v) => <span className="font-semibold">{v}</span>,
-    },
+    { title: "Section", dataIndex: "section_key", key: "section_key", ellipsis: true },
+    { ...countCol, title: "Views" },
   ];
+
+  const deviceRows = devices?.devices ?? [];
+  const deviceTotal = deviceRows.reduce((sum, r) => sum + Number(r.count || 0), 0) || 1;
+
+  const seriesData = timeseries?.series ?? [];
+  const seriesTotal = seriesData.reduce((sum, r) => sum + Number(r.count || 0), 0);
+  const isHourly = timeseries?.granularity === "hour";
 
   const lineConfig = useMemo(
     () => ({
-      data: timeseries?.series ?? [],
+      data: seriesData,
       xField: "date",
       yField: "count",
-      height: 280,
+      height: 360,
       smooth: true,
-      point: { size: 3 },
+      point: {
+        size: isHourly ? 2 : 3,
+        shape: "circle",
+      },
       axis: {
-        x: { title: false },
-        y: { title: false },
+        x: {
+          title: false,
+          labelAutoRotate: true,
+          labelAutoHide: true,
+          labelFormatter: (v) => {
+            if (!v) return "";
+            if (isHourly) {
+              const parts = String(v).split(" ");
+              return parts[1] ? parts[1].slice(0, 5) : String(v);
+            }
+            return String(v).slice(5); // MM-DD
+          },
+        },
+        y: {
+          title: false,
+          nice: true,
+        },
       },
       style: { lineWidth: 2 },
       interaction: { tooltip: true },
+      tooltip: {
+        title: (d) => d?.date ?? "",
+      },
     }),
-    [timeseries]
+    [seriesData, isHourly]
   );
 
   return (
@@ -361,7 +418,8 @@ function Statistics() {
               Website traffic
             </Title>
             <Text type="secondary">
-              First-party analytics from consenting visitors (pageviews, sources, sections).
+              First-party analytics from consenting visitors (pageviews, sources, devices,
+              sections).
             </Text>
           </div>
           <Space wrap>
@@ -416,13 +474,50 @@ function Statistics() {
               </Col>
             </Row>
 
-            <Card title="Pageviews over time" bordered={false} className="shadow-sm mb-4">
-              {(timeseries?.series?.length ?? 0) > 0 ? (
+            <Card
+              title={`Pageviews over time (${isHourly ? "hourly" : "daily"})`}
+              bordered={false}
+              className="shadow-sm mb-4"
+            >
+              {seriesData.length > 0 && seriesTotal > 0 ? (
                 <Line {...lineConfig} />
+              ) : seriesData.length > 0 ? (
+                <>
+                  <Line {...lineConfig} />
+                  <Text type="secondary" className="mt-2 block">
+                    No pageviews in this range yet — zeros are shown across the selected dates.
+                  </Text>
+                </>
               ) : (
                 <Text type="secondary">No pageview data in this range yet.</Text>
               )}
             </Card>
+
+            <Row gutter={[16, 16]} className="mb-4">
+              <Col xs={24}>
+                <Card title="Devices" bordered={false} className="shadow-sm">
+                  <Row gutter={[16, 16]}>
+                    {deviceRows.map((row) => (
+                      <Col xs={24} md={8} key={row.device}>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="flex items-center gap-2 text-sm text-gray-600">
+                              {deviceIcon(row.device)}
+                              {deviceLabel(row.device)}
+                            </span>
+                            <span className="font-semibold">{row.count}</span>
+                          </div>
+                          <Progress
+                            percent={Math.round((Number(row.count) / deviceTotal) * 100)}
+                            showInfo
+                          />
+                        </div>
+                      </Col>
+                    ))}
+                  </Row>
+                </Card>
+              </Col>
+            </Row>
 
             <Row gutter={[16, 16]}>
               <Col xs={24} lg={12}>
@@ -433,6 +528,7 @@ function Statistics() {
                     dataSource={pages?.pages ?? []}
                     pagination={false}
                     size="small"
+                    scroll={{ y: TABLE_SCROLL_Y }}
                     locale={{ emptyText: "No data" }}
                   />
                 </Card>
@@ -445,6 +541,7 @@ function Statistics() {
                     dataSource={sections?.sections ?? []}
                     pagination={false}
                     size="small"
+                    scroll={{ y: TABLE_SCROLL_Y }}
                     locale={{ emptyText: "No data" }}
                   />
                 </Card>
@@ -457,6 +554,7 @@ function Statistics() {
                     dataSource={sources?.referrers ?? []}
                     pagination={false}
                     size="small"
+                    scroll={{ y: TABLE_SCROLL_Y }}
                     locale={{ emptyText: "No data" }}
                   />
                 </Card>
@@ -469,6 +567,7 @@ function Statistics() {
                     dataSource={sources?.utm_sources ?? []}
                     pagination={false}
                     size="small"
+                    scroll={{ y: TABLE_SCROLL_Y }}
                     locale={{ emptyText: "No data" }}
                   />
                 </Card>
